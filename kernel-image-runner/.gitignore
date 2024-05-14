@@ -1,0 +1,10 @@
+releases/
+bzImage*
+vmlinu*
+*.img
+*.tar
+*.deb
+*.qcow2
+output
+**/busybox
+*.cpio
