@@ -21,6 +21,8 @@ if [ -e /dev/vdb ]; then
     tar -xvf /dev/vdb
 fi
 
+chmod o+rx / /bin /etc /dev /scripts
+
 if [ $1 == "--" ]; then
     shift;
 fi

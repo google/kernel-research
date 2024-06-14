@@ -40,7 +40,7 @@ download_busybox_if_missing() {
     if [ ! -f $ROOTFS_DIR/busybox ]; then
         echo_err "busybox was not found in the rootfs folder, downloading it..."
         curl -f https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox -o $ROOTFS_DIR/busybox
-        chmod u+x $ROOTFS_DIR/busybox
+        chmod a+rx $ROOTFS_DIR/busybox
     fi
 }
 
@@ -56,13 +56,13 @@ regenerate_rootfs_img() {
 }
 
 regenerate_rootfs_tar() {
-    tar --directory=$ROOTFS_DIR --exclude='./busybox' --exclude='./init' -cf $ROOTFS_TAR .
+    tar --directory=$ROOTFS_DIR --exclude='./busybox' --exclude='./init' --owner=root --group=root -cf $ROOTFS_TAR .
 }
 
 regenerate_initramfs() {
     download_busybox_if_missing
     pushd $ROOTFS_DIR
-    find . ! -name 'guestfish*' -print0 | cpio --null -ov --format=newc > ../$INITRAMFS
+    find . ! -name 'guestfish*' -print0 | cpio --owner 0:0 --null -ov --format=newc > ../$INITRAMFS
     popd
 }
 
@@ -102,8 +102,10 @@ check_archive_uptodate() {
 }
 
 check_archive_uptodate $ROOTFS_IMG "guestfish_script rootfs/init rootfs/busybox" regenerate_rootfs_img "with guestfish"
-check_archive_uptodate $ROOTFS_TAR rootfs regenerate_rootfs_tar
-check_archive_uptodate $INITRAMFS rootfs regenerate_initramfs
+#check_archive_uptodate $ROOTFS_TAR rootfs regenerate_rootfs_tar
+#check_archive_uptodate $INITRAMFS rootfs regenerate_initramfs
+regenerate_rootfs_tar
+regenerate_initramfs
 
 # ttyS0 (kernel messages) goes to stdout, ttyS1 (/output file) goes to ./output
 SERIAL_PORTS="-serial mon:stdio -serial file:output"
