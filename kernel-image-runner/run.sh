@@ -2,7 +2,7 @@
 set -e
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--only-script-output] <script-name> [<script-arguments>]";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--only-script-output] [--gdb] <script-name> [<script-arguments>]";
     exit 1;
 }
 
@@ -10,6 +10,7 @@ ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     --only-script-output) ONLY_SCRIPT_OUTPUT=1; shift;;
+    --gdb) GDB="--gdb"; shift;;
     --) # stop processing special arguments after "--"
         shift
         while [[ $# -gt 0 ]]; do ARGS+=("$1"); shift; done
@@ -38,7 +39,7 @@ if [ ! -z "$SCRIPT_NAME" ] && [ ! -f "rootfs/scripts/$SCRIPT_NAME.sh" ]; then ec
 ./download_release.sh "$DISTRO" "$RELEASE_NAME"
 
 if [ "$ONLY_SCRIPT_OUTPUT" == "1" ]; then
-    ./run_vmlinuz.sh "$VMLINUZ" --only-print-output-file "/scripts/script-output.sh" "$SCRIPT_NAME" -- "$SCRIPT_ARGUMENTS"
+    ./run_vmlinuz.sh "$VMLINUZ" --only-print-output-file $GDB "/scripts/script-output.sh" "$SCRIPT_NAME" -- "$SCRIPT_ARGUMENTS"
 else
-    ./run_vmlinuz.sh "$VMLINUZ" "/scripts/$SCRIPT_NAME.sh" -- "$SCRIPT_ARGUMENTS"
+    ./run_vmlinuz.sh "$VMLINUZ" $GDB "/scripts/$SCRIPT_NAME.sh" -- "$SCRIPT_ARGUMENTS"
 fi
