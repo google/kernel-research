@@ -10,7 +10,7 @@ ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     --only-script-output) ONLY_SCRIPT_OUTPUT=1; shift;;
-    --gdb) GDB="--gdb"; shift;;
+    --gdb) GDB=1; shift;;
     --) # stop processing special arguments after "--"
         shift
         while [[ $# -gt 0 ]]; do ARGS+=("$1"); shift; done
@@ -33,6 +33,7 @@ if [[ ! "$DISTRO" =~ ^(kernelctf|ubuntu)$ ]]; then usage; fi
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 RELEASE_DIR="$SCRIPT_DIR/../kernel-image-db/releases/$DISTRO/$RELEASE_NAME"
 VMLINUZ="$RELEASE_DIR/vmlinuz"
+MODULES_PATH="$RELEASE_DIR/linux-modules"
 
 if [ ! -z "$SCRIPT_NAME" ] && [ ! -f "rootfs/scripts/$SCRIPT_NAME.sh" ]; then echo "Script file '$SCRIPT_NAME.sh' is not found in the rootfs/scripts/ folder"; fi
 
@@ -43,8 +44,12 @@ fi
 
 "$SCRIPT_DIR/../kernel-image-db/download_release.sh" "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules"
 
+ARGS="$VMLINUZ"
+if [ "$GDB" == "1" ]; then ARGS+=" --gdb"; fi
+if [ -d "$MODULES_PATH" ]; then ARGS+=" --modules-path=$MODULES_PATH"; fi
+
 if [ "$ONLY_SCRIPT_OUTPUT" == "1" ]; then
-    ./run_vmlinuz.sh "$VMLINUZ" --only-print-output-file $GDB "/scripts/script-output.sh" "$SCRIPT_NAME" -- "$SCRIPT_ARGUMENTS"
+    ./run_vmlinuz.sh $ARGS --only-print-output-file "/scripts/script-output.sh" "$SCRIPT_NAME" -- "$SCRIPT_ARGUMENTS"
 else
-    ./run_vmlinuz.sh "$VMLINUZ" $GDB "/scripts/$SCRIPT_NAME.sh" -- "$SCRIPT_ARGUMENTS"
+    ./run_vmlinuz.sh $ARGS "/scripts/$SCRIPT_NAME.sh" -- "$SCRIPT_ARGUMENTS"
 fi

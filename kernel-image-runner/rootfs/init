@@ -21,6 +21,23 @@ if [ -e /dev/vdb ]; then
     tar -xvf /dev/vdb
 fi
 
+if [ -e /dev/sda ]; then
+    echo "Mounting modules..."
+    mkdir -p /mnt/modules
+    mount -t ext4 /dev/sda /mnt/modules
+
+    mkdir -p /lib
+    if [ -d /mnt/modules/lib/modprobe.d ]; then ln -s /mnt/modules/lib/modprobe.d /lib/; fi
+    if [ -d /mnt/modules/lib/modules ]; then
+        ln -s /mnt/modules/lib/modules /lib/
+        if [ ! -f /lib/modules/*/modules.dep ]; then
+            echo "Running depmod (as modules.dep is missing)..."
+            depmod
+            sync # save file changes
+        fi
+    fi
+fi
+
 chmod o+rx / /bin /etc /dev /scripts
 
 if [ $1 == "--" ]; then

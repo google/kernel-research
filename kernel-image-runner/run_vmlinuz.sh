@@ -2,13 +2,14 @@
 set -e
 
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--gdb] [--only-print-output-file] <commands-to-run>";
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--gdb] [--only-print-output-file] <commands-to-run>";
     exit 1;
 }
 
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --modules-path=*) MODULES_PATH="${1#*=}"; shift;;
     --only-print-output-file) ONLY_PRINT_OUTPUT_FILE=1; shift;;
     --gdb) GDB=1; shift;;
     --) # stop processing special arguments after "--"
@@ -44,7 +45,14 @@ fi
 
 EXTRA_ARGS=""
 if [ "$GDB" == "1" ]; then
-    EXTRA_ARGS="-s -S"
+    EXTRA_ARGS+=" -s -S"
+fi
+
+if [ ! -z "$MODULES_PATH" ]; then
+    if [[ "$MODULES_PATH" == */ ]]; then MODULES_PATH=${MODULES_PATH%/}; fi
+    MODULES_IMG="$MODULES_PATH.img"
+    check_archive_uptodate $MODULES_IMG $MODULES_PATH "virt-make-fs --type ext4 --size=+16M $MODULES_PATH $MODULES_IMG"
+    EXTRA_ARGS+=" -drive file=$MODULES_IMG,if=ide,format=raw"
 fi
 
 qemu-system-x86_64 -m 3.5G -nographic -nodefaults \
