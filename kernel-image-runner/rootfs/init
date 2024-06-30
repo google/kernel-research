@@ -21,6 +21,9 @@ if [ -e /dev/vdb ]; then
     tar -xvf /dev/vdb
 fi
 
+mkdir -p /proc
+mount proc /proc -t proc
+
 if [ -e /dev/sda ]; then
     echo "Mounting modules..."
     mkdir -p /mnt/modules
