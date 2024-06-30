@@ -2,7 +2,7 @@
 set -e
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--only-script-output] [--gdb] <script-name> [<script-arguments>]";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld] [--only-script-output] [--gdb] <script-name> [<script-arguments>]";
     exit 1;
 }
 
@@ -11,6 +11,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --only-script-output) ONLY_SCRIPT_OUTPUT=1; shift;;
     --gdb) GDB=1; shift;;
+    --custom-modules=*) CUSTOM_MODULES="${1#*=}"; shift;;
     --) # stop processing special arguments after "--"
         shift
         while [[ $# -gt 0 ]]; do ARGS+=("$1"); shift; done
@@ -47,6 +48,13 @@ fi
 ARGS="$VMLINUZ"
 if [ "$GDB" == "1" ]; then ARGS+=" --gdb"; fi
 if [ -d "$MODULES_PATH" ]; then ARGS+=" --modules-path=$MODULES_PATH"; fi
+
+rm -rf rootfs/custom_modules/*
+for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
+    make -C $RELEASE_DIR/linux-headers-for-module/ M=$SCRIPT_DIR/custom-modules/$MODULE_NAME modules
+    mv $SCRIPT_DIR/custom-modules/$MODULE_NAME/$MODULE_NAME.ko rootfs/custom_modules/
+    make -C $RELEASE_DIR/linux-headers-for-module/ M=$SCRIPT_DIR/custom-modules/$MODULE_NAME clean
+done
 
 if [ "$ONLY_SCRIPT_OUTPUT" == "1" ]; then
     ./run_vmlinuz.sh $ARGS --only-print-output-file "/scripts/script-output.sh" "$SCRIPT_NAME" -- "$SCRIPT_ARGUMENTS"

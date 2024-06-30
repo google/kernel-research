@@ -41,6 +41,11 @@ if [ -e /dev/sda ]; then
     fi
 fi
 
+for MODULE_FN in $(find /custom_modules -name '*.ko'); do
+    echo "Loading custom module: $MODULE_FN"
+    insmod $MODULE_FN
+done
+
 chmod o+rx / /bin /etc /dev /scripts
 
 if [ $1 == "--" ]; then

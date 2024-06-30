@@ -158,7 +158,12 @@ case $DISTRO in
 
     if [[ "$DOWNLOAD_TYPE" =~ "headers" ]]; then
         download_ddeb_and_extract $HEADERS_URL linux-headers.deb linux-headers
-        download_ddeb_and_extract $GENHEADERS_URL linux-headers-generic.deb linux-headers
+        download_ddeb_and_extract $GENHEADERS_URL linux-headers-generic.deb linux-headers-generic
+        if [ ! -d linux-headers-for-module ]; then
+            mkdir -p linux-headers-for-module/
+            cp -r --update=none linux-headers/usr/src/linux-headers-${RELEASE_SHORT}/* linux-headers-for-module/
+            cp -r --update=none linux-headers-generic/usr/src/linux-headers-${RELEASE_SHORT}-generic/* linux-headers-for-module/
+        fi
     fi
 
     if [[ "$DOWNLOAD_TYPE" =~ "modules" ]]; then

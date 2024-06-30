@@ -8,3 +8,7 @@ vmlinu*
 output
 **/busybox
 *.cpio
+*.ko
+rootfs/scripts/exp
+rootfs/scripts/exp.sh
+rootfs/lib
