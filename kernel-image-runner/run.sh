@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
+cd $(dirname $(realpath "$0"))
+
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld] [--only-script-output] [--gdb] <script-name> [<script-arguments>]";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld] [--only-script-output] [--gdb] [--snapshot] <script-name> [<script-arguments>]";
     exit 1;
 }
 
@@ -11,6 +13,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --only-script-output) ONLY_SCRIPT_OUTPUT=1; shift;;
     --gdb) GDB=1; shift;;
+    --snapshot) SNAPSHOT=1; shift;;
     --custom-modules=*) CUSTOM_MODULES="${1#*=}"; shift;;
     --) # stop processing special arguments after "--"
         shift
@@ -47,6 +50,7 @@ fi
 
 ARGS="$VMLINUZ"
 if [ "$GDB" == "1" ]; then ARGS+=" --gdb"; fi
+if [ "$SNAPSHOT" == "1" ]; then ARGS+=" --snapshot"; fi
 if [ -d "$MODULES_PATH" ]; then ARGS+=" --modules-path=$MODULES_PATH"; fi
 
 rm -rf rootfs/custom_modules/*

@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
+cd $(dirname $(realpath "$0"))
+
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--gdb] [--only-print-output-file] <commands-to-run>";
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--gdb] [--snapshot] [--only-print-output-file] <commands-to-run>";
     exit 1;
 }
 
@@ -11,6 +13,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --modules-path=*) MODULES_PATH="${1#*=}"; shift;;
     --only-print-output-file) ONLY_PRINT_OUTPUT_FILE=1; shift;;
+    --snapshot) SNAPSHOT=1; shift;;
     --gdb) GDB=1; shift;;
     --) # stop processing special arguments after "--"
         shift
@@ -44,9 +47,8 @@ if [ "$ONLY_PRINT_OUTPUT_FILE" == "1" ]; then
 fi
 
 EXTRA_ARGS=""
-if [ "$GDB" == "1" ]; then
-    EXTRA_ARGS+=" -s -S"
-fi
+if [ "$GDB" == "1" ]; then EXTRA_ARGS+=" -s -S"; fi
+if [ "$SNAPSHOT" == "1" ]; then EXTRA_ARGS+=" -snapshot"; fi
 
 if [ ! -z "$MODULES_PATH" ]; then
     if [[ "$MODULES_PATH" == */ ]]; then MODULES_PATH=${MODULES_PATH%/}; fi
