@@ -54,7 +54,7 @@ fi
 
 if [ $# -gt 0 ]; then
     echo "Running command: $@"
-    $@;
+    eval "$@"
 else
     echo "No commands were specified as init arguments. Opening a shell..."
     sh

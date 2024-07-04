@@ -4,7 +4,7 @@ set -e
 cd $(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--gdb] [--snapshot] [--only-print-output-file] <commands-to-run>";
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--gdb] [--snapshot] [--only-print-output-file] -- [<commands-to-run-in-vm>]";
     exit 1;
 }
 
@@ -29,7 +29,7 @@ set -- "${ARGS[@]}"
 VMLINUZ="$1"
 COMMANDS_TO_RUN="${@:2}"
 
-if [ "$#" -lt 2 ] ; then usage; fi
+if [ -z "$VMLINUZ" ] ; then usage; fi
 
 ROOTFS_DIR="rootfs"
 
