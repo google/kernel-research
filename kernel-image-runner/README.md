@@ -21,7 +21,7 @@ Downloads a Linux kernel release with and runs commands on it.
 
 * `<release-name>` (required): name of the release, run `./run.sh ubuntu` to list the supported release names
 
-* `--custom-modules=helloworld,kpwn` (optional): it compiles and loads the listed custom modules. Source code of the custom kernel modules can be found in the `custom_modules/` folder.
+* `--custom-modules=helloworld,kpwn` (optional): it compiles and loads the listed custom modules. Source code of the custom kernel modules can be found in the `custom-modules/` folder.
 
 * `--only-command-output` (optional): by default the kernel logs are also printed, but with this argument you can disable this behaviour.
 
@@ -97,4 +97,32 @@ Running arbitrary commands on arbitrary `vmlinuz` or `bzImage` files.
 
 ```
 ./run_vmlinuz.sh ../kernel-image-db/releases/kernelctf/lts-6.1.72/vmlinuz -- cat /proc/slabinfo
+```
+
+## test/kpwn_test.sh
+
+Compiles the `custom-modules/kpwn` kernel module and the `test/kpwn_test.c` user-space binary and tests the `kpwn` module.
+
+### Usage
+
+```
+test/kpwn_test.sh [(kernelctf|ubuntu) <release-name>]
+```
+
+### Arguments
+
+* same as `./run.sh` - which distro and release to compile the kernel module for and run the binary on. Defaults to `ubuntu 5.4.0-26.30` in case the kernel version does not matter, just testing the module.
+
+### Example usages
+
+* Tests the `kpwn` module on the default kernel version (currently `ubuntu 5.4.0-26.30`):
+
+```
+test/kpwn_test.sh
+```
+
+* Tests the `kpwn` module on the `ubuntu 5.4.0-67.75` release:
+
+```
+test/kpwn_test.sh ubuntu 5.4.0-67.75
 ```

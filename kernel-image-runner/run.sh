@@ -49,12 +49,20 @@ if [ "$GDB" == "1" ]; then ARGS+=" --gdb"; fi
 if [ "$SNAPSHOT" == "1" ]; then ARGS+=" --snapshot"; fi
 if [ -d "$MODULES_PATH" ]; then ARGS+=" --modules-path=$MODULES_PATH"; fi
 
+# custom modules handling
+
+if [ ! -z "$CUSTOM_MODULES" ]; then
+    ../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" headers
+fi
+
 rm -rf rootfs/custom_modules/*
 for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
     make -C $RELEASE_DIR/linux-headers-for-module/ M=$SCRIPT_DIR/custom-modules/$MODULE_NAME modules
     mv custom-modules/$MODULE_NAME/$MODULE_NAME.ko rootfs/custom_modules/
     make -C $RELEASE_DIR/linux-headers-for-module/ M=$SCRIPT_DIR/custom-modules/$MODULE_NAME clean
 done
+
+# only-command-output handling + running the VM
 
 if [ "$ONLY_COMMAND_OUTPUT" == "1" ]; then
     ./run_vmlinuz.sh $ARGS --only-print-output-file "/scripts/command-output.sh" -- "$COMMAND_TO_RUN"
