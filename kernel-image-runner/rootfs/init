@@ -41,6 +41,10 @@ if [ -e /dev/sda ]; then
     fi
 fi
 
+# disable LoadPin
+if [ -e /proc/sys/kernel/loadpin/enforce ]; then echo 0 > /proc/sys/kernel/loadpin/enforce; fi
+if [ -e /proc/sys/kernel/loadpin/enabled ]; then echo 0 > /proc/sys/kernel/loadpin/enabled; fi
+
 for MODULE_FN in $(find /custom_modules -name '*.ko'); do
     echo "Loading custom module: $MODULE_FN"
     insmod $MODULE_FN

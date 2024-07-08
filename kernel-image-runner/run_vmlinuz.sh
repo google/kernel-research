@@ -65,5 +65,5 @@ qemu-system-x86_64 -m 3.5G -nographic -nodefaults \
     -drive file=rootfs.img,if=virtio,format=raw,snapshot=on \
     -drive file=rootfs.tar,if=virtio,format=raw,readonly=on \
     $SERIAL_PORTS $EXTRA_ARGS \
-    -append "console=ttyS0 root=/dev/vda1 rootfstype=ext4 rw nokaslr panic=-1 init=/init -- $COMMANDS_TO_RUN" \
+    -append "console=ttyS0 root=/dev/vda1 rootfstype=ext4 rw nokaslr panic=-1 oops=panic loadpin.enable=0 loadpin.enforce=0 init=/init -- $COMMANDS_TO_RUN" \
     -nographic -no-reboot

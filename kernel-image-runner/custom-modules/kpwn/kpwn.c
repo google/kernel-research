@@ -10,6 +10,7 @@
 #include <linux/fcntl.h>
 #include <asm/segment.h>
 #include <linux/buffer_head.h>
+#include <linux/version.h>
 #include <asm/setup.h>
 #include "kpwn.h"
 #include "utils.h"
@@ -112,7 +113,11 @@ static int __init _module_init(void) {
 
     dev_no = MKDEV(major_num, 0);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+    if (IS_ERR(class = class_create(DEVICE_NAME))) {
+#else
     if (IS_ERR(class = class_create(THIS_MODULE, DEVICE_NAME))) {
+#endif
         printk(KERN_ERR "kpwn: class_create failed with %ld\n", PTR_ERR(class));
         unregister_chrdev_region(dev_no, 1);
         return -1;

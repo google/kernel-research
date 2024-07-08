@@ -13,3 +13,4 @@ rootfs/scripts/exp
 rootfs/scripts/exp.sh
 rootfs/lib
 rootfs/kpwn_test
+rootfs/exp*

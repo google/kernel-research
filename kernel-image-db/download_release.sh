@@ -56,15 +56,15 @@ download_file() {
     URL="$1"
     DST_FN="$2"
 
-    if [ ! -f "$DST_FN" ]; then
-        echo "Downloading '$DST_FN' from $URL"
-        if ! curl -f "$URL" -o "$DST_FN"; then
-            echo "Failed to download '$DST_FN' from $URL"
-            exit 1
-        fi
-        return 1
+    if [ -z "$DST_FN" ]; then DST_FN="${URL##*/}"; fi
+
+    if [ -f "$DST_FN" ]; then return; fi
+
+    echo "Downloading '$DST_FN' from $URL"
+    if ! curl -f "$URL" -o "$DST_FN"; then
+        echo "Failed to download '$DST_FN' from $URL"
+        exit 1
     fi
-    return 0
 }
 
 download_ddeb_and_extract() {
@@ -128,14 +128,37 @@ pushd $RELEASE_DIR >/dev/null
 
 case $DISTRO in
   kernelctf)
+    RELEASE_URL="$KERNELCTF_BASE_URL/$RELEASE_NAME"
     if [[ "$DOWNLOAD_TYPE" =~ "vmlinuz" ]]; then
-        download_file "$KERNELCTF_BASE_URL/$RELEASE_NAME/bzImage" "vmlinuz"
+        download_file "$RELEASE_URL/bzImage" "vmlinuz"
     fi
 
     if [[ "$DOWNLOAD_TYPE" =~ "dbgsym" && ! -f "vmlinux" ]]; then
-        download_file "$KERNELCTF_BASE_URL/$RELEASE_NAME/vmlinux.gz" vmlinux.gz
+        download_file "$RELEASE_URL/vmlinux.gz"
         echo "Extracing vmlinux.gz..."
         gzip -d vmlinux.gz
+    fi
+
+    if [[ "$DOWNLOAD_TYPE" =~ "headers" ]]; then
+        download_file "$RELEASE_URL/COMMIT_INFO"
+
+        if [ ! -d linux-source ]; then
+            echo "Cloning release repository for headers..."
+            REPOSITORY_URL=$(grep -oP '(?<=REPOSITORY_URL=).*' COMMIT_INFO)
+            COMMIT_HASH=$(grep -oP '(?<=COMMIT_HASH=).*' COMMIT_INFO)
+
+            mkdir linux-source
+            pushd linux-source 2>/dev/null
+            git init
+            git remote add origin "$REPOSITORY_URL"
+            git fetch --depth 1 origin "$COMMIT_HASH"
+            git checkout FETCH_HEAD
+            popd 2>/dev/null
+        fi
+
+        download_file "$RELEASE_URL/.config"
+        if [ ! -f linux-source/.config ]; then cp .config linux-source/; fi
+        if [ ! -e linux-headers-for-module ]; then ln -s linux-source linux-headers-for-module; fi
     fi
     ;;
   ubuntu)
@@ -161,8 +184,11 @@ case $DISTRO in
         download_ddeb_and_extract $GENHEADERS_URL linux-headers-generic.deb linux-headers-generic
         if [ ! -d linux-headers-for-module ]; then
             mkdir -p linux-headers-for-module/
-            cp -r --update=none linux-headers/usr/src/linux-headers-${RELEASE_SHORT}/* linux-headers-for-module/
-            cp -r --update=none linux-headers-generic/usr/src/linux-headers-${RELEASE_SHORT}-generic/* linux-headers-for-module/
+            # include hidden files
+            shopt -s dotglob
+            cp -ar --update=none linux-headers/usr/src/linux-headers-${RELEASE_SHORT}/* linux-headers-for-module
+            cp -ar --update=none linux-headers-generic/usr/src/linux-headers-${RELEASE_SHORT}-generic/* linux-headers-for-module
+            shopt -u dotglob
         fi
     fi
 

@@ -10,7 +10,7 @@
 
 long check(long res, const char* cmd) {
     if (res < 0) {
-        printf("%s failed with %d\n", cmd, errno);
+        printf("%s failed with %ld (errno=%d)\n", cmd, res, errno);
         _exit(1);
     }
     return res;
