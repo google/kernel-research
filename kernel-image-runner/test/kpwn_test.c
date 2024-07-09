@@ -6,11 +6,15 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "../custom-modules/kpwn/kpwn.h"
+#include <sys/reboot.h>    /* Definition of RB_* constants */
+#include <unistd.h>
 
 long check(long res, const char* cmd) {
     if (res < 0) {
         printf("%s failed with %ld (errno=%d)\n", cmd, res, errno);
+        usleep(40 * 1000);
         _exit(1);
     }
     return res;
@@ -18,10 +22,7 @@ long check(long res, const char* cmd) {
 
 #define CHECK(VAR) check(VAR, #VAR)
 
-int main() {
-    printf("kpwn_test: opening device...\n");
-    int fd = CHECK(open("/dev/kpwn", O_RDWR));
-
+void rip_control_test(int fd) {
     printf("kpwn_test: calling KASLR_LEAK...\n");
     uint64_t kaslr_base = 0x1337;
     CHECK(ioctl(fd, KASLR_LEAK, &kaslr_base));
@@ -67,6 +68,30 @@ int main() {
     rip.action = RET;
     usleep(40 * 1000);
     CHECK(ioctl(fd, RIP_CONTROL, &rip));
+}
+
+void kprobe_test(int fd) {
+    kprobe_args args = { .function_name = "__kmalloc", .pid_filter = getpid(), .log_mode = ENTRY_WITH_CALLSTACK | RETURN };
+    CHECK(ioctl(fd, INSTALL_KPROBE, &args));
+
+    kpwn_message msg = { 1024 };
+    CHECK(ioctl(fd, ALLOC_BUFFER, &msg));
+    printf("kernel buffer address = 0x%lx\n", msg.kernel_addr);
+}
+
+int main(int argc, const char** argv) {
+    printf("kpwn_test: opening device...\n");
+    int fd = CHECK(open("/dev/kpwn", O_RDWR));
+
+    bool mode_kprobe_test = 0;
+    for (int i = 0; i < argc; i++)
+        if (!strcmp(argv[i], "--kprobe-test"))
+            mode_kprobe_test = 1;
+
+    if (mode_kprobe_test)
+        kprobe_test(fd);
+    else
+        rip_control_test(fd);
 
     printf("kpwn_test: closing device...\n");
     usleep(40 * 1000);

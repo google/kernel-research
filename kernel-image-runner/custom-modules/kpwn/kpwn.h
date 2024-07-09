@@ -10,7 +10,7 @@ typedef struct kpwn_message {
     uint8_t gfp_account;
 } kpwn_message;
 
-enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE };
+enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK };
 
 enum kpwn_errors {
     SUCCESS = 0,
@@ -67,3 +67,18 @@ typedef struct {
     uint64_t action;
 } rip_control_args;
 
+enum kprobe_log_mode {
+    SILENT = 0x0,
+    ENTRY = 0x1,
+    ENTRY_CALLSTACK = 0x2,
+    RETURN = 0x4,
+    RETURN_CALLSTACK = 0x8,
+    ENTRY_WITH_CALLSTACK = ENTRY | ENTRY_CALLSTACK,
+    RETURN_WITH_CALLSTACK = RETURN | RETURN_CALLSTACK
+};
+
+typedef struct {
+    char function_name[128];
+    pid_t pid_filter;
+    uint8_t log_mode; // kprobe_log_mode
+} kprobe_args;

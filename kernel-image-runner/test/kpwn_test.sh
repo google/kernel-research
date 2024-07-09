@@ -20,4 +20,4 @@ if [ -z "$DISTRO" ] && [ -z "$RELEASE_NAME"]; then
 fi
 
 gcc -static -o ../rootfs/kpwn_test kpwn_test.c
-../run.sh "$DISTRO" "$RELEASE_NAME" --custom-modules=kpwn -- /kpwn_test
+../run.sh "$DISTRO" "$RELEASE_NAME" --custom-modules=kpwn -- /kpwn_test ${@:3}
