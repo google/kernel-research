@@ -3,17 +3,17 @@
 void rip_control(rip_control_args* regs) {
     register rip_control_args* regs_asm asm("r15") = regs;
 
-    printk(KERN_ERR "kpwn: rip_control: action=0x%llx, rsp=0x%llx, value@rsp=0x%llx, regs_to_set=0x%llx, rip=0x%llx", regs->action, regs->rsp, regs->rsp == 0 ? 0 : *(uint64_t*)regs->rsp, regs->regs_to_set, regs->rip);
+    LOG("rip_control: action=0x%llx, rsp=0x%llx, value@rsp=0x%llx, regs_to_set=0x%llx, rip=0x%llx", regs->action, regs->rsp, regs->rsp == 0 ? 0 : *(uint64_t*)regs->rsp, regs->regs_to_set, regs->rip);
     if (regs->action != JMP_RIP && regs->action != CALL_RIP && regs->action != RET && regs->action != NONE) {
-        printk(KERN_ERR "kpwn: rip_control: invalid action (0x%llx)!", regs->action);
+        LOG("rip_control: invalid action (0x%llx)!", regs->action);
         return;
     }
 
     if ((regs->action == RET) && (!regs->rsp || !(regs->regs_to_set & RSP)))
-        printk(KERN_ERR "kpwn: rip_control: executing RET without setting RSP to non-zero value. Are you sure?");
+        LOG("rip_control: executing RET without setting RSP to non-zero value. Are you sure?");
 
     if ((regs->action == JMP_RIP || regs->action == CALL_RIP) && !regs->rip)
-        printk(KERN_ERR "kpwn: rip_control: executing JMP_RIP or CALL_RIP with zero RIP ptr. Are you sure?");
+        LOG("rip_control: executing JMP_RIP or CALL_RIP with zero RIP ptr. Are you sure?");
 
     asm volatile (
         ".intel_syntax noprefix\n\t"  // switch to Intel syntax
@@ -115,5 +115,5 @@ void rip_control(rip_control_args* regs) {
         : // No clobbered registers
     );
 
-    printk(KERN_ERR "kpwn: kpwn: rip_control, after asm");
+    LOG("kpwn: rip_control, after asm");
 }

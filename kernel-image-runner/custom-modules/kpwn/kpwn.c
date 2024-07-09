@@ -31,14 +31,14 @@ static long alloc_buffer(kpwn_message* msg, void* user_ptr) {
 }
 
 static void win_target(void) {
-    printk(KERN_ERR "kpwn: win_target was called.\n\n!!! YOU WON !!! \n\n");
+    LOG("win_target was called.\n\n!!! YOU WON !!! \n");
 }
 
 static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
     kpwn_message msg;
     void* user_ptr = (void*) arg;
 
-    printk(KERN_ERR "kpwn: dev_ioctl, cmd=%x, arg=%lx\n", cmd, arg);
+    LOG("dev_ioctl, cmd=%x, arg=%lx", cmd, arg);
     switch (cmd) {
         case ALLOC_BUFFER:
             long res = alloc_buffer(&msg, (void*)arg);
@@ -82,12 +82,12 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
 }
 
 static int dev_open(struct inode *inode, struct file *file) {
-    printk(KERN_ERR "kpwn: dev_open\n");
+    LOG("dev_open");
     return 0;
 }
 
 static int dev_close(struct inode *inode, struct file *file) {
-    printk(KERN_ERR "kpwn: dev_close\n");
+    LOG("dev_close");
     return 0;
 }
 
@@ -107,7 +107,7 @@ struct device *device;
 static int __init _module_init(void) {
     int major_num;
     if ((major_num = register_chrdev(0, DEVICE_NAME, &dev_fops)) < 0) {
-        printk(KERN_ERR "kpwn: register_chrdev failed with %d\n", major_num);
+        LOG("register_chrdev failed with %d", major_num);
         return -EBUSY;
     }
 
@@ -118,25 +118,25 @@ static int __init _module_init(void) {
 #else
     if (IS_ERR(class = class_create(THIS_MODULE, DEVICE_NAME))) {
 #endif
-        printk(KERN_ERR "kpwn: class_create failed with %ld\n", PTR_ERR(class));
+        LOG("class_create failed with %ld", PTR_ERR(class));
         unregister_chrdev_region(dev_no, 1);
         return -1;
     }
 
     if (IS_ERR(device = device_create(class, NULL, dev_no, NULL, DEVICE_NAME))) {
-        printk(KERN_ERR "kpwn: device_create failed with %ld\n", PTR_ERR(device));
+        LOG("device_create failed with %ld", PTR_ERR(device));
         class_destroy(class);
         unregister_chrdev_region(dev_no, 1);
         return -1;
     }
 
-    printk(KERN_ERR "kpwn: module was successfully initialized.\n");
+    LOG("module was successfully initialized.");
     return 0;
 }
 
 static void __exit _module_exit(void) {
     unregister_chrdev_region(dev_no, 1);
-    printk(KERN_ERR "kpwn: module successfully exited.\n");
+    LOG("module successfully exited.");
 }
 
 module_init(_module_init);

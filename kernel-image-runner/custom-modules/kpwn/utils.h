@@ -1,9 +1,11 @@
 #pragma once
 
+#define LOG(msg, ...) printk(KERN_ERR "kpwn: " msg "\n" __VA_OPT__(,) __VA_ARGS__)
+
 #define CHECK_ALLOC(x) ({ \
     typeof(x) __temp = (x); \
     if(!__temp) { \
-        printk(KERN_ERR "kpwn: %s: " #x " returned 0.\n", __func__); \
+        LOG("%s: " #x " returned 0.", __func__); \
         return -ERROR_ALLOC; \
     } \
     __temp; \
@@ -12,7 +14,7 @@
 #define CHECK_ZERO(x, ERROR_CODE) ({ \
     typeof(x) __temp = (x); \
     if(__temp) { \
-        printk(KERN_ERR "kpwn: %s: " #x " returned non-zero.\n", __func__); \
+        LOG("%s: " #x " returned non-zero.", __func__); \
         return -ERROR_CODE; \
     } \
     __temp; \
