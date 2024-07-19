@@ -95,18 +95,25 @@ download_ddeb_and_extract() {
 # this one won't create zero-length files
 save() {
     local FILE="$1"
-    if [ -f "$FILE" ]; then rm "$FILE"; fi
-    while IFS= read -r LINE; do echo "$LINE" >> "$FILE"; done
+    local COMMAND="$2"
+    if [ -f "$FILE" ]; then return; fi
+
+    echo "Generating $FILE..."
+    if ! eval "$COMMAND" > $FILE; then rm $FILE; fi
 }
 
 process_vmlinux() {
-    if [ ! -f "btf" ];                then pahole --btf_encode_detached btf vmlinux; fi
-    if [ ! -f "btf.json" ];           then bpftool btf dump -j file btf | save btf.json; fi
-    if [ ! -f "btf_formatted.json" ]; then jq . btf.json | save btf_formatted.json; fi
-    if [ ! -f "pahole.txt" ];         then pahole vmlinux | save pahole.txt; fi
-    if [ ! -f "symbols.txt" ];        then nm vmlinux | save symbols.txt; fi
-    if [ ! -f ".config" ];            then $SCRIPT_DIR/extract-ikconfig vmlinux | save .config; fi
-    if [ ! -f "rop_gadgets.txt" ];    then ROPgadget --binary vmlinux | save rop_gadgets.txt; fi
+    if [ ! -f "btf" ]; then
+        echo "Extracting pahole BTF information..."
+        pahole --btf_encode_detached btf vmlinux;
+    fi
+
+    save btf.json           "bpftool btf dump -j file btf"
+    save btf_formatted.json "jq . btf.json"
+    save pahole.txt         "pahole vmlinux"
+    save symbols.txt        "nm vmlinux"
+    save .config            "$SCRIPT_DIR/extract-ikconfig vmlinux"
+    save rop_gadgets.txt    "ROPgadget --binary vmlinux"
 }
 
 DISTRO="$1"
