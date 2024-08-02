@@ -1,6 +1,6 @@
-Tool to run scripts on various kernel images.
+Tool for running various kernel distribution images, with debugging and custom kernel module compilation support.
 
-# Requirements
+# Prerequisites
  * `sudo apt install libguestfs-tools`
 
 # Commands
@@ -17,9 +17,9 @@ Downloads a Linux kernel release with and runs commands on it.
 
 ### Arguments
 
-* `(ubuntu|kernel)` (required): supported distributions
+* `(ubuntu|kernelctf)` (required): supported distributions
 
-* `<release-name>` (required): name of the release, run `./run.sh ubuntu` to list the supported release names
+* `<release-name>` (required): name of the release, run `./run.sh (ubuntu|kernelctf)` to list the supported release names
 
 * `--custom-modules=helloworld,kpwn` (optional): it compiles and loads the listed custom modules. Source code of the custom kernel modules can be found in the `custom-modules/` folder.
 
