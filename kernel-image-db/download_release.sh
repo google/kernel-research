@@ -126,7 +126,7 @@ process_vmlinux() {
     save btf_formatted.json "jq . btf.json"
     save pahole.txt         "pahole vmlinux"
     save symbols.txt        "nm vmlinux"
-    save .config            "$SCRIPT_DIR/../third_party/extract-ikconfig vmlinux"
+    save .config            "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
     save rop_gadgets.txt    "ROPgadget --binary vmlinux"
 }
 

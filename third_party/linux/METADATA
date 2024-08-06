@@ -1,0 +1,15 @@
+name: "Linux kernel"
+description: "Partial copy of the Linux kernel (selected script(s))"
+
+third_party {
+  url {
+    type: HOMEPAGE
+    value: "https://www.kernel.org/"
+  }
+  url {
+    type: GIT
+    value: "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/"
+  }
+  version: "6.11-rc2"
+  last_upgrade_date { year: 2024 month: 8 day: 6 }
+}
