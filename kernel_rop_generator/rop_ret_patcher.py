@@ -69,7 +69,7 @@ def replace_return_thunk_bytes(vmlinux_bytes, off_patch_addr):
                   len(RETURN_THUNK_BYTES_REPLACE)] = RETURN_THUNK_BYTES_REPLACE
 
 
-def patch_vmlinux_return_thunk(vmlinux_path):
+def patch_vmlinux_return_thunk(vmlinux_path, output_path):
     """
     Patches return thunks in the vmlinux kernel image.
 
@@ -84,7 +84,6 @@ def patch_vmlinux_return_thunk(vmlinux_path):
     project = angr.Project(vmlinux_path)
     symbols = load_symbols(vmlinux_path)
     return_thunk_addr = symbols["__x86_return_thunk"]
-    output_path = Path(vmlinux_path).with_suffix(OUTPUT_FILE_EXTENTION)
 
     # Read the original data
     with open(vmlinux_path, "rb") as vmlinux_file:
@@ -100,12 +99,11 @@ def patch_vmlinux_return_thunk(vmlinux_path):
         output_file.write(vmlinux_bytes)
 
     print(f"Patched vmlinux saved as '{output_path}'")
-    return output_path
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Patches \"jmp __x86_return_thunk\" with the custom bytes for finding the right ROP gadgets")
     parser.add_argument("vmlinux", help="Path to vmlinux file")
     file_path = parser.parse_args().vmlinux
-    patch_vmlinux_return_thunk(file_path)
+    output_path = Path(file_path).with_suffix(OUTPUT_FILE_EXTENTION)
+    patch_vmlinux_return_thunk(file_path, output_path)
