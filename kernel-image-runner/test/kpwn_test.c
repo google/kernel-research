@@ -77,11 +77,7 @@ void rip_control_test(int fd) {
     }
 
     printf("kpwn_test: calling RIP_CONTROL ioctl...\n");
-    rip_control_args rip = { 0 };
-    //rip.rip = 0x4141414141414141;
-    rip.rsp = (uint64_t) msg.kernel_ptr;
-    rip.regs_to_set = RSP;
-    rip.action = RET;
+    rip_control_args rip = { .rsp = (uint64_t) msg.kernel_ptr, .regs_to_set = RSP, .action = RET };
     usleep(40 * 1000);
     CHECK(ioctl(fd, RIP_CONTROL, &rip));
 }
