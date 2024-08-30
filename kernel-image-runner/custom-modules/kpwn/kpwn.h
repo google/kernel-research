@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 #define DEVICE_NAME "kpwn"
 
@@ -26,7 +26,7 @@ typedef struct kpwn_message {
     uint8_t gfp_account;
 } kpwn_message;
 
-enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK };
+enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR };
 
 enum kpwn_errors {
     SUCCESS = 0,
@@ -37,6 +37,7 @@ enum kpwn_errors {
     ERROR_COPY_FROM_USER_DATA = 0x1004,
     ERROR_COPY_TO_USER_STRUCT = 0x1005,
     ERROR_COPY_TO_USER_DATA = 0x1006,
+    ERROR_UNKNOWN_SYMBOL = 0x1007,
 };
 
 enum regs_to_set: unsigned long {
@@ -98,3 +99,9 @@ typedef struct {
     pid_t pid_filter;
     uint8_t log_mode; // kprobe_log_mode
 } kprobe_args;
+
+typedef struct {
+    char symbol_name[128];
+    uint64_t symbol_addr;
+} sym_addr;
+

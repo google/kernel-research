@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -220,6 +220,15 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
             char buf[512];
             STRING_FROM_USER(buf, user_ptr);
             printk(KERN_ERR "%s\n", buf);
+            return SUCCESS;
+
+        case SYM_ADDR:
+            sym_addr sym_args;
+            STRUCT_FROM_USER(&sym_args, user_ptr);
+            sym_args.symbol_addr = _kallsyms_lookup_name(sym_args.symbol_name);
+            if (!sym_args.symbol_addr)
+                return -ERROR_UNKNOWN_SYMBOL;
+            STRUCT_TO_USER(&sym_args, user_ptr);
             return SUCCESS;
 
         default:
