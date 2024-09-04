@@ -20,9 +20,7 @@
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
 
-MODULE_AUTHOR("");
-MODULE_DESCRIPTION("");
-MODULE_LICENSE("");
+MODULE_LICENSE("GPL");
 
 static int __init _module_init(void) {
     printk(KERN_ERR "helloworld module is loaded.\n");

@@ -21,7 +21,7 @@ Downloads a Linux kernel release with and runs commands on it.
 
 * `<release-name>` (required): name of the release, run `./run.sh (ubuntu|kernelctf)` to list the supported release names
 
-* `--custom-modules=helloworld,kpwn` (optional): it compiles and loads the listed custom modules. Source code of the custom kernel modules can be found in the `custom-modules/` folder.
+* `--custom-modules=helloworld,kpwn` (optional): it compiles and loads the listed custom modules. Source code of the custom kernel modules can be found in the `third_party/kernel-modules/` folder.
 
 * `--only-command-output` (optional): by default the kernel logs are also printed, but with this argument you can disable this behaviour.
 
@@ -101,7 +101,7 @@ Running arbitrary commands on arbitrary `vmlinuz` or `bzImage` files.
 
 ## test/kpwn_test.sh
 
-Compiles the `custom-modules/kpwn` kernel module and the `test/kpwn_test.c` user-space binary and tests the `kpwn` module.
+Compiles the `third_party/kernel-modules/kpwn` kernel module and the `test/kpwn_test.c` user-space binary and tests the `kpwn` module.
 
 ### Usage
 

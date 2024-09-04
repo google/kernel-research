@@ -33,6 +33,7 @@ if [[ $# -lt 3 ]]; then usage; fi
 rm -rf rootfs/custom_modules/*
 for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
     HDR_DIR="$RELEASE_DIR/linux-headers-for-module/"
+    MODULE_DIR="$SCRIPT_DIR/../third_party/kernel-modules/$MODULE_NAME"
 
     if [[ "$DISTRO" = "kernelctf" ]] && [ ! -f "$HDR_DIR/.modules_prepared" ]; then
         make -C $HDR_DIR olddefconfig
@@ -45,7 +46,7 @@ for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
         make LOCALVERSION=$LOCALVERSION -C $HDR_DIR modules_prepare && touch "$HDR_DIR/.modules_prepared"
     fi
 
-    KBUILD_MODPOST_WARN=1 make -C $HDR_DIR M=$SCRIPT_DIR/custom-modules/$MODULE_NAME modules || exit 1
-    mv custom-modules/$MODULE_NAME/$MODULE_NAME.ko rootfs/custom_modules/
-    make -C $HDR_DIR M=$SCRIPT_DIR/custom-modules/$MODULE_NAME clean
+    KBUILD_MODPOST_WARN=1 make -C $HDR_DIR M=$MODULE_DIR modules || exit 1
+    mv "$MODULE_DIR/$MODULE_NAME.ko" rootfs/custom_modules/
+    make -C $HDR_DIR M=$MODULE_DIR clean
 done

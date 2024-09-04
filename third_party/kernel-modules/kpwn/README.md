@@ -261,5 +261,5 @@ Run `./compile_custom_modules.sh (kernelctf|ubuntu) <release-name> kpwn` and aft
 
 Compile your kernel normally and then execute the following command from the same directory where you compiled your kernel (replace `<kernel-image-runner-dir>` with the root directory of the kernel-image-runner):
 
-`make M=<kernel-image-runner-dir>/custom-modules/kpwn modules`
+`make M=<kernel-image-runner-dir>/../third_party/kernel-modules/kpwn modules`
 

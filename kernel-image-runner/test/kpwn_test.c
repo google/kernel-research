@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "../custom-modules/kpwn/kpwn.h"
+#include "../../third_party/kernel-modules/kpwn/kpwn.h"
 #include <sys/reboot.h>    /* Definition of RB_* constants */
 #include <unistd.h>
 
