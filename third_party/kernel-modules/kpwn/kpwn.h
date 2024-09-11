@@ -87,14 +87,34 @@ enum kprobe_log_mode {
     ENTRY_CALLSTACK = 0x2,
     RETURN = 0x4,
     RETURN_CALLSTACK = 0x8,
+    CALL_LOG = 0x10,
     ENTRY_WITH_CALLSTACK = ENTRY | ENTRY_CALLSTACK,
     RETURN_WITH_CALLSTACK = RETURN | RETURN_CALLSTACK
 };
 
 typedef struct {
+    uint64_t entry_size;
+    uint64_t arguments[6];
+    uint64_t return_value;
+    uint64_t call_stack_size;
+    uint8_t call_stack[];
+} kprobe_log_entry;
+
+typedef struct {
+    uint64_t struct_size;
+    uint64_t entry_count;
+    uint64_t next_offset; // next writable offset
+    uint64_t missed_logs; // number of logs could not be written to due insufficient buffer space
+    kprobe_log_entry entries[];
+} kprobe_log;
+
+typedef struct {
     char function_name[128];
     pid_t pid_filter;
+    uint8_t arg_count;
     uint8_t log_mode; // kprobe_log_mode
+    char log_call_stack_filter[128];
+    kprobe_log* logs;
 } kprobe_args;
 
 typedef struct {

@@ -54,9 +54,9 @@ static void win_target(void) {
 
 unsigned long kaslr_base = 0;
 
-struct kprobe_data {
-    ktime_t entry_stamp;
-};
+typedef struct kprobe_data {
+    kprobe_log_entry* log_entry_user_ptr;
+} kprobe_data;
 
 static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
 static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs);
@@ -69,16 +69,20 @@ typedef struct {
     kprobe_args args;
 } kretprobe_wrapper;
 
-DEFINE_PER_CPU(int, disabled);
+#define CALL_STACK_SIZE 4096
+DEFINE_PER_CPU(int, _kprobe_disabled);
+DEFINE_PER_CPU(char[CALL_STACK_SIZE], cpu_call_stack);
 
 #define GET_CPU_VAR(var_name) ({ typeof(var_name) __temp = get_cpu_var(var_name); put_cpu_var(var_name); __temp; })
 #define SET_CPU_VAR(var_name, new_value) ({ get_cpu_var(var_name) = new_value; put_cpu_var(var_name); })
 
-static int my_dump_stack(const char* hooked_func) {
+static int my_dump_stack(const char* hooked_func, char* buf, int buf_size) {
     unsigned long stack_trace[32];
     char function_name[KSYM_NAME_LEN];
-    char stack_trace_buf[512];
     int buf_idx = 0;
+
+    int len = CHECK_ALLOC(_stack_trace_save_tsk_reliable(current, stack_trace, ARRAY_SIZE(stack_trace)));
+
     // skip first 6 entries, they are:
     //   stack_trace_save_tsk_reliable+0x78/0xd0
     //   my_dump_stack.isra.0+0x3b/0xb0 [kpwn]
@@ -86,31 +90,90 @@ static int my_dump_stack(const char* hooked_func) {
     //   pre_handler_kretprobe+0x37/0x90
     //   kprobe_ftrace_handler+0x1a2/0x240
     //   0xffffffffc03db0dc   // optimized area(?)
-    int len = CHECK_ALLOC(_stack_trace_save_tsk_reliable(current, stack_trace, ARRAY_SIZE(stack_trace)));
     for (int i = 6; i < len; i++) {
         _sprint_backtrace(function_name, stack_trace[i]);
-        buf_idx += snprintf(&stack_trace_buf[buf_idx], ARRAY_SIZE(stack_trace_buf) - buf_idx, (buf_idx == 0 ? "%s" : " <- %s"), function_name);
+        buf_idx += snprintf(&buf[buf_idx], buf_size - buf_idx, "%s%s", (buf_idx == 0 ? "" : " <- "), function_name);
     }
-    LOG("KPROBE: %s: stack trace: %s", hooked_func, stack_trace_buf);
-    return SUCCESS;
+    //LOG("KPROBE: %s: stack trace: %s", hooked_func, stack_trace_buf);
+    return buf_idx;
+}
+
+struct kretprobe* get_kretprobe_(struct kretprobe_instance *ri) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+    return get_kretprobe(ri);
+#else
+    return ri->rp;
+#endif
 }
 
 static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-    struct kretprobe* rp = get_kretprobe(ri);
+    struct kretprobe* rp = get_kretprobe_(ri);
     kretprobe_wrapper* wr = container_of(rp, kretprobe_wrapper, kretprobe);
+    kprobe_data* data = (kprobe_data*) ri->data;
 
     // !current->mm - skipping kernel threads
-    if (GET_CPU_VAR(disabled) || !current->mm || (wr->args.pid_filter != -1 && current->pid != wr->args.pid_filter))
+    if (GET_CPU_VAR(_kprobe_disabled) || !current->mm || (wr->args.pid_filter != -1 && current->pid != wr->args.pid_filter))
         return 1;
 
-    if (wr->args.log_mode & ENTRY) {
-        LOG("KPROBE: %s: entry, rdi=0x%lx, rsi=0x%lx, rdx=0x%lx, rcx=0x%lx, r8=0x%lx, r9=0x%lx", rp->kp.symbol_name,
-            regs->di, regs->si, regs->dx, regs->cx, regs->r8, regs->r9);
+    bool entry_log = wr->args.log_mode & ENTRY;
+    bool print_callstack = wr->args.log_mode & ENTRY_CALLSTACK;
+    bool log_call = wr->args.log_mode & CALL_LOG;
+    bool log_filter = !!wr->args.log_call_stack_filter[0];
+    if (!entry_log && !log_call)
+        return 0;
+
+    kprobe_log_entry new_entry = { 0, { regs->di, regs->si, regs->dx, regs->cx, regs->r8, regs->r9 }, 0, 0 };
+
+    bool filter_out = false;
+    if (log_call || print_callstack || log_filter) {
+        char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
+        new_entry.call_stack_size = my_dump_stack(rp->kp.symbol_name, call_stack_buf, CALL_STACK_SIZE);
+        if (log_filter)
+            filter_out = !strstr(call_stack_buf, wr->args.log_call_stack_filter);
+        put_cpu_ptr(cpu_call_stack);
     }
 
-    if (wr->args.log_mode & ENTRY_CALLSTACK) {
-        my_dump_stack(rp->kp.symbol_name);
+    if (filter_out)
+        return 1;
+
+    if (entry_log) {
+        char args_str[128];
+        char* args_ptr = &args_str[0];
+        for (int i = 0; i < wr->args.arg_count; i++)
+            args_ptr += snprintf(args_ptr, ARRAY_SIZE(args_str) - (args_ptr - args_str), "%s0x%llx", i == 0 ? "" : ", ", new_entry.arguments[i]);
+        LOG("KPROBE: %s(%s)", rp->kp.symbol_name, args_str);
+    }
+
+    if (log_call || print_callstack) {
+        char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
+        if (print_callstack)
+            LOG("KPROBE:   stack trace: %s", call_stack_buf);
+        put_cpu_ptr(cpu_call_stack);
+
+        if (log_call) {
+            kprobe_log log;
+            STRUCT_FROM_USER(&log, wr->args.logs);
+            int free_space = log.struct_size - sizeof(kprobe_log) - log.next_offset;
+            new_entry.entry_size = sizeof(new_entry) + new_entry.call_stack_size;
+
+            if (free_space < new_entry.entry_size) {
+                data->log_entry_user_ptr = 0;
+                log.missed_logs++;
+                LOG("KPROBE:   ERROR: could not log call, there were not enough space in user-space buffer (free_space=%d, log_entry_size=%llu)", free_space, new_entry.entry_size);
+            } else {
+                data->log_entry_user_ptr = (kprobe_log_entry*)(((uint8_t*)&wr->args.logs->entries) + log.next_offset);
+                char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
+                DATA_TO_USER(call_stack_buf, &data->log_entry_user_ptr->call_stack, new_entry.call_stack_size);
+                put_cpu_ptr(cpu_call_stack);
+                STRUCT_TO_USER(&new_entry, data->log_entry_user_ptr);
+
+                // TODO: this should be written atomicly... fix race
+                log.next_offset += new_entry.entry_size;
+                log.entry_count++;
+            }
+            STRUCT_TO_USER(&log, wr->args.logs);
+        }
     }
 
     return 0;
@@ -119,16 +182,26 @@ NOKPROBE_SYMBOL(entry_handler);
 
 static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 {
-    struct kretprobe* rp = get_kretprobe(ri);
+    struct kretprobe* rp = get_kretprobe_(ri);
     kretprobe_wrapper* wr = container_of(rp, kretprobe_wrapper, kretprobe);
-    //struct kprobe_data *data = (struct kprobe_data *)ri->data;
+    struct kprobe_data *data = (struct kprobe_data *)ri->data;
 
     if (wr->args.log_mode & RETURN) {
         LOG("KPROBE: %s: returned 0x%lx", rp->kp.symbol_name, regs_return_value(regs));
     }
 
     if (wr->args.log_mode & RETURN_CALLSTACK) {
-        my_dump_stack(rp->kp.symbol_name);
+        char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
+        my_dump_stack(rp->kp.symbol_name, call_stack_buf, CALL_STACK_SIZE);
+        LOG("KPROBE:   stack trace: %s", call_stack_buf);
+        put_cpu_ptr(cpu_call_stack);
+    }
+
+    if (wr->args.log_mode & CALL_LOG) {
+        kprobe_log_entry entry;
+        STRUCT_FROM_USER(&entry, data->log_entry_user_ptr);
+        entry.return_value = regs_return_value(regs);
+        STRUCT_TO_USER(&entry, data->log_entry_user_ptr);
     }
 
     return 0;
@@ -150,9 +223,11 @@ static int sym_lookup(void) {
     return SUCCESS;
 }
 
-static int install_kprobe(const kprobe_args* args) {
-    SET_CPU_VAR(disabled, 1);
+static int install_kprobe(kprobe_args* args) {
+    SET_CPU_VAR(_kprobe_disabled, 1);
     kretprobe_wrapper* wr = kzalloc(sizeof(kretprobe_wrapper), GFP_KERNEL);
+    if (args->arg_count > 6)
+        args->arg_count = 6;
     wr->args = *args;
     wr->kretprobe.handler = ret_handler;
     wr->kretprobe.entry_handler = entry_handler;
@@ -160,7 +235,7 @@ static int install_kprobe(const kprobe_args* args) {
     wr->kretprobe.maxactive = 20;
     wr->kretprobe.kp.symbol_name = wr->args.function_name;
     int res = CHECK_ZERO_NO_RET(register_kretprobe(&wr->kretprobe));
-    SET_CPU_VAR(disabled, 0);
+    SET_CPU_VAR(_kprobe_disabled, 0);
     if (res) return ERROR_GENERIC;
     LOG("KPROBE: %s: hook installed (addr=0x%llx, name=%pBb)", wr->args.function_name, (uint64_t)wr->kretprobe.kp.addr, wr->kretprobe.kp.addr);
     return SUCCESS;
@@ -199,6 +274,7 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
 
         case ARB_READ:
             STRUCT_FROM_USER(&msg, user_ptr);
+            //LOG("ARB_READ: kernel=0x%llx, user=0x%llx, len=%llu", (uint64_t)msg.kernel_ptr, (uint64_t)msg.data, msg.length);
             DATA_TO_USER(msg.kernel_ptr, msg.data, msg.length);
             return SUCCESS;
 
