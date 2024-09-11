@@ -33,5 +33,5 @@ if [ -z "$DISTRO" ] && [ -z "$RELEASE_NAME"]; then
     RELEASE_NAME="lts-6.1.58"
 fi
 
-gcc -static -o ../rootfs/kpwn_test kpwn_test.c
+gcc -static -Werror -o ../rootfs/kpwn_test kpwn_test.c
 ../run.sh "$DISTRO" "$RELEASE_NAME" --custom-modules=kpwn -- /kpwn_test ${@:3}
