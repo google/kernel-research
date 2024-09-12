@@ -7,8 +7,7 @@ import os
 import re
 import traceback
 
-targets_desc = "kernelctf:lts-6.1.31,lts-6.1.81,cos-97-16919.294.48,cos-101-17162.127.42,cos-105-17412.101.42,cos-109-17800.147.60,mitigation-v3-6.1.55;ubuntu:5.4.0-26.30,5.15.0-25.25,6.5.0-10.10"
-#targets_desc = "kernelctf:lts-6.1.31,lts-6.1.81"
+targets_desc = "kernelctf:lts-6.1.31,lts-6.1.81,lts-6.6.23,lts-6.6.47,cos-97-16919.294.48,cos-101-17162.127.42,cos-105-17412.101.42,cos-109-17800.147.60,mitigation-v3-6.1.55;ubuntu:4.4.0-186.216,4.15.0-20.21,4.15.0-213.224,5.4.0-26.30,5.4.0-195.215,5.15.0-25.25,5.15.0-121.131,6.5.0-10.10,6.8.0-31.31"
 
 
 class MultiPrintLine:
@@ -60,13 +59,13 @@ def read_pipes(*pipes):
       yield (line[:-1], pipes.index(key.fileobj))
 
 
-def run(cmd, success_exitcodes=None):
+def run(cmd):
   p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        universal_newlines=True, shell=True)
   for line, source in read_pipes(p.stdout, p.stderr):
     yield (line, source == 1)
   exitcode = p.wait()
-  if exitcode not in (success_exitcodes or [0]):
+  if exitcode:
     raise Exception(f"failed with error code {exitcode}")
 
 
@@ -106,18 +105,23 @@ class ReleaseRunner:
       self.status = status
       self.status_line.update(f"  {status}")
 
-  def run(self, cmd, success_exitcodes=[0]):
+  def run(self, cmd, detect_errors=False):
     self.log(f"[+] Running command: {cmd}")
 
     error = None
-    lines = []
-    for line, stderr in run(cmd, success_exitcodes):
-      full_line = ("[STDERR] " if stderr else "") + line
-      lines.append(full_line)
-      self.log(full_line)
-      if "error: " in line:
-        error = line.split("error: ")[1]
-      self.update_status(None, (bold_red("ERROR: ") if stderr else "status: ") + re.sub(r"[^\x20-\x7E]+", " ", line))
+    try:
+      lines = []
+      for line, stderr in run(cmd):
+        full_line = ("[STDERR] " if stderr else "") + line
+        lines.append(full_line)
+        self.log(full_line)
+        if detect_errors and "error: " in line:
+          error = line.split("error: ")[1]
+        if not line.startswith("["):
+          self.update_status(None, (bold_red("ERROR: ") if stderr else "status: ") + re.sub(r"[^\x20-\x7E]+", " ", line))
+    except:
+      if not error:
+        raise
 
     if error is not None:
       raise Exception(error)
@@ -127,13 +131,19 @@ class ReleaseRunner:
   def thread_main(self):
     try:
       self.update_status("downloading release...")
-      self.run(f"../kernel-image-db/download_release.sh '{self.distro}' '{self.release_name}' 'vmlinuz,modules'")
+      self.run(f"../kernel-image-db/download_release.sh '{self.distro}' '{self.release_name}' 'vmlinuz,modules'", True)
 
       self.update_status("compiling custom modules...")
-      self.run(f"./compile_custom_modules.sh '{self.distro}' '{self.release_name}' 'kpwn'", [0, 1])
+      self.run(f"./compile_custom_modules.sh '{self.distro}' '{self.release_name}' 'kpwn'", True)
 
       self.update_status("running kpwn_test...")
-      result = self.run(f"./run.sh {self.distro} {self.release_name} --custom-modules=keep -- /kpwn_test --pipebuf-test")
+      while True:
+        try:
+          result = self.run(f"./run.sh {self.distro} {self.release_name} --snapshot --custom-modules=keep -- /kpwn_test --pipebuf-test")
+          break
+        except Exception as e:
+          if str(e) != "failed with error code 135":
+            raise
       result = '\n'.join(result)
 
       def find(pattern):
@@ -142,10 +152,10 @@ class ReleaseRunner:
           raise Exception(f"did not find pattern in result: '{pattern}'")
         return m[0]
 
-      regs = dict(re.findall(" (R..): ([0-9a-f]+)\\b", result))
+      regs = re.findall(" (R..): ([0-9a-f]+)\\b", result)
       inv_regs = {}
-      for reg, value in regs.items():
-        inv_regs[value] = inv_regs.get(value, []) + [reg]
+      for reg, value in regs:
+        inv_regs.setdefault(value, set()).add(reg)
       pipe_buffer_addr = find("pipe_buffer addr = 0x([0-9a-f]*)")
 
       self.update_status(bold_green("SUCCESS"), f"pipe_buf registers: {inv_regs.get(pipe_buffer_addr, [])}")
