@@ -37,6 +37,7 @@ MODULE_LICENSE("GPL");
 unsigned long (*_kallsyms_lookup_name)(const char *name) = 0;
 int (*_sprint_backtrace)(char *buffer, unsigned long address) = 0;
 int (*_stack_trace_save_tsk_reliable)(struct task_struct *tsk, unsigned long *store, unsigned int size) = 0;
+int (*_stack_trace_save_tsk)(struct task_struct *tsk, unsigned long *store, unsigned int size, unsigned int skipnr) = 0;
 
 static long alloc_buffer(kpwn_message* msg, void* user_ptr) {
     msg->kernel_ptr = 0;
@@ -81,16 +82,21 @@ static int my_dump_stack(const char* hooked_func, char* buf, int buf_size) {
     char function_name[KSYM_NAME_LEN];
     int buf_idx = 0;
 
-    int len = CHECK_ALLOC(_stack_trace_save_tsk_reliable(current, stack_trace, ARRAY_SIZE(stack_trace)));
-
-    // skip first 6 entries, they are:
-    //   stack_trace_save_tsk_reliable+0x78/0xd0
+    // skip first 5 entries, they are:
     //   my_dump_stack.isra.0+0x3b/0xb0 [kpwn]
     //   entry_handler+0x98/0xb0 [kpwn]
     //   pre_handler_kretprobe+0x37/0x90
     //   kprobe_ftrace_handler+0x1a2/0x240
     //   0xffffffffc03db0dc   // optimized area(?)
-    for (int i = 6; i < len; i++) {
+    int len = _stack_trace_save_tsk(current, stack_trace, ARRAY_SIZE(stack_trace), 5);
+    if (len < 0) {
+        LOG("my_dump_stack: FAILED with len=%d < 0", len);
+        dump_stack();
+        return 0;
+    }
+
+    int i;
+    for (i = 0; i < len; i++) {
         _sprint_backtrace(function_name, stack_trace[i]);
         buf_idx += snprintf(&buf[buf_idx], buf_size - buf_idx, "%s%s", (buf_idx == 0 ? "" : " <- "), function_name);
     }
@@ -140,7 +146,8 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
     if (entry_log) {
         char args_str[128];
         char* args_ptr = &args_str[0];
-        for (int i = 0; i < wr->args.arg_count; i++)
+        int i;
+        for (i = 0; i < wr->args.arg_count; i++)
             args_ptr += snprintf(args_ptr, ARRAY_SIZE(args_str) - (args_ptr - args_str), "%s0x%llx", i == 0 ? "" : ", ", new_entry.arguments[i]);
         LOG("KPROBE: %s(%s)", rp->kp.symbol_name, args_str);
     }
@@ -220,6 +227,7 @@ static int sym_lookup(void) {
     kaslr_base = _kallsyms_lookup_name("_text");
     _sprint_backtrace = (void*)_kallsyms_lookup_name("sprint_backtrace");
     _stack_trace_save_tsk_reliable = (void*)_kallsyms_lookup_name("stack_trace_save_tsk_reliable");
+    _stack_trace_save_tsk = (void*)_kallsyms_lookup_name("stack_trace_save_tsk");
     return SUCCESS;
 }
 
