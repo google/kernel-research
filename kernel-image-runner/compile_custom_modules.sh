@@ -20,6 +20,8 @@ SCRIPT_DIR=$(dirname $(realpath "$0"))
 cd $SCRIPT_DIR
 
 RELEASE_DIR="$SCRIPT_DIR/../kernel-image-db/releases/$DISTRO/$RELEASE_NAME"
+CUSTOM_MODULES_DIR="$RELEASE_DIR/custom_modules"
+CUSTOM_MODULES_BUILD_DIR="$RELEASE_DIR/.custom_modules_build"
 
 usage() {
     echo "Usage: $0 (kernelctf|ubuntu) <release-name> <helloworld|kpwn>";
@@ -27,13 +29,18 @@ usage() {
 }
 
 if [[ $# -lt 3 ]]; then usage; fi
+if [ -z "$CUSTOM_MODULES" ]; then exit; fi
 
 ../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" headers
 
-rm -rf rootfs/custom_modules/*
+mkdir -p "$CUSTOM_MODULES_BUILD_DIR"
+
 for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
     HDR_DIR="$RELEASE_DIR/linux-headers-for-module/"
     MODULE_DIR="$SCRIPT_DIR/../third_party/kernel-modules/$MODULE_NAME"
+    BUILD_DIR="$CUSTOM_MODULES_BUILD_DIR/$MODULE_NAME"
+
+    cp -a "$MODULE_DIR/." "$BUILD_DIR/"
 
     if [[ "$DISTRO" = "kernelctf" ]] && [ ! -f "$HDR_DIR/.modules_prepared" ]; then
         make -C $HDR_DIR olddefconfig
@@ -46,7 +53,9 @@ for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
         make LOCALVERSION=$LOCALVERSION -C $HDR_DIR modules_prepare && touch "$HDR_DIR/.modules_prepared"
     fi
 
-    KBUILD_MODPOST_WARN=1 make -C $HDR_DIR M=$MODULE_DIR modules || exit 1
-    mv "$MODULE_DIR/$MODULE_NAME.ko" rootfs/custom_modules/
-    make -C $HDR_DIR M=$MODULE_DIR clean
+    KBUILD_MODPOST_WARN=1 make -C $HDR_DIR M=$BUILD_DIR modules || exit 1
+    mkdir -p $CUSTOM_MODULES_DIR
+    cp "$BUILD_DIR/$MODULE_NAME.ko" $CUSTOM_MODULES_DIR/
+    #make -C $HDR_DIR M=$MODULE_DIR clean
 done
+tar --directory=$CUSTOM_MODULES_DIR --owner=root --group=root -cf $CUSTOM_MODULES_DIR.tar . > /dev/null

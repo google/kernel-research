@@ -18,7 +18,7 @@ set -e
 cd $(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--gdb] [--snapshot] [--nokaslr] [--only-print-output-file] -- [<commands-to-run-in-vm>]";
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--nokaslr] [--only-print-output-file] -- [<commands-to-run-in-vm>]";
     exit 1;
 }
 
@@ -26,6 +26,7 @@ ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     --modules-path=*) MODULES_PATH="${1#*=}"; shift;;
+    --custom-modules-tar=*) CUSTOM_MODULES_TAR="${1#*=}"; shift;;
     --only-print-output-file) ONLY_PRINT_OUTPUT_FILE=1; shift;;
     --snapshot) SNAPSHOT=1; shift;;
     --gdb) GDB=1; shift;;
@@ -67,11 +68,21 @@ if [ "$GDB" == "1" ]; then EXTRA_ARGS+=" -s -S"; fi
 if [ "$SNAPSHOT" == "1" ]; then EXTRA_ARGS+=" -snapshot"; fi
 if [ "$NOKASLR" == "1" ]; then EXTRA_CMDLINE+=" nokaslr"; fi
 
+ABC=({a..z})
+IDE_IDX=0
 if [ ! -z "$MODULES_PATH" ]; then
     if [[ "$MODULES_PATH" == */ ]]; then MODULES_PATH=${MODULES_PATH%/}; fi
     MODULES_IMG="$MODULES_PATH.img"
     check_archive_uptodate $MODULES_IMG $MODULES_PATH "virt-make-fs --type ext4 --size=+16M $MODULES_PATH $MODULES_IMG"
     EXTRA_ARGS+=" -drive file=$MODULES_IMG,if=ide,format=raw"
+    EXTRA_CMDLINE+=" MOUNT_MODULES=/dev/sd${ABC[IDE_IDX]}"
+    IDE_IDX=$((IDE_IDX+1))
+fi
+
+if [ ! -z "$CUSTOM_MODULES_TAR" ]; then
+    EXTRA_ARGS+=" -drive file=$CUSTOM_MODULES_TAR,if=ide,format=raw"
+    EXTRA_CMDLINE+=" MOUNT_CUSTOM_MODULES=/dev/sd${ABC[IDE_IDX]}"
+    IDE_IDX=$((IDE_IDX+1))
 fi
 
 qemu-system-x86_64 -m 3.5G -nographic -nodefaults \

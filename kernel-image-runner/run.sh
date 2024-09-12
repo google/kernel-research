@@ -67,6 +67,8 @@ if [ "$CUSTOM_MODULES" != "keep" ]; then
     ./compile_custom_modules.sh "$DISTRO" "$RELEASE_NAME" "$CUSTOM_MODULES"
 fi
 
+if [ ! -z "$CUSTOM_MODULES" ]; then ARGS+=" --custom-modules-tar=$RELEASE_DIR/custom_modules.tar"; fi
+
 # only-command-output handling + running the VM
 
 if [ "$ONLY_COMMAND_OUTPUT" == "1" ]; then
