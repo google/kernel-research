@@ -11,8 +11,9 @@
  * GNU General Public License for more details.
 */
 
-#define DEVICE_NAME "kpwn"
+#pragma once
 
+#define DEVICE_NAME "kpwn"
 typedef struct kpwn_message {
     uint64_t length;
     uint8_t* data;

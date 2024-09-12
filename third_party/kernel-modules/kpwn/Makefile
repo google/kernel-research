@@ -11,4 +11,4 @@
 # GNU General Public License for more details.
 
 obj-m += kpwn.o
-ccflags-y := -Werror -Wno-declaration-after-statement -Wno-frame-larger-than
+ccflags-y := -Werror -Wno-declaration-after-statement -Wno-frame-larger-than -Wno-missing-prototypes -Wno-missing-declarations -Wno-missing-attributes

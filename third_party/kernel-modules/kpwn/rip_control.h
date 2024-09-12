@@ -11,7 +11,10 @@
  * GNU General Public License for more details.
 */
 
+#pragma once
+
 #include "utils.h"
+#include "kpwn.h"
 
 void rip_control(rip_control_args* regs) {
     register rip_control_args* regs_asm asm("r15") = regs;
@@ -98,6 +101,7 @@ void rip_control(rip_control_args* regs) {
         "  cmp QWORD PTR [r15 + 0x90], 0x01\n\t" // rip_action.JMP_RIP == 0x01
         "  jne action_call_rip\n\t"
         "  mov r15, QWORD PTR[r15 + 0x80]\n\t"   // r15 = rip_control_args.rip
+        ANNOTATE_RETPOLINE_SAFE
         "  jmp r15\n\t"
         "  int3\n\t"
 
@@ -105,6 +109,7 @@ void rip_control(rip_control_args* regs) {
         "  cmp QWORD PTR [r15 + 0x90], 0x02\n\t" // rip_action.CALL_RIP == 0x02
         "  jne action_ret\n\t"
         "  mov r15, QWORD PTR[r15 + 0x80]\n\t"   // r15 = rip_control_args.rip
+        ANNOTATE_RETPOLINE_SAFE
         "  call r15\n\t"
         "  jmp end\n\t"
 
@@ -112,6 +117,7 @@ void rip_control(rip_control_args* regs) {
         "  cmp QWORD PTR [r15 + 0x90], 0x03\n\t" // rip_action.RET == 0x03
         "  jne action_none\n\t"
         "  mov r15, [r15 + 0x78]\n\t"            // r15 = rip_control_args.r15
+        ANNOTATE_RETPOLINE_SAFE
         "  ret\n\t"
         "  int3\n\t"
 

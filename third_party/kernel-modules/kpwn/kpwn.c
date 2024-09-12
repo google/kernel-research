@@ -39,10 +39,14 @@ int (*_sprint_backtrace)(char *buffer, unsigned long address) = 0;
 int (*_stack_trace_save_tsk_reliable)(struct task_struct *tsk, unsigned long *store, unsigned int size) = 0;
 int (*_stack_trace_save_tsk)(struct task_struct *tsk, unsigned long *store, unsigned int size, unsigned int skipnr) = 0;
 
+#ifndef __GFP_ACCOUNT
+#define __GFP_ACCOUNT 0
+#endif
+
 static long alloc_buffer(kpwn_message* msg, void* user_ptr) {
     msg->kernel_ptr = 0;
     STRUCT_FROM_USER(msg, user_ptr);
-    msg->kernel_ptr = CHECK_ALLOC(kmalloc(msg->length, msg->gfp_account ? GFP_KERNEL_ACCOUNT : GFP_KERNEL));
+    msg->kernel_ptr = CHECK_ALLOC(kmalloc(msg->length, GFP_KERNEL | (msg->gfp_account ? __GFP_ACCOUNT : 0)));
     if (msg->data)
         DATA_FROM_USER(msg->kernel_ptr, msg->data, msg->length);
     STRUCT_TO_USER(msg, user_ptr);
@@ -88,6 +92,11 @@ static int my_dump_stack(const char* hooked_func, char* buf, int buf_size) {
     //   pre_handler_kretprobe+0x37/0x90
     //   kprobe_ftrace_handler+0x1a2/0x240
     //   0xffffffffc03db0dc   // optimized area(?)
+    if (!_stack_trace_save_tsk) {
+        LOG("my_dump_stack: stack_trace_save_tsk is not available");
+        return 0;
+    }
+
     int len = _stack_trace_save_tsk(current, stack_trace, ARRAY_SIZE(stack_trace), 5);
     if (len < 0) {
         LOG("my_dump_stack: FAILED with len=%d < 0", len);
@@ -135,7 +144,7 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
     if (log_call || print_callstack || log_filter) {
         char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
         new_entry.call_stack_size = my_dump_stack(rp->kp.symbol_name, call_stack_buf, CALL_STACK_SIZE);
-        if (log_filter)
+        if (log_filter && new_entry.call_stack_size)
             filter_out = !strstr(call_stack_buf, wr->args.log_call_stack_filter);
         put_cpu_ptr(cpu_call_stack);
     }

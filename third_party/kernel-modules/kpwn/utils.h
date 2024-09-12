@@ -40,8 +40,16 @@
     __temp; \
 })
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 5, 0)
+    #define _raw_copy_from_user raw_copy_from_user
+    #define _raw_copy_to_user raw_copy_to_user
+#else
+    #define _raw_copy_from_user _copy_from_user
+    #define _raw_copy_to_user _copy_to_user
+#endif
+
 #define STRUCT_FROM_USER(kernel_struct_ptr, user_ptr) CHECK_ZERO(copy_from_user(kernel_struct_ptr, user_ptr, sizeof(*kernel_struct_ptr)), ERROR_COPY_FROM_USER_STRUCT)
 #define STRUCT_TO_USER(kernel_struct_ptr, user_ptr) CHECK_ZERO(copy_to_user(user_ptr, kernel_struct_ptr, sizeof(*kernel_struct_ptr)), ERROR_COPY_TO_USER_STRUCT)
-#define DATA_FROM_USER(kernel_ptr, user_ptr, len) CHECK_ZERO(raw_copy_from_user(kernel_ptr, user_ptr, len), ERROR_COPY_FROM_USER_DATA)
-#define DATA_TO_USER(kernel_ptr, user_ptr, len) CHECK_ZERO(raw_copy_to_user(user_ptr, kernel_ptr, len), ERROR_COPY_TO_USER_DATA);
+#define DATA_FROM_USER(kernel_ptr, user_ptr, len) CHECK_ZERO(_raw_copy_from_user(kernel_ptr, user_ptr, len), ERROR_COPY_FROM_USER_DATA)
+#define DATA_TO_USER(kernel_ptr, user_ptr, len) CHECK_ZERO(_raw_copy_to_user(user_ptr, kernel_ptr, len), ERROR_COPY_TO_USER_DATA);
 #define STRING_FROM_USER(kernel_buf, user_ptr) CHECK_ALLOC(strncpy_from_user(kernel_buf, user_ptr, ARRAY_SIZE(kernel_buf)))
