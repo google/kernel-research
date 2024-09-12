@@ -85,7 +85,7 @@ if [ ! -z "$CUSTOM_MODULES_TAR" ]; then
     IDE_IDX=$((IDE_IDX+1))
 fi
 
-qemu-system-x86_64 -m 3.5G -nographic -nodefaults \
+qemu-system-x86_64 -m 3.5G -nographic -nodefaults -no-reboot \
     -enable-kvm -cpu host -smp cores=2 \
     -kernel $VMLINUZ \
     -initrd initramfs.cpio \
@@ -93,5 +93,6 @@ qemu-system-x86_64 -m 3.5G -nographic -nodefaults \
     -drive file=rootfs.img,if=virtio,format=raw,snapshot=on \
     -drive file=rootfs.tar,if=virtio,format=raw,readonly=on \
     $SERIAL_PORTS $EXTRA_ARGS \
-    -append "console=ttyS0 root=/dev/vda1 rootfstype=ext4 rw panic=-1 oops=panic loadpin.enable=0 loadpin.enforce=0$EXTRA_CMDLINE init=/init -- $COMMANDS_TO_RUN" \
-    -nographic -no-reboot
+    -append "console=ttyS0 root=/dev/vda1 rootfstype=ext4 rw panic=-1 oops=panic loadpin.enable=0 loadpin.enforce=0$EXTRA_CMDLINE init=/init -- $COMMANDS_TO_RUN"
+
+stty sane

