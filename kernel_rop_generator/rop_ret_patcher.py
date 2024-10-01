@@ -57,7 +57,7 @@ def replace_return_thunks(project, return_thunk_addr, vmlinux_bytes, elffile):
     addresses = get_jmp_addresses_by_byte_pattern(project)
     for addr in addresses:
         ins = project.factory.block(addr).disassembly.insns[0]
-        if ins.mnemonic == "jmp" and int(ins.op_str, 16) == return_thunk_addr:
+        if ins.mnemonic == "jmp" and int(ins.op_str.rstrip('h'), 16) == return_thunk_addr:
             off_patch_addr = get_offset(elffile, addr)
             replace_return_thunk_bytes(vmlinux_bytes, off_patch_addr)
 

