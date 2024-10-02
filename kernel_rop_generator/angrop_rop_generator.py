@@ -274,7 +274,7 @@ class RopGeneratorAngrop:
         """
         items = [
             RopChainOffset(self._find_pop_one_reg("rdi")),
-            0,
+            RopChainConstant(0),
             self._find_symbol(PREPARE_KERNEL_CRED),
         ]
 
@@ -291,7 +291,7 @@ class RopGeneratorAngrop:
         """
         items = [
             RopChainOffset(self._find_pop_one_reg("rdi")),
-            1,
+            RopChainConstant(1),
             self._find_symbol(FIND_TASK_BY_VPID),
         ]
 
