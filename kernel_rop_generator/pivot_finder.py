@@ -433,7 +433,7 @@ class PivotFinder:
 
         raise BadPivot("doesn't match poprsp")
 
-    def _try_match_single_inst_pivot(self, address, gadget, pivot_pattern):
+    def _parse_single_inst_pivot(self, address, gadget, match):
         """
         After finding a matching pattern with a single instruction which includes the patterns below
         xchg reg, rsp; ret
@@ -446,9 +446,6 @@ class PivotFinder:
         first_inst = gadget[0]
         last_inst = gadget[-1]
         middle_insts = gadget[1:-1]
-
-        match = re.match(pivot_pattern, first_inst)
-        assert match, "_try_match_single_inst_pivot should only be called with the correct pattern"
 
         if first_inst == "leave":
             pivot_reg = "rbp"
@@ -631,7 +628,7 @@ class PivotFinder:
         for pattern in SINGLE_INSTRUCTION_PIVOT_PATTERNS:
             match = re.match(pattern, first_inst)
             if match:
-                return self._try_match_single_inst_pivot(address, gadget, pattern)
+                return self._parse_single_inst_pivot(address, gadget, match)
 
         # multiple patterns match if first_instruction is a push reg
         match = re.match(PUSH_PATTERN, first_inst)

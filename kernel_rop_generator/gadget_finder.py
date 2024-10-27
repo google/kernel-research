@@ -2,6 +2,7 @@ import subprocess
 import re
 import sys
 from elftools.elf.elffile import ELFFile
+from elftools.common.exceptions import ELFError
 
 
 def get_text_section_range(binary_path):
@@ -15,22 +16,16 @@ def get_text_section_range(binary_path):
       A tuple containing the start and end addresses of the .text section,
       or None if the section is not found.
     """
-    try:
-        with open(binary_path, 'rb') as f:
-            elffile = ELFFile(f)
-            # Get the .text section
-            text_section = elffile.get_section_by_name('.text')
-            if not text_section:
-                print("Error: .text section not found in the binary.")
-                return None
+    with open(binary_path, 'rb') as f:
+        elffile = ELFFile(f)
+        # Get the .text section
+        text_section = elffile.get_section_by_name('.text')
+        if not text_section:
+            raise ELFError("Error: .text section not found in the binary.")
 
-            text_section_start = text_section['sh_addr']
-            text_section_end = text_section_start + text_section['sh_size']
-            return text_section_start, text_section_end
-
-    except FileNotFoundError:
-        print(f"Error: Binary file not found: {binary_path}")
-        return None
+        text_section_start = text_section['sh_addr']
+        text_section_end = text_section_start + text_section['sh_size']
+        return text_section_start, text_section_end
 
 
 def run_rp(context_size, binary_path):
@@ -45,12 +40,10 @@ def run_rp(context_size, binary_path):
       A dictionary where keys are addresses and values are the corresponding gadgets.
     """
     gadgets = {}
-    try:
-        text_section_range = get_text_section_range(binary_path)
-        if not text_section_range:
-            return {}  # Return empty dictionary if .text section not found
-        text_section_start, text_section_end = text_section_range
+    text_section_range = get_text_section_range(binary_path)
+    text_section_start, text_section_end = text_section_range
 
+    try:
         # Run rp++ command and capture the output
         result = subprocess.run(['rp++', '-r', str(context_size), '-f',
                                 binary_path], capture_output=True, text=True, check=True)
@@ -59,22 +52,19 @@ def run_rp(context_size, binary_path):
             if line.strip():
                 # Split the line into address and gadget
                 try:
-                    address, gadget = line.rsplit(':', 1)
+                    address, gadget = line.split(':', 1)
                     address = int(address.strip(), 16)
                     if text_section_start <= address < text_section_end:
-                        gadget = gadget.replace("(1 found)", "").strip()
+                        # Split off "1 found" from rp++ output
+                        gadget = gadget.rsplit('(', 1)[0]
                         gadgets[address] = gadget
                 except ValueError:
                     print(
                         f"Warning: Skipping line with unexpected format: {line}")
         return gadgets
-    except FileNotFoundError:
-        print(
-            "Error: rp++ tool not found. Please make sure it is installed and in your PATH.")
-        return {}
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing rp++: {e}")
-        return {}
+    except FileNotFoundError as e:
+        raise FileNotFoundError(
+            "Error: rp++ tool not found. Please make sure it is installed and in your PATH.") from e
 
 
 def remove_duplicate_gadgets(gadgets):
@@ -116,7 +106,8 @@ def filter_gadgets(gadgets, registers):
 
 
 def split_instructions(gadgets):
-    """Splits the gadget string into separate instructions 
+    """
+    Splits the gadget string into separate instructions 
     """
     split_gadgets = {}
     for addr, gad in gadgets.items():
@@ -126,6 +117,9 @@ def split_instructions(gadgets):
 
 
 def find_gadgets(binary_path, context_size):
+    """
+    Filters the found gadgets and returns a dict of unique gadgets
+    """
     gadgets = run_rp(context_size, binary_path)
     gadgets = remove_duplicate_gadgets(gadgets)
     gadgets = split_instructions(gadgets)
@@ -134,12 +128,15 @@ def find_gadgets(binary_path, context_size):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python script_name.py <binary_path>")
+        print(f"Usage: python3 {sys.argv[0]} <binary_path>")
         sys.exit(1)
 
     binary_path = sys.argv[1]
     context_size = 5
-    gadgets = find_gadgets(binary_path, context_size)
+    try:
+        gadgets = find_gadgets(binary_path, context_size)
+    except (FileNotFoundError, ValueError, subprocess.CalledProcessError) as exc:
+        print(exc)
 
     for address, gad in gadgets.items():
         print(hex(address), gad)
