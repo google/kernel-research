@@ -6,6 +6,10 @@
 #include "util/log.cpp"
 #include "util/str.cpp"
 
+#define TEST_METHOD(name, desc) \
+    Test _test_ ## name = registerTest(Test(#name, desc, [this]() { name(); })); \
+    void name()
+
 struct Test {
     std::string func_name;
     std::string desc;
@@ -23,9 +27,17 @@ struct TestSuite: ILog {
     TestSuite() {}
     TestSuite(std::string class_name, std::string desc): class_name(class_name), desc(desc) { }
 
+    virtual void init() { }
+    virtual void deinit() { }
+
     void log(LogLevel log_level, const char* format, ...) {
         va_list args;
         va_start(args, format);
         logs.push_back(format_str(format, args));
+    }
+
+    Test& registerTest(Test test) {
+        tests.push_back(test);
+        return tests.back();
     }
 };

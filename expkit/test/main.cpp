@@ -14,12 +14,13 @@ int main() {
 
     for (auto& testSuite : testSuites) {
         printf("===== TEST SUITE ::: " YELLOW("%s") " (%s) ::: =====\n", testSuite->class_name.c_str(), testSuite->desc.c_str());
+        testSuite->init();
         for (auto& test : testSuite->tests) {
             printf("[+] Running test: " YELLOW("%s") " (%s) \n", test.func_name.c_str(), test.desc.c_str());
             testSuite->logs.clear();
             try {
                 test.func();
-                printf("[+] Test ran successfully.");
+                printf("[+] Test ran successfully.\n");
             } catch(std::exception& exc) {
                 failedTests.push_back(format_str("%s::%s", testSuite->class_name.c_str(), test.func_name.c_str()));
                 printf("[!] Test failed with: " RED("%s") "\n", exc.what());
@@ -30,6 +31,7 @@ int main() {
                 }
             }
         }
+        testSuite->deinit();
     }
 
     printf("\n===== SUMMARY =====\n");
