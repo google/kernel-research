@@ -62,32 +62,35 @@ class KpwnWriterTests(unittest.TestCase):
 
   def test_empty(self):
     self.expect(self.EXPECTED_HDR +
-                b"\x04\0\0\0" +  # meta len
+                b"\x08\0\0\0" +  # meta len
                 b"\x00\0\0\0" +  # symbols len
+                b"\x00\0\0\0" +  # ROP actions len
                 b"\x00\0\0\0",   # targets len
-                types.SimpleNamespace(symbols={}), [])
+                types.SimpleNamespace(symbols={}, rop_actions={}), [])
 
   def test_msleep(self):
     self.expect(self.EXPECTED_HDR +
-                b"\x13\0\0\0" +              # meta len
+                b"\x17\0\0\0" +              # meta len
                 b"\x01\0\0\0" +              # symbols len
                 b"\x0d\0" +                  # symbols[0].sizeof
                 b"\x44\x33\x22\x11" +        # symbols[0].type_id == 0x11223344
                 b"\x06\x00" + b"msleep\0" +  # symbols[0].name == "msleep"
+                b"\x00\0\0\0" +              # ROP actions len
                 b"\x00\0\0\0",               # targets len
-                types.SimpleNamespace(symbols={0x11223344: "msleep"}), [])
+                types.SimpleNamespace(symbols={0x11223344: "msleep"}, rop_actions={}), [])
 
   def test_target(self):
     target = Target("kernelCTF", "lts-6.1.36",
                     "test/mock_db/releases/kernelctf/lts-6.1.36")
 
     self.expect(self.EXPECTED_HDR +
-                b"\x04\0\0\0" +                # meta len
+                b"\x08\0\0\0" +                # meta len
                 b"\x00\0\0\0" +                # symbols len
+                b"\x00\0\0\0" +                # ROP actions len
                 b"\x01\0\0\0" +                # targets len
                 b"\x3a\0\0\0" +                # targets[0].sizeof
                 b"\x09\0" + b"kernelCTF\0" +   # targets[0].distro
                 b"\x0a\0" + b"lts-6.1.36\0" +  # targets[0].release_name
                 # targets[0].version
                 b"\x1e\0" + b"KernelCTF version 6.1.36 (...)\x00",
-                types.SimpleNamespace(symbols={}), [target])
+                types.SimpleNamespace(symbols={}, rop_actions={}), [target])

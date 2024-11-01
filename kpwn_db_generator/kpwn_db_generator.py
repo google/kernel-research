@@ -4,6 +4,8 @@ import os
 import re
 import sys
 import config
+
+sys.path.append(os.path.realpath("../kernel_rop_generator"))
 from kpwn_writer import KpwnWriter
 from target import Target
 from utils import list_dirs

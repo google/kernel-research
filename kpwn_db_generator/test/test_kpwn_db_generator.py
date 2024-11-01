@@ -37,5 +37,5 @@ class KpwnDbGeneratorTests(unittest.TestCase):
         RELEASES_DIR, "bad/missing_files")
     self.assertEqual(1, len(targets))
     self.assertEqual("missing_files", targets[0].release_name)
-    self.assertListEqual(["version.txt", "symbols.txt"],
+    self.assertListEqual(["version.txt", "symbols.txt", "rop_actions.json"],
                          targets[0].missing_files)

@@ -40,4 +40,3 @@ class RopChain:
         items_str = ", ".join(repr(item) for item in self.items)
         return f"RopChain(items=[{items_str}])"
 
-

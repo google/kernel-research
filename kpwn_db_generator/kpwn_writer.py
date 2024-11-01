@@ -1,10 +1,12 @@
 """Classes for writing the kpwn file format."""
 from binary_writer import BinaryWriter
+from rop_actions import RopActionWriter
 
 MAGIC = "KPWN"
 VERSION_MAJOR = 1
 VERSION_MINOR = 0
 
+## .kpwn file format structure
 # magic = KPWN (u4)
 # version_major = 0x1 (u2) - file with newer version_major
 #                            is not compatible with older readers
@@ -18,6 +20,19 @@ VERSION_MINOR = 0
 #     type_id (u4)
 #     name_len (u2)
 #     name[name_len] (zstr)
+#   num_rop_actions (u4)
+#   rop_actions[num_rop_actions]
+#     struct_size (u2)
+#     type_id (u4)
+#     desc_len (u2)
+#     desc[desc_len] (zstr)
+#     num_args (u1)
+#     arguments[num_args]
+#       name_len (u2)
+#       name[name_len] (zstr)
+#       flags (u1)
+#         required - 0x1
+#       default_value (u8) - only if required == 0
 # num_targets (u4)
 # targets[num_targets]
 #   struct_size (u4) - so we can jump over easily and
@@ -30,7 +45,17 @@ VERSION_MINOR = 0
 #   version[version_len] (zstr)
 #   symbols[num_symbols]
 #     offset (u4)
-
+#   rop_actions[num_rop_actions]
+#     struct_size (u2) - 0 means this ROP action is not supported
+#     num_items (u1)
+#     items[num_items]
+#       type (b4) - enum, 0 = constant_value, 1 = symbol, 2 = argument
+#       size (b4) - value is stored as 2^size
+#                   (0 -> 1 byte, 1 -> 2 bytes, 2 -> 4 bytes, 3 -> 8 bytes)
+#       value (depends on size)
+#
+# u[N] = N-byte unsigned integer (u1 = uint8_t, u4 = uint32_t)
+# b[N] = N-bit unsigned integer (b4 = integer stored on 4 bits)
 
 class SymbolWriter:
   """Helper class to handle symbol writing to the db."""
@@ -56,6 +81,7 @@ class KpwnWriter:
 
   def __init__(self, config, debug=False):
     self.symbol_writer = SymbolWriter(config.symbols)
+    self.rop_action_writer = RopActionWriter(config.rop_actions)
     self.debug = debug
 
   def _write_target(self, wr_root, target):
@@ -69,6 +95,9 @@ class KpwnWriter:
       # symbols
       self.symbol_writer.write_target(wr_target, target)
 
+      # ROP Actions
+      self.rop_action_writer.write_target(wr_target, target)
+
   def write(self, f, targets):
     wr_root = BinaryWriter(f)
     wr_root.write(bytes(MAGIC, "ascii"))
@@ -79,6 +108,9 @@ class KpwnWriter:
     with wr_root.struct(4) as wr_hdr:
       # symbols
       self.symbol_writer.write_meta(wr_hdr)
+
+      # ROP Actions
+      self.rop_action_writer.write_meta(wr_hdr)
 
     # targets
     wr_root.u4(len(targets))

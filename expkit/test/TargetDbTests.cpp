@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <cstdio>
 #include "test/TestUtils.cpp"
 #include "test/TestSuite.cpp"
@@ -44,5 +43,36 @@ struct TargetDbTests: TestSuite {
         ASSERT_EQ(0x2876880, target.GetSymbolOffset(INIT_NSPROXY));
         ASSERT_EQ(0x1a200c0, target.GetSymbolOffset(ANON_PIPE_BUF_OPS));
         ASSERT_EQ(0x227a50, target.GetSymbolOffset(MSLEEP));
+    }
+
+    TEST_METHOD(metaDataIsNotParsedByDefault, "metadata is not parsed by default") {
+        auto parser = getParser();
+        parser.ParseHeader();
+        ASSERT_EQ(0, parser.rop_action_meta_.size());
+    }
+
+    TEST_METHOD(ropActionsMetaLts6181, "rop actions metadata is correct (lts-6.1.81)") {
+        auto parser = getParser();
+        parser.ParseHeader(true);
+        ASSERT_EQ(5, parser.rop_action_meta_.size());
+        auto& msleep_meta = parser.rop_action_meta_[RopActionId::MSLEEP];
+        ASSERT_EQ(RopActionId::MSLEEP, msleep_meta.type_id);
+        ASSERT_EQ("msleep(ARG_time_msec)", msleep_meta.desc.c_str());
+        ASSERT_EQ(1, msleep_meta.args.size());
+        ASSERT_EQ("time_msec", msleep_meta.args[0].name.c_str());
+        ASSERT_EQ(true, msleep_meta.args[0].required);
+        ASSERT_EQ(0, msleep_meta.args[0].default_value);
+    }
+
+    TEST_METHOD(ropActionsLts6181, "rop actions are correct (lts-6.1.81)") {
+        auto target = getLts6181();
+        auto& msleep = target.rop_actions[RopActionId::MSLEEP];
+        ASSERT_EQ(3, msleep.size());
+        ASSERT_EQ(RopItemType::SYMBOL, msleep[0].type);
+        ASSERT_EQ(0x21f5 /* POP_RDI */, msleep[0].value);
+        ASSERT_EQ(RopItemType::ARGUMENT, msleep[1].type);
+        ASSERT_EQ(0, msleep[1].value);
+        ASSERT_EQ(RopItemType::SYMBOL, msleep[2].type);
+        ASSERT_EQ(0x227a50 /* MSLEEP */, msleep[2].value);
     }
 };
