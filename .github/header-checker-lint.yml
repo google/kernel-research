@@ -1,0 +1,11 @@
+allowedCopyrightHolders:
+  - 'Google LLC'
+allowedLicenses:
+  - 'Apache-2.0'
+sourceFileExtensions:
+  - 'sh'
+  - 'py'
+  - 'c'
+  - 'cpp'
+  - 'h'
+  - 'hpp'
