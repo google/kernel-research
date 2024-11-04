@@ -4,6 +4,7 @@ import subprocess
 import threading
 import time
 import os
+import sys
 import re
 import traceback
 
@@ -139,7 +140,7 @@ class ReleaseRunner:
       self.update_status("running kpwn_test...")
       while True:
         try:
-          result = self.run(f"./run.sh {self.distro} {self.release_name} --snapshot --custom-modules=keep -- /kpwn_test --pipebuf-test")
+          result = self.run(f"./run.sh {self.distro} {self.release_name} --snapshot --custom-modules=keep -- {self.multi_runner.cmd_line}")
           break
         except Exception as e:
           if str(e) != "failed with error code 135":
@@ -170,7 +171,8 @@ class ReleaseRunner:
 
 
 class MultiRunner:
-  def __init__(self):
+  def __init__(self, cmd_line):
+    self.cmd_line = cmd_line
     self.mp = MultiPrint()
     self.logs_dir = "logs/"
     self.runners = []
@@ -184,7 +186,8 @@ class MultiRunner:
         runner.start()
 
 def main():
-  mr = MultiRunner()
+  cmd_line = " ".join(sys.argv[1:])
+  mr = MultiRunner(cmd_line)
   for distro_targets in targets_desc.split(";"):
     (distro, releases) = distro_targets.split(":")
     for release in releases.split(","):
