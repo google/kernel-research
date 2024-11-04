@@ -77,7 +77,6 @@ download_file() {
     echo "Downloading '$DST_FN' from $URL"
     if ! curl -f "$URL" -o "$DST_FN"; then
         echo "Failed to download '$DST_FN' from $URL"
-        exit 1
     fi
 }
 
@@ -122,12 +121,14 @@ process_vmlinux() {
         pahole --btf_encode_detached btf vmlinux;
     fi
 
-    save btf.json           "bpftool btf dump -j file btf"
-    save btf_formatted.json "jq . btf.json"
-    save pahole.txt         "pahole vmlinux"
-    save symbols.txt        "nm vmlinux"
-    save .config            "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
-    save rop_gadgets.txt    "ROPgadget --binary vmlinux"
+    save btf.json                 "bpftool btf dump -j file btf"
+    save btf_formatted.json       "jq . btf.json"
+    save pahole.txt               "pahole vmlinux"
+    save symbols.txt              "nm vmlinux"
+    save .config                  "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
+    save rop_gadgets.txt          "ROPgadget --binary vmlinux"
+    save rop_gadgets_wo_jop.txt   "ROPgadget --nojop --binary vmlinux"
+    save rop_gadgets_filtered.txt "grep ' : \(pop\|cmp\|add rsp\|mov\|push\|xchg\|leave\).* ; ret$' rop_gadgets_wo_jop.txt"
 }
 
 DISTRO="$1"
