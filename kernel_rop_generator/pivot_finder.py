@@ -1,3 +1,4 @@
+import logging
 import re
 import sys
 from collections import defaultdict
@@ -5,29 +6,16 @@ import archinfo
 import gadget_finder
 
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
 class BadPivot(Exception):
     """Exception raised for a bad pivot."""
-    pass
-
-# TODO add logging
 
 
 # size for the rop gadget search
 CONTEXT_SIZE = 5
-
-# these need extra handling
-# Dictionary of instructions and their implicit writes
-IMPLICIT_CLOBBER = {
-    "mul": ["rax", "rdx"],
-    "imul": ["rax", "rdx"],  # only with 1 operand
-    "aad": ["rax"],
-    "aam": ["rax"],
-    "aaa": ["rax"],
-    "aas": ["rax"],
-    "daa": ["rax"],
-    "das": ["rax"],
-    "cdq": ["rax", "rdx"]
-}
 
 # div can cause floating point exceptions so don't use it
 # push is disallowed other than what we look for in the patterns
@@ -55,7 +43,7 @@ CLOBBER_TWO = ["xchg"]
 
 
 SINGLE_INSTRUCTION_PIVOT_PATTERNS = [
-    r"xchg\s+(\w+),\s*rsp", r"mov\s+rsp,\s*(\w+)", r"leave"]
+    r"xchg\s+(\w+),\s*rsp", r"xchg\s+rsp,\s*(\w+)", r"mov\s+rsp,\s*(\w+)", r"leave"]
 PUSH_PATTERN = r"push\s+(\w+)"
 POP_PATTERN = r"pop\s+(\w+)"
 
@@ -77,27 +65,69 @@ PIVOT_REGISTER_NAMES = [
 
 
 class Pivot:
-    pass
+    def __init__(self, address, instructions):
+        self.address = address
+        self.instructions = instructions
+
+    def debug_print(self):
+        raise NotImplementedError
 
 
 class OneGadgetPivot(Pivot):
-    def __init__(self, address, pivot_reg, used_offsets, next_rip_offset):
-        pass
+    """
+    This pivot doesn't need to be paired with other pivots. 
+    Examples include:
+        xchg reg, rsp; ret
+        mov rsp, reg; ret
+        leave; ret
+    """
+
+    def __init__(self, address, instructions, pivot_reg, used_offsets, next_rip_offset):
+        super().__init__(address, instructions)
+        self.pivot_reg = pivot_reg
+        self.used_offsets = used_offsets
+        self.next_rip_offset = next_rip_offset
+
+    def debug_print(self):
+        print("OneGadgetPivot: ", self.pivot_reg, self.next_rip_offset)
+        print(self.instructions)
 
 
-class PushJumpPivot(Pivot):
-    def __init__(self, address, push_register, used_offsets_in_push, jump_register, used_offsets_in_jump, next_rip_offset):
-        pass
+class PushIndirectPivot(Pivot):
+    """
+    This pivot is a push "reg" followed by an indirect control flow transfer such as jmp qword [rsi+0x30].
+    Should be paired with a pop rsp pivot
+    """
 
+    def __init__(self, address, instructions, indirect_type, push_register, used_offsets_in_push,
+                 indirect_register, used_offsets_in_indirect_reg, next_rip_offset):
+        super().__init__(address, instructions)
+        self.indirect_type = indirect_type
+        self.push_register = push_register
+        self.used_offsets_in_push = used_offsets_in_push
+        self.indirect_register = indirect_register
+        self.used_offsets_in_indirect_reg = used_offsets_in_indirect_reg
+        self.next_rip_offset = next_rip_offset
 
-class PushCallPivot(Pivot):
-    def __init__(self, address, push_register, used_offsets_in_push, jump_register, used_offsets_in_jump, next_rip_offset):
-        pass
+    def debug_print(self):
+        print("PushIndirectPivot: ", self.indirect_type, self.push_register,
+              self.indirect_register, self.next_rip_offset)
+        print(self.instructions)
 
 
 class PopRspPivot(Pivot):
-    def __init__(self, address, stack_change_before_rsp, next_rip_offset):
-        pass
+    """
+    This pivot pairs with PushIndirectPivot
+    """
+
+    def __init__(self, address, instructions, stack_change_before_rsp, next_rip_offset):
+        super().__init__(address, instructions)
+        self.stack_change_before_rsp = stack_change_before_rsp
+        self.next_rip_offset = next_rip_offset
+
+    def debug_print(self):
+        print("PopRspPivot: ", self.stack_change_before_rsp, self.next_rip_offset)
+        print(self.instructions)
 
 
 class PivotFinder:
@@ -105,19 +135,21 @@ class PivotFinder:
         self.vmlinux_path = vmlinux_path
         self._reg_to_base_reg = {}
         self._setup_reg_info()
-        self.pivots = {}
+        self.pivots = []
 
     def find_pivots(self):
         """
         finds all the pivots
         """
         gadgets = gadget_finder.find_gadgets(self.vmlinux_path, CONTEXT_SIZE)
-        pivots = {}
         for addr, gadget in gadgets.items():
             try:
-                self.pivots[addr] = self._check_if_pivot(addr, gadget)
+                self.pivots.append(self._check_if_pivot(addr, gadget))
             except BadPivot as e:
-                pass
+                logger.debug(
+                    'Gadget: %s was a bad pivot with reason: %s', gadget, e)
+
+        return self.pivots
 
     # functions for preparing register info
 
@@ -242,30 +274,9 @@ class PivotFinder:
         else:
             raise BadPivot("memory addr unknown")
 
-    def _parse_jmp_instruction(self, inst):
+    def _parse_jmp_or_call_instruction(self, inst):
         # Pattern to match various jmp formats, optionally including 'qword'
-        pattern = r"jmp\s+(qword\s+)?\[(\w+)([+-](?:0x[\da-fA-F]+|\d+))?\]"
-        match = re.match(pattern, inst)
-        if match:
-            # Register is captured in the second group
-            register = match.group(2)
-
-            # Offset value, if present, is captured in the third group
-            offset = match.group(3) if match.group(3) else "0"
-
-            # offset should be an integer
-            try:
-                offset = int(offset, 0)
-            except ValueError:
-                raise BadPivot("Offset isn't an int") from None
-
-            return register, offset
-        else:
-            raise BadPivot("jump addr unknown")
-
-    def _parse_call_instruction(self, inst):
-        # Pattern to match various jmp formats, optionally including 'qword'
-        pattern = r"call\s+(qword\s+)?\[(\w+)([+-](?:0x[\da-fA-F]+|\d+))?\]"
+        pattern = r"(?:call|jmp)\s+(qword\s+)?\[(\w+)([+-](?:0x[\da-fA-F]+|\d+))?\]"
         match = re.match(pattern, inst)
         if match:
             # Register is captured in the second group
@@ -316,9 +327,6 @@ class PivotFinder:
 
         if opcode in CLOBBER_TWO:
             return
-
-        # if opcode in IMPLICIT_CLOBBER:
-        #    return True
 
         raise BadPivot("opcode not in allowlist")
 
@@ -426,10 +434,7 @@ class PivotFinder:
                 stack_change_before = idx*8
                 stack_change_after = (len(insts_before_ret)-1-idx)*8
 
-                print("pop rsp pivot:", stack_change_before, stack_change_after)
-                print(gadget)
-                print("")
-                return PopRspPivot(address, stack_change_before, stack_change_after)
+                return PopRspPivot(address, gadget, stack_change_before, stack_change_after)
 
         raise BadPivot("doesn't match poprsp")
 
@@ -481,11 +486,7 @@ class PivotFinder:
         else:
             used_offsets = list(memory_writes[pivot_reg])
 
-        print("single pivot: ", pivot_reg, stack_change)
-        print(gadget)
-        print("")
-
-        return OneGadgetPivot(address, pivot_reg, used_offsets, stack_change)
+        return OneGadgetPivot(address, gadget, pivot_reg, used_offsets, stack_change)
 
     def _try_match_push_poprsp_pivot(self, address, gadget, pivot_reg):
         """
@@ -522,13 +523,9 @@ class PivotFinder:
 
         self._check_write_collision_with_rip_offset(used_offsets, stack_change)
 
-        print("push pop pivot", pivot_reg, stack_change)
-        print(gadget)
-        print("")
+        return OneGadgetPivot(address, gadget, pivot_reg, used_offsets, stack_change)
 
-        return OneGadgetPivot(address, pivot_reg, used_offsets, stack_change)
-
-    def _try_match_push_jump_pivot(self, address, gadget, pivot_reg):
+    def _try_match_indirect_pivot(self, address, gadget, pivot_reg):
         """
         After finding a gadget with includes the following pattern 
         push reg ; ... ;  jmp qword [reg+offset];
@@ -542,7 +539,7 @@ class PivotFinder:
         # make sure no push or pop after the first push
         self._check_no_push_pop(middle_insts)
 
-        jump_reg, offset = self._parse_jmp_instruction(last_inst)
+        jump_reg, offset = self._parse_jmp_or_call_instruction(last_inst)
         if jump_reg not in PIVOT_REGISTER_NAMES:
             raise BadPivot("jump register not allowlisted")
 
@@ -563,49 +560,10 @@ class PivotFinder:
         self._check_write_collision_with_rip_offset(
             jump_used_offsets, offset)
 
-        print("push jump pivot", pivot_reg, jump_reg)
-        print(gadget)
-        print("")
-        return PushJumpPivot(address, pivot_reg, memory_writes[pivot_reg], jump_reg, jump_used_offsets, offset)
+        indirect_type = last_inst.split(" ")[0]
 
-    def _try_match_push_call_pivot(self, address, gadget, pivot_reg):
-        """
-        After finding a gadget with includes the following pattern 
-        push reg ; ... ;  call qword [reg+offset];
-
-        Checks the middle instructions to make sure they are allowlisted safe ones
-        Analyzes memory reads and writes and creates the Pivot
-        """
-        last_inst = gadget[-1]
-        middle_insts = gadget[1:-1]
-
-        # make sure no push or pop after the first push
-        self._check_no_push_pop(middle_insts)
-
-        call_reg, offset = self._parse_call_instruction(last_inst)
-        if call_reg not in PIVOT_REGISTER_NAMES:
-            raise BadPivot("call register not allowlisted")
-
-        if offset < 0 or offset >= 0x80:
-            raise BadPivot("call gadget has large offset")
-
-        # for this gadget we can have reads/writes to pivot_reg or call_reg
-        memory_writes = self._analyze_instruction_reads_writes(
-            middle_insts,
-            {"rsp", call_reg},  # rsp/call_reg should not be modified
-            {pivot_reg, call_reg}  # can read/write to pivot reg
-        )
-
-        # check memory writes[call_reg] don't overlap call offset
-        call_used_offsets = list(memory_writes[call_reg])
-
-        self._check_write_collision_with_rip_offset(
-            call_used_offsets, offset)
-
-        print("push call pivot", pivot_reg, call_reg)
-        print(gadget)
-        print("")
-        return PushCallPivot(address, pivot_reg, memory_writes[pivot_reg], call_reg, call_used_offsets, offset)
+        return PushIndirectPivot(address, gadget, indirect_type, pivot_reg, memory_writes[pivot_reg],
+                                 jump_reg, jump_used_offsets, offset)
 
     def _check_if_pivot(self, address, gadget):
         """
@@ -641,13 +599,9 @@ class PivotFinder:
             if gadget.count("pop rsp") == 1:
                 return self._try_match_push_poprsp_pivot(address, gadget, pivot_reg)
 
-            # check if push ... jump [reg]
-            if last_inst.startswith("jmp"):
-                return self._try_match_push_jump_pivot(address, gadget, pivot_reg)
-
-            # check if push ... call [reg]
-            if last_inst.startswith("call"):
-                return self._try_match_push_call_pivot(address, gadget, pivot_reg)
+            # check if push ... jump|call [reg]
+            if last_inst.startswith("jmp") or last_inst.startswith("call"):
+                return self._try_match_indirect_pivot(address, gadget, pivot_reg)
 
         # check if [popN, poprsp, popN ret]
         if re.match(POP_PATTERN, first_inst):
@@ -663,4 +617,8 @@ if __name__ == "__main__":
 
     binary_path = sys.argv[1]
     pivot_finder = PivotFinder(binary_path)
-    pivot_finder.find_pivots()
+    pivots = pivot_finder.find_pivots()
+
+    for pivot in pivots:
+        pivot.debug_print()
+        print("")
