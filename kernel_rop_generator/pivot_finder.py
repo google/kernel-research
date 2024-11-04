@@ -139,7 +139,7 @@ class PivotFinder:
 
     def find_pivots(self):
         """
-        finds all the pivots
+        Finds all the pivots
         """
         gadgets = gadget_finder.find_gadgets(self.vmlinux_path, CONTEXT_SIZE)
         for addr, gadget in gadgets.items():
@@ -184,9 +184,6 @@ class PivotFinder:
         operands_list = [operand.strip() for operand in operands_list]
         return opcode, operands_list
 
-    def _get_base_reg(self, reg_name):
-        return self._reg_to_base_reg[reg_name]
-
     def _get_operands_written_to(self, opcode, operands):
         """
         Returns the operands that are written to by the instruction
@@ -204,16 +201,16 @@ class PivotFinder:
         elif opcode in CLOBBER_TWO:
             num_operands_clobbered = 2
         else:
-            assert f"Unhandled opcode {opcode}"
+            raise ValueError(f"Unhandled opcode {opcode}")
 
         return operands[:num_operands_clobbered]
-
-    def _is_tracked_reg(self, operand):
-        return operand in self._reg_to_base_reg
 
     def _get_clobbered_regs(self, opcode, operands):
         """
         Returns the list of clobbered registers.
+
+        Callers should check we are only writing to general purpose registers. 
+        Writes to certain registers such as fs and gs can cause crashes
         """
         clobbered_operands = self._get_operands_written_to(opcode, operands)
         clobbered_regs = []
@@ -244,19 +241,14 @@ class PivotFinder:
         written_to_operands = self._get_operands_written_to(opcode, operands)
 
         for operand in operands:
-            if '[' in operand:
-                reg, offset = self._parse_memory_reg_and_offset(operand)
-                try:
-                    offset = int(offset, 0)
-                except ValueError:
-                    # offset isn't an integer
-                    # operands like [rax+rbx] not handled due to complexity
-                    raise BadPivot("Invalid offset") from None
-                # store memory read/write offset
-                if operand in written_to_operands:
-                    memory_writes[reg].add(offset)
-                else:
-                    memory_reads[reg].add(offset)
+            if '[' not in operand:
+                continue
+            reg, offset = self._parse_memory_reg_and_offset(operand)
+            # store memory read/write offset
+            if operand in written_to_operands:
+                memory_writes[reg].add(offset)
+            else:
+                memory_reads[reg].add(offset)
 
         return memory_reads, memory_writes
 
@@ -269,10 +261,17 @@ class PivotFinder:
             offset = match.group(2) if match.group(2) else "0"
             # constant addresses are bad
             if register.startswith("0x"):
-                raise BadPivot("constant memory reference")
+                raise BadPivot("Constant memory reference, value is not a register")
+            # convert offset to int
+            try:
+                offset = int(offset, 0)
+            except ValueError:
+                # offset isn't an integer
+                # operands like [rax+rbx] not handled due to complexity
+                raise BadPivot("Invalid offset") from None
             return register, offset
         else:
-            raise BadPivot("memory addr unknown")
+            raise BadPivot("Memory addr unknown")
 
     def _parse_jmp_or_call_instruction(self, inst):
         # Pattern to match various jmp formats, optionally including 'qword'
@@ -293,12 +292,12 @@ class PivotFinder:
 
             return register, offset
         else:
-            raise BadPivot("jump addr unknown")
+            raise BadPivot("Address unknown for jmp or call instruction")
 
     # instruction analysis functions
     def _check_no_push_pop(self, insts):
         """
-        checks that there are no push/pop in insts
+        Checks that there are no push/pop in insts
         """
         for inst in insts:
             if re.match(PUSH_PATTERN, inst):
@@ -308,7 +307,7 @@ class PivotFinder:
 
     def _compute_stack_change(self, insts):
         """
-        returns the stack change
+        Returns the stack change
         """
         # TODO maybe we want to allow "add rsp"
         # but add rsp seems quite rare in the pivots it would be okay in
@@ -328,7 +327,7 @@ class PivotFinder:
         if opcode in CLOBBER_TWO:
             return
 
-        raise BadPivot("opcode not in allowlist")
+        raise BadPivot("Opcode not in allowlist")
 
     def _analyze_instruction_reads_writes(self, instructions, non_modify_regs, memory_regs):
         """
@@ -368,15 +367,15 @@ class PivotFinder:
 
             for reg in inst_writes.keys():
                 if reg in clobbered_regs:
-                    raise BadPivot("memory write to clobbered reg")
+                    raise BadPivot("Memory write to clobbered reg")
             for reg in inst_reads.keys():
                 if reg in clobbered_regs:
-                    raise BadPivot("memory read from clobbered reg")
+                    raise BadPivot("Memory read from clobbered reg")
 
-            for reg, offs in inst_writes.items():
-                memory_writes[reg].update(offs)
-            for reg, offs in inst_reads.items():
-                memory_reads[reg].update(offs)
+            for reg, offsets in inst_writes.items():
+                memory_writes[reg].update(offsets)
+            for reg, offsets in inst_reads.items():
+                memory_reads[reg].update(offsets)
 
         # check if we touched a reg we shouldn't
         if clobbered_regs & non_modify_regs:
@@ -386,23 +385,22 @@ class PivotFinder:
         # some of the other ones such as xmm registers could be okay
         # but it's easiest to just check this allowlist
         if not clobbered_regs.issubset(set(PIVOT_REGISTER_NAMES)):
-            raise BadPivot("overwriting rgister not in allowlist")
+            raise BadPivot("Overwriting rgister not in allowlist")
 
         # check r/w addresses are only to memory_regs and do not write less than 0 or more than 0x80
         # range is chosen arbitrarily to keep reads and writes within writable memory
-        for reg, offs in memory_writes.items():
-            if reg not in memory_regs:
-                raise BadPivot("memory write with non-allowed register")
-            for off in offs:
-                if off < 0 or off > 0x80:
-                    # TODO: Should we allow negative offsets?
-                    raise BadPivot("memory write offset outside allowed range")
-        for reg in memory_reads:
-            if reg not in memory_regs:
-                raise BadPivot("memory read with non-allowed register")
-            for off in offs:
-                if off < 0 or off > 0x80:
-                    raise BadPivot("memory read offset outside allowed range")
+        def check_access(memory_accesses, op_type):
+            for reg, offsets in memory_accesses.items():
+                if reg not in memory_regs:
+                    raise BadPivot(f"Memory {op_type} with non-allowed register")
+                for offset in offsets:
+                    if offset < 0 or offset > 0x80:
+                        # These offsets are arbitrary
+                        raise BadPivot(
+                            f"Memory {op_type} offset outside allowed range")
+
+        check_access(memory_writes, "write")
+        check_access(memory_reads, "read")
 
         return memory_writes
 
@@ -436,7 +434,7 @@ class PivotFinder:
 
                 return PopRspPivot(address, gadget, stack_change_before, stack_change_after)
 
-        raise BadPivot("doesn't match poprsp")
+        raise BadPivot("Doesn't match poprsp")
 
     def _parse_single_inst_pivot(self, address, gadget, match):
         """
@@ -458,7 +456,7 @@ class PivotFinder:
             pivot_reg = match.group(1)
 
         if pivot_reg not in PIVOT_REGISTER_NAMES:
-            raise BadPivot("pivot_reg isn't a allowlisted Pivot register")
+            raise BadPivot("Register isn't a allowlisted Pivot register")
 
         # last inst should be a ret
         if last_inst != "ret":
@@ -501,9 +499,9 @@ class PivotFinder:
 
         # check if it's a push ... pop rsp ... ret
         if last_inst != "ret":
-            raise BadPivot("push poprsp should end in ret")
+            raise BadPivot("Push poprsp should end in ret")
         if middle_insts.count("pop rsp") != 1:
-            raise BadPivot("should have exactly one pop rsp")
+            raise BadPivot("Should have exactly one pop rsp")
 
         idx = middle_insts.index("pop rsp")
 
@@ -541,10 +539,11 @@ class PivotFinder:
 
         jump_reg, offset = self._parse_jmp_or_call_instruction(last_inst)
         if jump_reg not in PIVOT_REGISTER_NAMES:
-            raise BadPivot("jump register not allowlisted")
+            raise BadPivot("Indirect register not allowlisted")
 
-        if offset < 0 or offset >= 0x80:
-            raise BadPivot("jump gadget has large offset")
+        if offset < -0x80 or offset >= 0x200:
+            # These offsets are arbitrary
+            raise BadPivot("Indirect gadget has large offset")
 
         # for this gadget we can have reads/writes to pivot_reg or jump_reg
         # TODO: check if allowing these helps or we can simplify
@@ -569,10 +568,10 @@ class PivotFinder:
         """
         Checks if the gadget matches one of our pivot patterns.
 
-        xchg reg, rsp; ret
+        xchg reg|rsp, rsp|reg; ret
         mov rsp, reg; ret
         leave; ret
-        push reg; … ; pop rsp; ret
+        push reg; … ; pop rsp; [pops]; ret
         push reg; jmp qword [reg + const]
         [pops]; pop rsp; [pops]; ret
 
@@ -593,7 +592,7 @@ class PivotFinder:
         if match:
             pivot_reg = match.group(1)
             if pivot_reg not in PIVOT_REGISTER_NAMES:
-                raise BadPivot("push not good register for pivot")
+                raise BadPivot("Register being pushed not good register for pivot")
 
             # check if push ... pop rsp ... ret
             if gadget.count("pop rsp") == 1:
@@ -607,7 +606,7 @@ class PivotFinder:
         if re.match(POP_PATTERN, first_inst):
             return self._try_match_poprsp_pivot(address, gadget)
 
-        raise BadPivot("no match")
+        raise BadPivot("No match")
 
 
 if __name__ == "__main__":
