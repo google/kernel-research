@@ -50,6 +50,8 @@ regenerate_rootfs_tar() {
 regenerate_initramfs() {
     download_busybox_if_missing
     pushd $ROOTFS_DIR > /dev/null
+    # if this "rm" line is removed then the file gets into an inconsistent state when run from multiple threads
+    rm ../$INITRAMFS || true
     find . ! -name 'guestfish*' -print0 | cpio --owner 0:0 --null -ov --format=newc > ../$INITRAMFS 2>/dev/null
     popd > /dev/null
 }
@@ -89,8 +91,8 @@ check_archive_uptodate() {
     touch -m -t $(date --date=@$(src_last_mod) +%Y%m%d%H%M.%S) $ARCHIVE_FILE
 }
 
-check_archive_uptodate $ROOTFS_IMG "guestfish_script rootfs/init rootfs/busybox" regenerate_rootfs_img "with guestfish"
+#check_archive_uptodate $ROOTFS_IMG "guestfish_script rootfs/init rootfs/busybox" regenerate_rootfs_img "with guestfish"
 #check_archive_uptodate $ROOTFS_TAR rootfs regenerate_rootfs_tar
 #check_archive_uptodate $INITRAMFS rootfs regenerate_initramfs
-regenerate_rootfs_tar
+#regenerate_rootfs_tar
 regenerate_initramfs
