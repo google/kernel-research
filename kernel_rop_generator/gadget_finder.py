@@ -27,44 +27,77 @@ def get_text_section_range(binary_path):
         text_section_end = text_section_start + text_section['sh_size']
         return text_section_start, text_section_end
 
+class RopGadgetBackend:
+    def __init__(self, binary_path=None):
+        self.binary_path = binary_path
 
-def run_rp(context_size, binary_path):
+    def get_gadgets(self):
+        raise NotImplementedError
+
+    def get_text_section_range(self):
+        return get_text_section_range(self.binary_path) if self.binary_path else (0, float("inf"))
+
+class RppBackend(RopGadgetBackend):
+    def __init__(self, binary_path, context_size):
+        """Backend using the rp++ tool
+
+          Args:
+            context_size: The context size to use for gadget search.
+            binary_path: The path to the binary file.
+        """
+        super().__init__(binary_path)
+        self.context_size = context_size
+
+    def get_gadgets(self):
+        try:
+            result = subprocess.check_output(['rp++', '-r', str(self.context_size), '-f',
+                                              self.binary_path], text=True)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                "Error: rp++ tool not found. Please make sure it is installed and in your PATH.") from e
+
+        for line in result.splitlines():
+            yield line
+
+class TextFileBackend(RopGadgetBackend):
+    def __init__(self, file_path, vmlinux_path=None):
+        super().__init__(vmlinux_path)
+        self.file_path = file_path
+
+    def get_gadgets(self):
+        return open(self.file_path, "rt")
+
+def run_gadget_finder(backend):
     """
-    Runs the rp++ tool and returns a dictionary of gadgets.
+    Runs the gadget finder tool and returns a dictionary of gadgets.
 
     Args:
-      context_size: The context size to use for gadget search.
-      binary_path: The path to the binary file.
+      backend: ROP gadget finder backend
 
     Returns:
       A dictionary where keys are addresses and values are the corresponding gadgets.
     """
     gadgets = {}
-    text_section_range = get_text_section_range(binary_path)
+    text_section_range = backend.get_text_section_range()
     text_section_start, text_section_end = text_section_range
 
-    try:
-        # Run rp++ command and capture the output
-        result = subprocess.run(['rp++', '-r', str(context_size), '-f',
-                                binary_path], capture_output=True, text=True, check=True)
-        # Split the output into lines and remove empty lines
-        for line in result.stdout.splitlines():
-            if line.strip():
-                # Split the line into address and gadget
-                try:
-                    address, gadget = line.split(':', 1)
-                    address = int(address.strip(), 16)
-                    if text_section_start <= address < text_section_end:
-                        # Split off "1 found" from rp++ output
-                        gadget = gadget.rsplit('(', 1)[0]
-                        gadgets[address] = gadget
-                except ValueError:
-                    print(
-                        f"Warning: Skipping line with unexpected format: {line}")
-        return gadgets
-    except FileNotFoundError as e:
-        raise FileNotFoundError(
-            "Error: rp++ tool not found. Please make sure it is installed and in your PATH.") from e
+    # Split the output into lines and remove empty lines
+    for line in backend.get_gadgets():
+        line = line.strip()
+        if not line: continue
+
+        # Split the line into address and gadget
+        try:
+            # Split off "1 found" from rp++ output
+            line = line.rsplit('(', 1)[0]
+            address, gadget = line.split(':', 1)
+            address = int(address.strip(), 16)
+            if text_section_start <= address < text_section_end:
+                gadgets[address] = gadget
+        except ValueError:
+            print(
+                f"Warning: Skipping line with unexpected format: {line}")
+    return gadgets
 
 
 def remove_duplicate_gadgets(gadgets):
@@ -107,7 +140,7 @@ def filter_gadgets(gadgets, registers):
 
 def split_instructions(gadgets):
     """
-    Splits the gadget string into separate instructions 
+    Splits the gadget string into separate instructions
     """
     split_gadgets = {}
     for addr, gad in gadgets.items():
@@ -116,11 +149,11 @@ def split_instructions(gadgets):
     return split_gadgets
 
 
-def find_gadgets(binary_path, context_size):
+def find_gadgets(rop_gadget_backend):
     """
     Filters the found gadgets and returns a dict of unique gadgets
     """
-    gadgets = run_rp(context_size, binary_path)
+    gadgets = run_gadget_finder(rop_gadget_backend)
     gadgets = remove_duplicate_gadgets(gadgets)
     gadgets = split_instructions(gadgets)
     return gadgets
@@ -134,7 +167,8 @@ if __name__ == "__main__":
     binary_path = sys.argv[1]
     context_size = 5
     try:
-        gadgets = find_gadgets(binary_path, context_size)
+        backend = RppBackend(binary_path, context_size)
+        gadgets = find_gadgets(backend)
     except (FileNotFoundError, ValueError, subprocess.CalledProcessError) as exc:
         print(exc)
 

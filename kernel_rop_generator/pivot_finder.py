@@ -1,3 +1,4 @@
+import argparse
 import logging
 import re
 import sys
@@ -131,8 +132,8 @@ class PopRspPivot(Pivot):
 
 
 class PivotFinder:
-    def __init__(self, vmlinux_path) -> None:
-        self.vmlinux_path = vmlinux_path
+    def __init__(self, rop_gadget_backend) -> None:
+        self.rop_gadget_backend = rop_gadget_backend
         self._reg_to_base_reg = {}
         self._setup_reg_info()
         self.pivots = []
@@ -141,7 +142,7 @@ class PivotFinder:
         """
         Finds all the pivots
         """
-        gadgets = gadget_finder.find_gadgets(self.vmlinux_path, CONTEXT_SIZE)
+        gadgets = gadget_finder.find_gadgets(self.rop_gadget_backend)
         for addr, gadget in gadgets.items():
             try:
                 self.pivots.append(self._check_if_pivot(addr, gadget))
@@ -609,15 +610,31 @@ class PivotFinder:
         raise BadPivot("No match")
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python script_name.py <binary_path>")
-        sys.exit(1)
+def main():
+    parser = argparse.ArgumentParser(description="ROP stack pivot finder")
+    parser.add_argument("--backend", choices=["rp++", "text"], default="rp++",
+                        help="Backend to use for processing: "
+                             "'rp++': use the rp++ tool (default), "
+                             "'text': use a text file produced by either the "
+                             "rp++ or the ROPgadget tools.")
+    parser.add_argument("--vmlinux", help="Path to the vmlinux file, filters gadgets"
+                        "only within the .text section if the 'text' backend is used")
+    parser.add_argument("input_file", help="Path to the input file (vmlinux binary for "
+                        "the 'rp++' backend, text file containing ROP gadgets for the "
+                        "'text' gadget)")
+    args = parser.parse_args()
 
-    binary_path = sys.argv[1]
-    pivot_finder = PivotFinder(binary_path)
+    if args.backend == "text":
+        backend = gadget_finder.TextFileBackend(args.input_file, args.vmlinux)
+    else:
+        backend = gadget_finder.RppBackend(args.input_file, CONTEXT_SIZE)
+
+    pivot_finder = PivotFinder(backend)
     pivots = pivot_finder.find_pivots()
 
     for pivot in pivots:
         pivot.debug_print()
         print("")
+
+if __name__ == "__main__":
+    main()
