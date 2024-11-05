@@ -1,3 +1,4 @@
+import logging
 import subprocess
 import re
 import sys
@@ -95,8 +96,7 @@ def run_gadget_finder(backend):
             if text_section_start <= address < text_section_end:
                 gadgets[address] = gadget
         except ValueError:
-            print(
-                f"Warning: Skipping line with unexpected format: {line}")
+            logging.warning("Skipping line with unexpected format: %s", line)
     return gadgets
 
 

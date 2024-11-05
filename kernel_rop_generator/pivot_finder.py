@@ -612,6 +612,8 @@ class PivotFinder:
 
 def main():
     parser = argparse.ArgumentParser(description="ROP stack pivot finder")
+    parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="ERROR",
+                        help="Set the logging level.")
     parser.add_argument("--backend", choices=["rp++", "text"], default="rp++",
                         help="Backend to use for processing: "
                              "'rp++': use the rp++ tool (default), "
@@ -623,6 +625,8 @@ def main():
                         "the 'rp++' backend, text file containing ROP gadgets for the "
                         "'text' gadget)")
     args = parser.parse_args()
+
+    logging.basicConfig(level=getattr(logging, args.log_level))
 
     if args.backend == "text":
         backend = gadget_finder.TextFileBackend(args.input_file, args.vmlinux)
