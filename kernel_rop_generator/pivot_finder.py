@@ -5,7 +5,8 @@ import sys
 from collections import defaultdict
 import archinfo
 import gadget_finder
-
+from pivots import *
+from pivot_serializer import PivotSerializer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -62,81 +63,13 @@ PIVOT_REGISTER_NAMES = [
     'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', 'r15'
 ]
 
-# Pivot classes
-
-
-class Pivot:
-    def __init__(self, address, instructions):
-        self.address = address
-        self.instructions = instructions
-
-    def debug_print(self):
-        raise NotImplementedError
-
-
-class OneGadgetPivot(Pivot):
-    """
-    This pivot doesn't need to be paired with other pivots. 
-    Examples include:
-        xchg reg, rsp; ret
-        mov rsp, reg; ret
-        leave; ret
-    """
-
-    def __init__(self, address, instructions, pivot_reg, used_offsets, next_rip_offset):
-        super().__init__(address, instructions)
-        self.pivot_reg = pivot_reg
-        self.used_offsets = used_offsets
-        self.next_rip_offset = next_rip_offset
-
-    def debug_print(self):
-        print("OneGadgetPivot: ", self.pivot_reg, self.next_rip_offset)
-        print(self.instructions)
-
-
-class PushIndirectPivot(Pivot):
-    """
-    This pivot is a push "reg" followed by an indirect control flow transfer such as jmp qword [rsi+0x30].
-    Should be paired with a pop rsp pivot
-    """
-
-    def __init__(self, address, instructions, indirect_type, push_register, used_offsets_in_push,
-                 indirect_register, used_offsets_in_indirect_reg, next_rip_offset):
-        super().__init__(address, instructions)
-        self.indirect_type = indirect_type
-        self.push_register = push_register
-        self.used_offsets_in_push = used_offsets_in_push
-        self.indirect_register = indirect_register
-        self.used_offsets_in_indirect_reg = used_offsets_in_indirect_reg
-        self.next_rip_offset = next_rip_offset
-
-    def debug_print(self):
-        print("PushIndirectPivot: ", self.indirect_type, self.push_register,
-              self.indirect_register, self.next_rip_offset)
-        print(self.instructions)
-
-
-class PopRspPivot(Pivot):
-    """
-    This pivot pairs with PushIndirectPivot
-    """
-
-    def __init__(self, address, instructions, stack_change_before_rsp, next_rip_offset):
-        super().__init__(address, instructions)
-        self.stack_change_before_rsp = stack_change_before_rsp
-        self.next_rip_offset = next_rip_offset
-
-    def debug_print(self):
-        print("PopRspPivot: ", self.stack_change_before_rsp, self.next_rip_offset)
-        print(self.instructions)
-
 
 class PivotFinder:
     def __init__(self, rop_gadget_backend) -> None:
         self.rop_gadget_backend = rop_gadget_backend
         self._reg_to_base_reg = {}
         self._setup_reg_info()
-        self.pivots = []
+        self.pivots = Pivots()
 
     def find_pivots(self):
         """
@@ -562,7 +495,7 @@ class PivotFinder:
 
         indirect_type = last_inst.split(" ")[0]
 
-        return PushIndirectPivot(address, gadget, indirect_type, pivot_reg, memory_writes[pivot_reg],
+        return PushIndirectPivot(address, gadget, indirect_type, pivot_reg, list(memory_writes[pivot_reg]),
                                  jump_reg, jump_used_offsets, offset)
 
     def _check_if_pivot(self, address, gadget):
@@ -621,6 +554,9 @@ def main():
                              "rp++ or the ROPgadget tools.")
     parser.add_argument("--vmlinux", help="Path to the vmlinux file, filters gadgets"
                         "only within the .text section if the 'text' backend is used")
+    parser.add_argument("--output", choices=["text", "json"], default="text")
+    parser.add_argument("--text-output-format", choices=["original", "short"], default="original")
+    parser.add_argument("--json-indent", type=int, default=None)
     parser.add_argument("input_file", help="Path to the input file (vmlinux binary for "
                         "the 'rp++' backend, text file containing ROP gadgets for the "
                         "'text' gadget)")
@@ -636,9 +572,18 @@ def main():
     pivot_finder = PivotFinder(backend)
     pivots = pivot_finder.find_pivots()
 
-    for pivot in pivots:
-        pivot.debug_print()
-        print("")
+    if args.output == "json":
+        print(PivotSerializer.serialize(pivots, indent=args.json_indent))
+    else:
+        combined_pivots = pivots.combined_list()
+        sys.stderr.write(f"Found {len(combined_pivots)} pivots.\n")
+        for pivot in combined_pivots:
+            if args.text_output_format == "short":
+                pivot_desc = ", ".join([f"{repr(value)}" for (key,value) in pivot.__dict__.items() if key not in ["address", "instructions"]])
+                print(f"{'; '.join(pivot.instructions):<50}// {pivot.__class__.__name__}({pivot_desc})")
+            else:
+                pivot.debug_print()
+                print()
 
 if __name__ == "__main__":
     main()
