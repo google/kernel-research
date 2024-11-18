@@ -21,7 +21,7 @@ int main() {
             try {
                 test.func();
                 printf("[+] Test ran successfully.\n");
-            } catch(std::exception& exc) {
+            } catch(const std::exception& exc) {
                 failedTests.push_back(format_str("%s::%s", testSuite->class_name.c_str(), test.func_name.c_str()));
                 printf("[!] Test failed with: " RED("%s") "\n", exc.what());
                 if (!testSuite->logs.empty()) {
