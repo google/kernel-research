@@ -129,6 +129,8 @@ process_vmlinux() {
     save rop_gadgets.txt          "ROPgadget --binary vmlinux"
     save rop_gadgets_wo_jop.txt   "ROPgadget --nojop --binary vmlinux"
     save rop_gadgets_filtered.txt "grep ' : \(pop\|cmp\|add rsp\|mov\|push\|xchg\|leave\).* ; ret$' rop_gadgets_wo_jop.txt"
+    save rp++.txt                 "rp++ -r 5 -f vmlinux"
+    save stack_pivots.json        "pivot_finder.py --backend text --output json --json-indent 4 rp++.txt"
 }
 
 DISTRO="$1"
