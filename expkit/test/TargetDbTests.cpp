@@ -75,4 +75,29 @@ struct TargetDbTests: TestSuite {
         ASSERT_EQ(RopItemType::SYMBOL, msleep[2].type);
         ASSERT_EQ(0x227a50 /* MSLEEP */, msleep[2].value);
     }
+
+    TEST_METHOD(pivotsLts6181, "stack pivots are correct (lts-6.1.81)") {
+        auto pivots = getLts6181().pivots;
+        ASSERT_EQ(37, pivots.one_gadgets.size());
+        ASSERT_EQ(344, pivots.push_indirects.size());
+        ASSERT_EQ(13, pivots.pop_rsps.size());
+
+        auto& g1 = pivots.one_gadgets[0];
+        ASSERT_EQ(0x169f080, g1.address);
+        ASSERT_EQ(Register::RBP, g1.pivot_reg.reg);
+        ASSERT_EQ(0, g1.pivot_reg.used_offsets.size());
+        ASSERT_EQ(8, g1.next_rip_offset);
+
+        auto& g2 = pivots.push_indirects[0];
+        ASSERT_EQ(0x338ae98, g2.address);
+        ASSERT_EQ(IndirectType::JMP, g2.indirect_type);
+        ASSERT_EQ(Register::R10, g2.push_reg.reg);
+        ASSERT_EQ(Register::RDX, g2.indirect_reg.reg);
+        ASSERT_EQ(82, g2.next_rip_offset);
+
+        auto& g3 = pivots.pop_rsps[0];
+        ASSERT_EQ(0x19213e5, g3.address);
+        ASSERT_EQ(8, g3.stack_change_before_rsp);
+        ASSERT_EQ(0, g3.next_rip_offset);
+    }
 };

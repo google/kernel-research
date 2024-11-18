@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include "util/error.cpp"
+#include "pivot/Pivot.cpp"
 
 #define SYM_FUNC   0x01000000
 #define SYM_STRUCT 0x02000000
@@ -81,6 +82,7 @@ struct Target {
     std::string version;
     std::map<SymbolId, uint32_t> symbols;
     std::map<RopActionId, std::vector<RopItem>> rop_actions;
+    Pivots pivots;
 
     Target() { }
 

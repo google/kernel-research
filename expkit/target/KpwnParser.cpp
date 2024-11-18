@@ -7,6 +7,7 @@
 #include <vector>
 #include "target/BinaryReader.cpp"
 #include "target/Target.cpp"
+#include "pivot/Pivot.cpp"
 #include "util/error.cpp"
 #include "util/file.cpp"
 
@@ -83,6 +84,56 @@ protected:
         }
     }
 
+    RegisterUsage ReadRegisterUsage() {
+        RegisterUsage reg_usage;
+        reg_usage.reg = (Register) ReadUInt();
+        auto count = ReadUInt();
+        for (int i = 0; i < count; i++)
+            reg_usage.used_offsets.push_back(ReadInt());
+        return reg_usage;
+    }
+
+    void ParsePivots(Target& target) {
+        DebugLog("ParsePivots()");
+        if (!BeginStruct(2, false))
+            return;
+
+        auto num_one_gadgets = ReadUInt();
+        DebugLog("ParsePivots(): num_one_gadgets = %u", num_one_gadgets);
+        for (int i = 0; i < num_one_gadgets; i++) {
+            OneGadgetPivot pivot;
+            pivot.address = ReadUInt();
+            pivot.pivot_reg = ReadRegisterUsage();
+            pivot.next_rip_offset = ReadInt();
+            target.pivots.one_gadgets.push_back(pivot);
+            DebugLog("one_gadgets[%u]: address=0x%x, pivot_reg=%u, next_rip_offset=%d", i, pivot.address, pivot.pivot_reg.reg, pivot.next_rip_offset);
+        }
+
+        auto num_push_indirects = ReadUInt();
+        DebugLog("ParsePivots(): num_push_indirects = %u", num_push_indirects);
+        for (int i = 0; i < num_push_indirects; i++) {
+            PushIndirectPivot pivot;
+            pivot.address = ReadUInt();
+            pivot.indirect_type = (IndirectType) ReadUInt();
+            pivot.push_reg = ReadRegisterUsage();
+            pivot.indirect_reg = ReadRegisterUsage();
+            pivot.next_rip_offset = ReadInt();
+            target.pivots.push_indirects.push_back(pivot);
+        }
+
+        auto num_poprsps = ReadUInt();
+        DebugLog("ParsePivots(): num_poprsps = %u", num_poprsps);
+        for (int i = 0; i < num_poprsps; i++) {
+            PopRspPivot pivot;
+            pivot.address = ReadUInt();
+            pivot.stack_change_before_rsp = ReadInt();
+            pivot.next_rip_offset = ReadInt();
+            target.pivots.pop_rsps.push_back(pivot);
+        }
+
+        EndStruct();
+    }
+
     Target ParseTarget(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version) {
         if (offset_targets_ == 0)
             ParseHeader();
@@ -120,6 +171,7 @@ protected:
 
             ParseSymbols(result);
             ParseRopActions(result);
+            ParsePivots(result);
             return result;
         }
 

@@ -57,6 +57,23 @@ public:
         return *(uint64_t*)Read(8);
     }
 
+    int64_t ReadInt(bool signed_ = true) {
+        uint64_t byte = ReadU8();
+        bool negative = signed_ && (byte & 0x40);
+        uint64_t result = byte & (signed_ ? 0x3f : 0x7f);
+        uint64_t shift = signed_ ? 6 : 7;
+        while (byte & 0x80) {
+            byte = ReadU8();
+            result |= (byte & 0x7f) << shift;
+            shift += 7;
+        }
+        return negative ? ~result : result;
+    }
+
+    uint64_t ReadUInt() {
+        return ReadInt(false);
+    }
+
     template <typename... Args>
     inline void DebugLog(const char* format, const Args&... args) {
         static const char spaces[] = "                                                                     ";
