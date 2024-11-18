@@ -41,6 +41,32 @@ class BinaryWriter:
   def u8(self, value):
     self.uint(8, value)
 
+  def varint(self, value, signed):
+    if value == 0:
+      self.u1(0)
+      return
+
+    negative = value < 0
+    if negative and not signed:
+      raise ValueError(f"trying to write value '{value}' as unsigned number")
+    value = ~value if negative else value
+
+    if signed:
+      self.u1((0x80 if value > 63 else 0) |
+              (0x40 if negative else 0) |
+              (value & 63))
+      value >>= 6
+
+    while value:
+      self.u1((0x80 if value > 127 else 0) | (value & 127))
+      value >>= 7
+
+  def varuint(self, value):
+    self.varint(value, False)
+
+  def varsint(self, value):
+    self.varint(value, True)
+
   @contextlib.contextmanager
   def struct(self, struct_size_len=2):
     sub_writer = BinaryWriter()

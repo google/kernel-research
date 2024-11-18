@@ -1,6 +1,7 @@
 """Classes for writing the kpwn file format."""
 from binary_writer import BinaryWriter
 from rop_actions import RopActionWriter
+from stack_pivots import StackPivotWriter
 
 MAGIC = "KPWN"
 VERSION_MAJOR = 1
@@ -53,9 +54,30 @@ VERSION_MINOR = 0
 #       size (b4) - value is stored as 2^size
 #                   (0 -> 1 byte, 1 -> 2 bytes, 2 -> 4 bytes, 3 -> 8 bytes)
 #       value (depends on size)
+#   stack_pivots
+#     struct_size (u2) - to skip stack_pivots if we don't care
+#     one_gadgets[varsize]
+#       address (uint)
+#       pivot_reg (uint) - enum
+#       pivot_reg_used_offsets[varsize] (sint)
+#       next_rip_offset (sint)
+#     push_indirects[varsize]
+#       address (uint)
+#       indirect_type (uint) - enum: 0 = jmp, 1 = call
+#       push_reg (uint) - enum
+#       push_reg_used_offsets[varsize] (sint)
+#       indirect_reg (uint) - enum
+#       indirect_reg_used_offsets[varsize] (sint)
+#       next_rip_offset (sint)
+#     pop_rsps[varsize]
+#       address (uint)
+#       stack_change_before_rsp (uint)
+#       next_rip_offset (sint)
 #
 # u[N] = N-byte unsigned integer (u1 = uint8_t, u4 = uint32_t)
 # b[N] = N-bit unsigned integer (b4 = integer stored on 4 bits)
+# uint = generic, variable-sized unsigned integer
+# sint = generic, variable-sized signed integer
 
 class SymbolWriter:
   """Helper class to handle symbol writing to the db."""
@@ -82,6 +104,7 @@ class KpwnWriter:
   def __init__(self, config, debug=False):
     self.symbol_writer = SymbolWriter(config.symbols)
     self.rop_action_writer = RopActionWriter(config.rop_actions)
+    self.stack_pivot_writer = StackPivotWriter()
     self.debug = debug
 
   def _write_target(self, wr_root, target):
@@ -97,6 +120,9 @@ class KpwnWriter:
 
       # ROP Actions
       self.rop_action_writer.write_target(wr_target, target)
+
+      # Stack Pivots
+      self.stack_pivot_writer.write_target(wr_target, target)
 
   def write(self, f, targets):
     wr_root = BinaryWriter(f)

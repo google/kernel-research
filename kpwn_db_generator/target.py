@@ -1,5 +1,6 @@
 """Module containing classes related to targets."""
 import os
+from pivot_serializer import PivotSerializer
 from rop_action_serializer import RopActionSerializer
 
 class Target:
@@ -9,7 +10,8 @@ class Target:
   VERSION_TXT = "version.txt"
   SYMBOLS_TXT = "symbols.txt"
   ROP_ACTIONS_JSON = "rop_actions.json"
-  ALL_FILES = [VERSION_TXT, SYMBOLS_TXT, ROP_ACTIONS_JSON]
+  STACK_PIVOTS_JSON = "stack_pivots.json"
+  ALL_FILES = [VERSION_TXT, SYMBOLS_TXT, ROP_ACTIONS_JSON, STACK_PIVOTS_JSON]
 
   def __init__(self, distro, release_name, dir_):
     self.distro = distro
@@ -52,3 +54,7 @@ class Target:
   def get_rop_actions(self):
     with self.open_file(self.ROP_ACTIONS_JSON) as f:
       return RopActionSerializer.deserialize(f.read())
+
+  def get_stack_pivots(self):
+    with self.open_file(self.STACK_PIVOTS_JSON) as f:
+      return PivotSerializer.deserialize(f.read())

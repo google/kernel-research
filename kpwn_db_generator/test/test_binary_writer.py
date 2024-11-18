@@ -38,6 +38,45 @@ class BinaryWriterTests(unittest.TestCase):
     with self.expect(b"\x07\x00content\x00") as bw:
       bw.zstr_u2("content")
 
+  def varint_test(self, expected, value, signed):
+    with self.expect(expected) as bw:
+      bw.varint(value, signed)
+
+  def test_varuint(self):
+    tests = {
+            0      : b"\x00",
+            1      : b"\x01",
+          127      : b"\x7f",
+          128      : b"\x80\x01",
+          129      : b"\x81\x01",
+          255      : b"\xff\x01",
+          256      : b"\x80\x02",
+      127*128      : b"\x80\x7f",
+      127*128 +   1: b"\x81\x7f",
+      127*128 + 127: b"\xff\x7f",
+      127*128 + 128: b"\x80\x80\x01",
+    }
+
+    for (value, expected) in tests.items():
+      self.varint_test(expected, value, False)
+
+  def test_varsint(self):
+    tests = {
+        0: b"\x00",
+        1: b"\x01",
+       63: b"\x3f",
+       -1: b"\x40",
+       -2: b"\x41",
+      -64: b"\x7f",
+       64: b"\x80\x01",
+       65: b"\x81\x01",
+      -65: b"\xc0\x01",
+      -66: b"\xc1\x01",
+    }
+
+    for (value, expected) in tests.items():
+      self.varint_test(expected, value, True)
+
   def test_struct(self):
     with self.expect(b"\x07\x00\x00\x00" + b"\x05\x00" + b"ABCD\x00") as bw:
       with bw.struct(4) as inner:

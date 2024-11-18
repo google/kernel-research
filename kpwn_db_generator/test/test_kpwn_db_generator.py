@@ -15,7 +15,7 @@ class KpwnDbGeneratorTests(unittest.TestCase):
 
   @contextlib.contextmanager
   def expect_file(self, fn):
-    with open(f"test/actual_results/{fn}", "r+b") as f_actual:
+    with open(f"test/actual_results/{fn}", "w+b") as f_actual:
       yield f_actual
       f_actual.seek(0)
       with open(f"test/expected_results/{fn}", "rb") as f_expected:
@@ -32,10 +32,16 @@ class KpwnDbGeneratorTests(unittest.TestCase):
         "release_filter": "kernelctf/lts-6.1.36",
     }, "lts_6_1_36_db.kpwn")
 
+  def test_generate_lts_6_1_38_db(self):
+    self.expect_db({
+        "kernel_image_db_path": MOCK_DB_DIR,
+        "release_filter": "kernelctf/lts-6.1.38",
+    }, "lts_6_1_38_db.kpwn")
+
   def test_missing_files(self):
     targets = kpwn_db_generator.collect_targets(
         RELEASES_DIR, "bad/missing_files")
     self.assertEqual(1, len(targets))
     self.assertEqual("missing_files", targets[0].release_name)
-    self.assertListEqual(["version.txt", "symbols.txt", "rop_actions.json"],
+    self.assertListEqual(["version.txt", "symbols.txt", "rop_actions.json", "stack_pivots.json"],
                          targets[0].missing_files)
