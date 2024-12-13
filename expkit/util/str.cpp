@@ -33,3 +33,12 @@ std::string str_concat(const std::string& delimiter, const std::vector<std::stri
     }
     return result;
 }
+
+void replace(std::string& str, const std::string& from, const std::string& to)
+{
+    std::string::size_type pos = 0u;
+    while ((pos = str.find(from, pos)) != std::string::npos) {
+        str.replace(pos, from.length(), to);
+        pos += to.length();
+    }
+}

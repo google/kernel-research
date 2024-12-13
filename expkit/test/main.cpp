@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include "test/TestRunner.cpp"
+#include "test/logging/TapLogger.cpp"
 #include "test/tests/TargetDbTests.cpp"
 #include "util/ArgumentParser.cpp"
 
@@ -23,6 +24,9 @@ public:
         runner_.Add(new TargetDbTests());
 
         runner_.SetSuiteFilter(args_.getListOption("test-suites"));
+
+        if (args_.getOption("tap"))
+            runner_.SetLogger(new TapLogger());
     }
 
     int Run() {
