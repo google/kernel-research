@@ -10,6 +10,7 @@
 
 class TestRunner {
     vector<unique_ptr<TestSuite>> test_suites_;
+    optional<vector<string>> test_suite_filter_;
     unique_ptr<TestLogger> logger_;
 
 public:
@@ -19,11 +20,15 @@ public:
         test_suites_.push_back(unique_ptr<TestSuite>(suite));
     }
 
+    void SetSuiteFilter(optional<vector<string>> filter) {
+        test_suite_filter_ = filter;
+    }
+
     const vector<unique_ptr<TestSuite>>& GetTestSuites() {
         return test_suites_;
     }
 
-    bool Run() {
+    bool Run(uint skip = 0) {
         bool success = true;
 
         uint test_idx = 0;
@@ -34,9 +39,20 @@ public:
 
         logger_->Begin(test_suites_, test_count);
         for (auto& testSuite : test_suites_) {
+            if (test_suite_filter_ && !contains(*test_suite_filter_, testSuite->class_name)) {
+                logger_->TestSuiteSkip(*testSuite, test_idx);
+                test_idx += testSuite->tests.size();
+                continue;
+            }
+
             logger_->TestSuiteBegin(*testSuite);
             testSuite->init();
             for (auto& test : testSuite->tests) {
+                if (skip > test_idx) {
+                    logger_->TestSkip(*testSuite, test, test_idx++);
+                    continue;
+                }
+
                 logger_->TestBegin(*testSuite, test, test_idx);
                 testSuite->logs.clear();
                 try {

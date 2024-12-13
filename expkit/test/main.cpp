@@ -21,6 +21,8 @@ class Main {
 public:
     Main(int argc, const char* argv[]): args_(argc, argv) {
         runner_.Add(new TargetDbTests());
+
+        runner_.SetSuiteFilter(args_.getListOption("test-suites"));
     }
 
     int Run() {
@@ -28,7 +30,7 @@ public:
         if (posArgs.size() >= 1 && posArgs[0] == "list") {
             ListTests();
         } else if (posArgs.size() == 0 || posArgs[0] == "run") {
-            return runner_.Run() ? 0 : 1;
+            return runner_.Run(args_.getInt("skip").value_or(0)) ? 0 : 1;
         } else {
             cerr << "Unknown command." << endl;
             return 1;

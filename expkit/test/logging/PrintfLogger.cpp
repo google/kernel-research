@@ -28,6 +28,12 @@ public:
         cout << endl;
     }
 
+    void TestSuiteSkip(const TestSuite& suite, uint first_test_idx) { }
+
+    void TestSkip(const TestSuite& suite, const Test& test, uint test_idx) {
+        cout << "[-] Skipping test: " YELLOW(test.func_name) " (" << test.desc << ") " << endl;
+    }
+
     void TestBegin(const TestSuite& suite, const Test& test, uint test_idx) {
         cout << "[+] Running test: " YELLOW(test.func_name) " (" << test.desc << ") " << endl;
     }
