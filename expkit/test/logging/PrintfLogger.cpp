@@ -30,6 +30,10 @@ public:
 
     void TestSuiteSkip(const TestSuite& suite, uint first_test_idx) { }
 
+    void TestSuiteFail(const TestSuite& suite, const std::exception& exc) {
+        cout << "[!] Test suite failed with: " RED(exc.what()) << endl;
+    }
+
     void TestSkip(const TestSuite& suite, const Test& test, uint test_idx) {
         cout << "[-] Skipping test: " YELLOW(test.func_name) " (" << test.desc << ") " << endl;
     }

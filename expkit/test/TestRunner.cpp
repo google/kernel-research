@@ -46,7 +46,15 @@ public:
             }
 
             logger_->TestSuiteBegin(*testSuite);
-            testSuite->init();
+            try {
+                testSuite->init();
+            } catch(const exception& exc) {
+                logger_->TestSuiteFail(*testSuite, exc);
+                test_idx += testSuite->tests.size();
+                success = false;
+                continue;
+            }
+
             for (auto& test : testSuite->tests) {
                 if (skip > test_idx) {
                     logger_->TestSkip(*testSuite, test, test_idx++);

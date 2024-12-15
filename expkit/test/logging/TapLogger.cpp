@@ -19,6 +19,10 @@ public:
         cout << endl << "# Test Suite: " << suite.class_name << " (" << suite.desc << ")" << endl;
     }
 
+    void TestSuiteFail(const TestSuite& suite, const std::exception& exc) {
+        cout << "# failed with: " << exc.what() << endl;
+    }
+
     void TestSuiteSkip(const TestSuite& suite, uint first_test_idx) {
         uint test_idx = first_test_idx + 1;
         cout << endl << "# Test Suite skipped: " << suite.class_name << " (" << suite.desc << ")" << endl;
