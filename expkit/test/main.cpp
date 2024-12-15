@@ -5,6 +5,7 @@
 #include "test/TestRunner.cpp"
 #include "test/logging/TapLogger.cpp"
 #include "test/tests/TargetDbTests.cpp"
+#include "test/tests/KpwnTests.cpp"
 #include "util/ArgumentParser.cpp"
 
 class Main {
@@ -22,6 +23,7 @@ class Main {
 public:
     Main(int argc, const char* argv[]): args_(argc, argv) {
         runner_.Add(new TargetDbTests());
+        runner_.Add(new KpwnTests());
 
         runner_.SetSuiteFilter(args_.getListOption("test-suites"));
 
