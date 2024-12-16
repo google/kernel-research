@@ -95,4 +95,6 @@ check_archive_uptodate() {
 #check_archive_uptodate $ROOTFS_TAR rootfs regenerate_rootfs_tar
 #check_archive_uptodate $INITRAMFS rootfs regenerate_initramfs
 #regenerate_rootfs_tar
+pushd $(dirname $(realpath "$0")) >/dev/null
 regenerate_initramfs
+popd >/dev/null

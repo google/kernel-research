@@ -15,7 +15,7 @@
 
 set -e
 
-cd $(dirname $(realpath "$0"))
+SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
     echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--only-print-output-file] -- [<commands-to-run-in-vm>]";
@@ -48,14 +48,14 @@ COMMANDS_TO_RUN="${@:2}"
 
 if [ -z "$VMLINUZ" ] ; then usage; fi
 
-ROOTFS_DIR="rootfs"
+ROOTFS_DIR="$SCRIPT_DIR/rootfs"
 
 echo_err() {
     echo "$@" 1>&2;
 }
 
 if [ "$NO_ROOTFS_UPDATE" == "" ]; then
-    . ./update_rootfs_image.sh
+    . $SCRIPT_DIR/update_rootfs_image.sh
 fi
 
 # ttyS0 (kernel messages) goes to stdout, ttyS1 (/output file) goes to ./output
@@ -91,7 +91,7 @@ fi
 qemu-system-x86_64 -m 3.5G -nographic -nodefaults -no-reboot \
     -enable-kvm -cpu host -smp cores=2 \
     -kernel $VMLINUZ \
-    -initrd initramfs.cpio \
+    -initrd $SCRIPT_DIR/initramfs.cpio \
     -nic user,model=virtio-net-pci \
     $SERIAL_PORTS $EXTRA_ARGS \
     -append "console=ttyS0 panic=-1 oops=panic loadpin.enable=0 loadpin.enforce=0$EXTRA_CMDLINE init=/init -- $COMMANDS_TO_RUN"
