@@ -28,6 +28,7 @@ public:
         runner_.Add(new SymbolsTest());
 
         runner_.SetSuiteFilter(args_.getListOption("test-suites"));
+        runner_.SetTargetDbPath(args_.getOption("target-db").value_or("test/artifacts/targets.kpwn"));
 
         if (args_.getOption("tap"))
             runner_.SetLogger(new TapLogger());

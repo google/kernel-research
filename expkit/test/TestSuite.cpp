@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include "test/TestEnvironment.cpp"
 #include "util/log.cpp"
 #include "util/str.cpp"
 
@@ -23,6 +24,7 @@ struct TestSuite: ILog {
     std::string desc;
     std::vector<Test> tests;
     std::vector<std::string> logs;
+    TestEnvironment* env;
 
     TestSuite() {}
     TestSuite(std::string class_name, std::string desc): class_name(class_name), desc(desc) { }

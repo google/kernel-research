@@ -13,14 +13,7 @@ public:
     KpwnTests(): TestSuite("KpwnTests", "kpwn kernel module tests") { }
 
     void init() {
-        if (!Kpwn::IsAvailable())
-            throw ExpKitError("the kpwn kernel module is not available");
-
-        kpwn_ = new Kpwn();
-    }
-
-    void deinit() {
-        delete kpwn_;
+        kpwn_ = &env->GetKpwn();
     }
 
     TEST_METHOD(kaslrLeak, "can leak kASLR address") {

@@ -9,27 +9,17 @@
 #include "util/str.cpp"
 
 class SymbolsTest: public TestSuite {
-    Kpwn* kpwn_;
-    KpwnParser* parser_;
-    Target target_;
-
 public:
     SymbolsTest(): TestSuite("SymbolsTest", "kpwn db symbols tests") { }
 
-    void init() {
-        parser_ = new KpwnParser(read_file("test/artifacts/target_db_lts-6.1.81.kpwn"));
-        target_ = parser_->AutoDetectTarget();
-        kpwn_ = new Kpwn();
-    }
-
     TEST_METHOD(symbolsCheck, "check if the database contains the correct symbols") {
-        auto kaslr_base = kpwn_->KaslrLeak();
+        auto kaslr_base = env->GetKpwn().KaslrLeak();
 
         for (auto pair : symbol_names) {
             std::string func_name(pair.second);
             tolower(func_name);
-            TestUtils::eq(kpwn_->SymAddr(func_name.c_str()) - kaslr_base,
-                target_.GetSymbolOffset(pair.first), pair.second);
+            TestUtils::eq(env->GetKpwn().SymAddr(func_name.c_str()) - kaslr_base,
+                env->GetTarget().GetSymbolOffset(pair.first), pair.second);
         }
     }
 };
