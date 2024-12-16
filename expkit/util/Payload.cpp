@@ -16,14 +16,25 @@ public:
 
     std::vector<uint8_t>& GetData() { return data_; }
 
-    uint8_t* Reserve(uint64_t offset, uint64_t len) {
-        if (offset + len > data_.size())
-            throw ExpKitError("buffer (%u) is not big enough to store this data (offs: %u, len: %u)", data_.size(), offset, len);
+    bool CheckFree(uint64_t offset, uint64_t len, bool throws = false) {
+        if (offset + len > data_.size()) {
+            if (throws)
+                throw ExpKitError("buffer (%u) is not big enough to store this data (offs: %u, len: %u)", data_.size(), offset, len);
+            return false;
+        }
 
         for (int i = 0; i < len; i++)
-            if (used_bytes_[offset + i])
-                throw ExpKitError("there is already data at this offset: 0x%x", offset + i);
+            if (used_bytes_[offset + i]) {
+                if (throws)
+                    throw ExpKitError("there is already data at this offset: 0x%x", offset + i);
+                return false;
+            }
 
+        return true;
+    }
+
+    uint8_t* Reserve(uint64_t offset, uint64_t len) {
+        CheckFree(offset, len, true);
         std::fill_n(used_bytes_.begin() + offset, len, true);
         return data_.data() + offset;
     }

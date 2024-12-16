@@ -1,0 +1,349 @@
+Found 128 pivots for RAX
+ - OneGadget @ 0x17362f8: set RSP to RAX + 0x0
+ - PushIndirect @ 0x33177b7: push RAX and call [RAX + 0x0]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x33177b7: push RAX and call [RAX + 0x0]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x33177b7: push RAX and call [RAX + 0x0]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x33177b7: push RAX and call [RAX + 0x0]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x33177b7: push RAX and call [RAX + 0x0]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x1b2a248: push RAX and call [RAX + 0x0]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x1b2a248: push RAX and call [RAX + 0x0]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x1b2a248: push RAX and call [RAX + 0x0]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x1b2a248: push RAX and call [RAX + 0x0]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x1b2a248: push RAX and call [RAX + 0x0]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x3325de0: push RAX and jmp [RAX + 0x4e]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x1a02005: push RAX and call [RAX + 0x1c]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x1a02005: push RAX and call [RAX + 0x1c]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x1a02005: push RAX and call [RAX + 0x1c]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x1a02005: push RAX and call [RAX + 0x1c]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x1a02005: push RAX and call [RAX + 0x1c]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x331c7bf: push RAX and call [RAX + 0x0]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x331c7bf: push RAX and call [RAX + 0x0]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x331c7bf: push RAX and call [RAX + 0x0]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x331c7bf: push RAX and call [RAX + 0x0]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x331c7bf: push RAX and call [RAX + 0x0]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x333d897: push RAX and call [RAX + 0x43]; PopRsp @ 0x19213e5: pivots to buf + 0x0 (clobbers 0x0)
+ - PushIndirect @ 0x333d897: push RAX and call [RAX + 0x43]; PopRsp @ 0x17317b2: pivots to buf + 0x0 (clobbers 0x0)
+ - PushIndirect @ 0x333d897: push RAX and call [RAX + 0x43]; PopRsp @ 0x1753ee1: pivots to buf + 0x0 (clobbers 0x0)
+ - PushIndirect @ 0x333d897: push RAX and call [RAX + 0x43]; PopRsp @ 0x183b739: pivots to buf + 0x0 (clobbers 0x0)
+ - PushIndirect @ 0x333d897: push RAX and call [RAX + 0x43]; PopRsp @ 0x1706092: pivots to buf + 0x8 (clobbers 0x0)
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x333d927: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x33803f8: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x332dea7: push RAX and call [RAX + 0x4a]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x332dea7: push RAX and call [RAX + 0x4a]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x332dea7: push RAX and call [RAX + 0x4a]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x332dea7: push RAX and call [RAX + 0x4a]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x332dea7: push RAX and call [RAX + 0x4a]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x3367340: push RAX and jmp [RAX + 0x0]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x336663f: push RAX and call [RAX + 0x0]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x336663f: push RAX and call [RAX + 0x0]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x336663f: push RAX and call [RAX + 0x0]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x336663f: push RAX and call [RAX + 0x0]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x336663f: push RAX and call [RAX + 0x0]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x33666d1: push RAX and jmp [RAX + 0x52]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x3365330: push RAX and call [RAX + 0x44]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x3365330: push RAX and call [RAX + 0x44]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x3365330: push RAX and call [RAX + 0x44]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x3365330: push RAX and call [RAX + 0x44]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x3365330: push RAX and call [RAX + 0x44]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x3365478: push RAX and jmp [RAX + 0x64]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x3365f38: push RAX and call [RAX + 0x66]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x3365f38: push RAX and call [RAX + 0x66]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x3365f38: push RAX and call [RAX + 0x66]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x3365f38: push RAX and call [RAX + 0x66]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x3365f38: push RAX and call [RAX + 0x66]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x3365db1: push RAX and call [RAX + 0x0]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x3365db1: push RAX and call [RAX + 0x0]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x3365db1: push RAX and call [RAX + 0x0]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x3365db1: push RAX and call [RAX + 0x0]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x3365db1: push RAX and call [RAX + 0x0]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x3365dc8: push RAX and jmp [RAX + 0x50]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x331a30f: push RAX and call [RAX + 0x0]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x331a30f: push RAX and call [RAX + 0x0]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x331a30f: push RAX and call [RAX + 0x0]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x331a30f: push RAX and call [RAX + 0x0]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x331a30f: push RAX and call [RAX + 0x0]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x1706093: pivots to buf + 0x8 (clobbers 0x0)
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x1f769ab: pivots to buf + 0x20 (clobbers 0x0)
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x162807f: pivots to buf + 0x18 (clobbers 0x0)
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x12c7be: pivots to buf + 0x8 (clobbers 0x0)
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x113165: pivots to buf + 0x10 (clobbers 0x0)
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x1f767c9: pivots to buf + 0x8 (clobbers 0x0)
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x16e5a09: pivots to buf + 0x8 (clobbers 0x0)
+ - PushIndirect @ 0x335e2e0: push RAX and jmp [RAX + 0x43]; PopRsp @ 0x3248cb0: pivots to buf + 0x0 (clobbers 0x0)
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x335e328: push RAX and jmp [RAX + 0x4b]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+
+Found 28 pivots for RBX
+ - PushIndirect @ 0xbd88e3: push RBX and call [RBX + 0xf]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0xbd88e3: push RBX and call [RBX + 0xf]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0xbd88e3: push RBX and call [RBX + 0xf]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0xbd88e3: push RBX and call [RBX + 0xf]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0xbd88e3: push RBX and call [RBX + 0xf]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0xbd2193: push RBX and call [RBX + 0x48]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0xbd2193: push RBX and call [RBX + 0x48]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0xbd2193: push RBX and call [RBX + 0x48]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0xbd2193: push RBX and call [RBX + 0x48]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0xbd2193: push RBX and call [RBX + 0x48]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0xbd55d3: push RBX and call [RBX + 0x49]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0xbd55d3: push RBX and call [RBX + 0x49]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0xbd55d3: push RBX and call [RBX + 0x49]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0xbd55d3: push RBX and call [RBX + 0x49]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0xbd55d3: push RBX and call [RBX + 0x49]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x1834080: push RBX and jmp [RBX + 0x0]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x3413e91: push RBX and call [RBX + 0x63]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x3413e91: push RBX and call [RBX + 0x63]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x3413e91: push RBX and call [RBX + 0x63]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x3413e91: push RBX and call [RBX + 0x63]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x3413e91: push RBX and call [RBX + 0x63]; PopRsp @ 0x1706092: pivots to buf + 0x8
+
+Found 9 pivots for RCX
+ - OneGadget @ 0x180d2fa: set RSP to RCX + 0x0
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x2ef510: push RCX and jmp [RCX + 0x0]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+
+Found 14 pivots for RDX
+ - OneGadget @ 0x178cefa: set RSP to RDX + 0x0
+ - PushIndirect @ 0x33ffa0d: push RDX and call [RDX + 0x20]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x33ffa0d: push RDX and call [RDX + 0x20]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x33ffa0d: push RDX and call [RDX + 0x20]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x33ffa0d: push RDX and call [RDX + 0x20]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x33ffa0d: push RDX and call [RDX + 0x20]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x338ae99: push RDX and jmp [RDX + 0x52]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+
+Found 69 pivots for RSI
+ - PushIndirect @ 0x167db55: push RSI and call [RSI + 0x0]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x167db55: push RSI and call [RSI + 0x0]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x167db55: push RSI and call [RSI + 0x0]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x167db55: push RSI and call [RSI + 0x0]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x167db55: push RSI and call [RSI + 0x0]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0xc458c8: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0xd45994: push RSI and jmp [RSI + 0x2e]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x988647: push RSI and jmp [RSI + 0x39]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0xc50c3f: push RSI and jmp [RSI + 0x66]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0xafc1a6: push RSI and jmp [RSI + 0x0]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x79d476: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x232456: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x79d376: push RSI and jmp [RSI + 0xf]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+
+Found 6 pivots for RDI
+ - OneGadget @ 0x80bc85: set RSP to RDI + 0x0
+ - PushIndirect @ 0x16659ac: push RDI and call [RDI + 0x4a]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x16659ac: push RDI and call [RDI + 0x4a]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x16659ac: push RDI and call [RDI + 0x4a]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x16659ac: push RDI and call [RDI + 0x4a]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x16659ac: push RDI and call [RDI + 0x4a]; PopRsp @ 0x1706092: pivots to buf + 0x8
+
+Found 64 pivots for RBP
+ - OneGadget @ 0x169f080: set RSP to RBP + 0x8
+ - OneGadget @ 0x840463: set RSP to RBP + 0x8
+ - OneGadget @ 0x1d2385b: set RSP to RBP + 0x8
+ - OneGadget @ 0x198e995: set RSP to RBP + 0x8
+ - OneGadget @ 0x1badccd: set RSP to RBP + 0x8
+ - OneGadget @ 0x767853: set RSP to RBP + 0x8
+ - OneGadget @ 0x1e1156a: set RSP to RBP + 0x8
+ - OneGadget @ 0x1dcc58f: set RSP to RBP + 0x8
+ - OneGadget @ 0x1dfed3c: set RSP to RBP + 0x8
+ - OneGadget @ 0x179f56d: set RSP to RBP + 0x8
+ - OneGadget @ 0x336bd6a: set RSP to RBP + 0x8
+ - OneGadget @ 0x177815e: set RSP to RBP + 0x8
+ - OneGadget @ 0x194f931: set RSP to RBP + 0x8
+ - OneGadget @ 0x19ea74e: set RSP to RBP + 0x8
+ - OneGadget @ 0x195cec7: set RSP to RBP + 0x8
+ - OneGadget @ 0x18302e8: set RSP to RBP + 0x8
+ - OneGadget @ 0x171df06: set RSP to RBP + 0x8
+ - OneGadget @ 0x192b292: set RSP to RBP + 0x8
+ - OneGadget @ 0x16d4bbd: set RSP to RBP + 0x8
+ - OneGadget @ 0x57af33: set RSP to RBP + 0x10
+ - OneGadget @ 0x33eccb8: set RSP to RBP + 0x8
+ - OneGadget @ 0x327cfa7: set RSP to RBP + 0x8
+ - OneGadget @ 0x1863799: set RSP to RBP + 0x8
+ - OneGadget @ 0x179cf18: set RSP to RBP + 0x8
+ - OneGadget @ 0x33e3ed8: set RSP to RBP + 0x8
+ - OneGadget @ 0x164b50f: set RSP to RBP + 0x10
+ - OneGadget @ 0x18daf7c: set RSP to RBP + 0x8
+ - OneGadget @ 0x18ce665: set RSP to RBP + 0x8
+ - OneGadget @ 0x197a84d: set RSP to RBP + 0x8
+ - OneGadget @ 0x181a6f7: set RSP to RBP + 0x8
+ - OneGadget @ 0x16fd112: set RSP to RBP + 0x8
+ - OneGadget @ 0x12c72c: set RSP to RBP + 0x8
+ - OneGadget @ 0x1962e1a: set RSP to RBP + 0x0
+ - PushIndirect @ 0x33f8561: push RBP and call [RBP + 0x3]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0x33f8561: push RBP and call [RBP + 0x3]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0x33f8561: push RBP and call [RBP + 0x3]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0x33f8561: push RBP and call [RBP + 0x3]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0x33f8561: push RBP and call [RBP + 0x3]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0xbb2f93: push RBP and call [RBP + 0x48]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2f93: push RBP and call [RBP + 0x48]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2f93: push RBP and call [RBP + 0x48]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2f93: push RBP and call [RBP + 0x48]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2f93: push RBP and call [RBP + 0x48]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0xbb2823: push RBP and call [RBP + 0x53]; PopRsp @ 0x19213e5: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2823: push RBP and call [RBP + 0x53]; PopRsp @ 0x17317b2: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2823: push RBP and call [RBP + 0x53]; PopRsp @ 0x1753ee1: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2823: push RBP and call [RBP + 0x53]; PopRsp @ 0x183b739: pivots to buf + 0x0
+ - PushIndirect @ 0xbb2823: push RBP and call [RBP + 0x53]; PopRsp @ 0x1706092: pivots to buf + 0x8
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x114b184: push RBP and jmp [RBP + 0x48]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x1706093: pivots to buf + 0x8
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x1f769ab: pivots to buf + 0x20
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x162807f: pivots to buf + 0x18
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x12c7be: pivots to buf + 0x8
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x113165: pivots to buf + 0x10
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x1f767c9: pivots to buf + 0x8
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x16e5a09: pivots to buf + 0x8
+ - PushIndirect @ 0x114b118: push RBP and jmp [RBP + 0x4c]; PopRsp @ 0x3248cb0: pivots to buf + 0x0
+
+Found 0 pivots for RSP
+
+Found 0 pivots for R8
+
+Found 0 pivots for R9
+
+Found 0 pivots for R10
+
+Found 0 pivots for R11
+
+Found 0 pivots for R12
+
+Found 0 pivots for R13
+
+Found 0 pivots for R14
+
+Found 0 pivots for R15

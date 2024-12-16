@@ -7,6 +7,7 @@
 #include "test/tests/TargetDbTests.cpp"
 #include "test/tests/KpwnTests.cpp"
 #include "test/tests/SymbolsTests.cpp"
+#include "test/tests/PivotTests.cpp"
 #include "util/ArgumentParser.cpp"
 
 class Main {
@@ -26,6 +27,7 @@ public:
         runner_.Add(new TargetDbTests());
         runner_.Add(new KpwnTests());
         runner_.Add(new SymbolsTest());
+        runner_.Add(new PivotTests());
 
         runner_.SetSuiteFilter(args_.getListOption("test-suites"));
         runner_.SetTargetDbPath(args_.getOption("target-db").value_or("test/artifacts/targets.kpwn"));

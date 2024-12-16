@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include "util/error.cpp"
-#include "pivot/Pivot.cpp"
+#include "pivot/Pivots.cpp"
 
 #define SYM_FUNC   0x01000000
 #define SYM_STRUCT 0x02000000
