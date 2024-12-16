@@ -5,6 +5,7 @@
 #include "test/TestSuite.cpp"
 #include "test/kpwn/kpwn.h"
 #include "util/error.cpp"
+#include "util/Payload.cpp"
 
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;
@@ -78,5 +79,14 @@ public:
         ASSERT_EQ("msleep", callLogs[0].function_name.c_str());
         ASSERT_EQ(1, callLogs[0].arguments.size());
         ASSERT_EQ(10, callLogs[0].arguments[0]);
+    }
+
+    TEST_METHOD(stackPivotRecoveryTest, "stack pivot recovery test") {
+        auto rip_recovery = kpwn_->GetRipControlRecoveryAddr();
+        Payload p(128);
+        p.Set(0, rip_recovery);
+        auto buf_addr = kpwn_->AllocBuffer(p.GetData(), true);
+        kpwn_->SetRspAndRet(buf_addr);
+        kpwn_->Kfree(buf_addr);
     }
 };
