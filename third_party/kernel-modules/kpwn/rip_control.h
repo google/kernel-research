@@ -16,6 +16,8 @@
 #include "utils.h"
 #include "kpwn.h"
 
+uint64_t saved_rsp;
+
 void rip_control(rip_control_args* regs) {
     register rip_control_args* regs_asm asm("r15") = regs;
 
@@ -138,4 +140,21 @@ void rip_control(rip_control_args* regs) {
     );
 
     LOG("kpwn: rip_control, after asm");
+}
+
+void rip_control_wrapper(rip_control_args* regs) {
+    __asm__ (
+        ".intel_syntax noprefix\n"
+        "mov saved_rsp, rsp\n"
+        ".att_syntax prefix\n"
+    );
+    rip_control(regs);
+}
+
+void rip_control_recover(void) {
+    __asm__ (
+        ".intel_syntax noprefix\n"
+        "mov rsp, saved_rsp\n"
+        ".att_syntax prefix\n"
+    );
 }

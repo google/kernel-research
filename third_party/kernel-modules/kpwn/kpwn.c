@@ -296,7 +296,7 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
         case RIP_CONTROL:
             rip_control_args rip_args;
             STRUCT_FROM_USER(&rip_args, user_ptr);
-            rip_control(&rip_args);
+            rip_control_wrapper(&rip_args);
             return SUCCESS;
 
         case ARB_READ:
@@ -337,6 +337,11 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
             if (!sym_args.symbol_addr)
                 return -ERROR_UNKNOWN_SYMBOL;
             STRUCT_TO_USER(&sym_args, user_ptr);
+            return SUCCESS;
+
+        case GET_RIP_CONTROL_RECOVERY:
+            uint64_t rip_recovery_addr = (uint64_t)&rip_control_recover;
+            STRUCT_TO_USER(&rip_recovery_addr, user_ptr);
             return SUCCESS;
 
         default:
