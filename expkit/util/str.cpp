@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdarg>
 #include <string>
 #include <vector>
@@ -41,4 +42,9 @@ void replace(std::string& str, const std::string& from, const std::string& to)
         str.replace(pos, from.length(), to);
         pos += to.length();
     }
+}
+
+void tolower(std::string& str) {
+    std::transform(str.begin(), str.end(), str.begin(),
+        [](unsigned char c){ return std::tolower(c); });
 }

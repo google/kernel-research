@@ -6,6 +6,7 @@
 #include "test/logging/TapLogger.cpp"
 #include "test/tests/TargetDbTests.cpp"
 #include "test/tests/KpwnTests.cpp"
+#include "test/tests/SymbolsTests.cpp"
 #include "util/ArgumentParser.cpp"
 
 class Main {
@@ -24,6 +25,7 @@ public:
     Main(int argc, const char* argv[]): args_(argc, argv) {
         runner_.Add(new TargetDbTests());
         runner_.Add(new KpwnTests());
+        runner_.Add(new SymbolsTest());
 
         runner_.SetSuiteFilter(args_.getListOption("test-suites"));
 
