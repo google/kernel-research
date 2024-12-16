@@ -18,14 +18,16 @@ set -e
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld,kpwn] [--only-command-output] [--gdb] [--snapshot] -- [<commands-to-run-in-vm>]";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld,kpwn] [--only-command-output [--dmesg=<path>]] [--gdb] [--snapshot] -- [<commands-to-run-in-vm>]";
     exit 1;
 }
 
+DMESG="/dev/null"
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     --only-command-output) ONLY_COMMAND_OUTPUT=1; shift;;
+    --dmesg=*) DMESG="${1#*=}"; shift;;
     --gdb) GDB=1; shift;;
     --snapshot) SNAPSHOT=1; shift;;
     --custom-modules=*) CUSTOM_MODULES="${1#*=}"; shift;;
@@ -71,7 +73,7 @@ if [ ! -z "$CUSTOM_MODULES" ]; then ARGS+=" --custom-modules-tar=$RELEASE_DIR/cu
 # only-command-output handling + running the VM
 
 if [ "$ONLY_COMMAND_OUTPUT" == "1" ]; then
-    $SCRIPT_DIR/run_vmlinuz.sh $ARGS --only-print-output-file "/scripts/command-output.sh" -- "$COMMAND_TO_RUN"
+    $SCRIPT_DIR/run_vmlinuz.sh $ARGS --stdout-file=$DMESG "/scripts/command-output.sh" -- "$COMMAND_TO_RUN"
 else
     $SCRIPT_DIR/run_vmlinuz.sh $ARGS -- "$COMMAND_TO_RUN"
 fi

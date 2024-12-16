@@ -18,7 +18,7 @@ set -e
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--only-print-output-file] -- [<commands-to-run-in-vm>]";
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--stdout-file=<path>] -- [<commands-to-run-in-vm>]";
     exit 1;
 }
 
@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --modules-path=*) MODULES_PATH="${1#*=}"; shift;;
     --custom-modules-tar=*) CUSTOM_MODULES_TAR="${1#*=}"; shift;;
-    --only-print-output-file) ONLY_PRINT_OUTPUT_FILE=1; shift;;
+    --stdout-file=*) STDOUT_FILE="${1#*=}"; shift;;
     --no-rootfs-update) NO_ROOTFS_UPDATE=1; shift;;
     --snapshot) SNAPSHOT=1; shift;;
     --gdb) GDB=1; shift;;
@@ -60,9 +60,9 @@ fi
 
 # ttyS0 (kernel messages) goes to stdout, ttyS1 (/output file) goes to ./output
 SERIAL_PORTS="-serial mon:stdio -serial file:output"
-if [ "$ONLY_PRINT_OUTPUT_FILE" == "1" ]; then
-    # ttyS0 (kernel messages) goes to /dev/null, ttyS1 (/output file) goes to stdout
-    SERIAL_PORTS="-serial null -serial mon:stdio"
+if [ ! -z "$STDOUT_FILE" ]; then
+    # ttyS0 (kernel messages) goes to STDOUT_FILE, ttyS1 (/output file) goes to stdout
+    SERIAL_PORTS="-serial file:$STDOUT_FILE -serial mon:stdio"
 fi
 
 EXTRA_ARGS=""
