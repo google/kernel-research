@@ -46,6 +46,11 @@ public:
         kpwn_->Kfree(buf_ptr);
     }
 
+    TEST_METHOD(callWinTarget, "call win_target and check result") {
+        kpwn_->CallAddr(kpwn_->WinTarget());
+        kpwn_->CheckWin();
+    }
+
     TEST_METHOD(kprobeTest, "kprobe test") {
         auto kprobe = kpwn_->InstallKprobe("__kmalloc", 2, CALL_LOG);
         auto buf_ptr = kpwn_->AllocBuffer(128, true);

@@ -225,6 +225,11 @@ public:
             probe->PrintCallLog(clear_log);
     }
 
+    void CheckWin() {
+        if (Syscalls::ioctl(fd_, CHECK_WIN, nullptr) != SUCCESS)
+            throw ExpKitError("exploit failed, the win_target was not called :(");
+    }
+
     ~Kpwn() {
         for (auto probe: std::set(installed_probes_))
             RemoveKprobe(probe);
