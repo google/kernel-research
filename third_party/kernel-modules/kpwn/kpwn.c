@@ -53,8 +53,11 @@ static long alloc_buffer(kpwn_message* msg, void* user_ptr) {
     return SUCCESS;
 }
 
+unsigned long won = 0;
+
 static void win_target(void) {
     LOG("win_target was called.\n\n!!! YOU WON !!! \n");
+    won = 1;
 }
 
 unsigned long kaslr_base = 0;
@@ -289,6 +292,7 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
             return SUCCESS;
 
         case WIN_TARGET:
+            won = 0;
             unsigned long win_target_addr = (unsigned long)&win_target;
             STRUCT_TO_USER(&win_target_addr, user_ptr);
             return SUCCESS;
@@ -343,6 +347,11 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
             uint64_t rip_recovery_addr = (uint64_t)&rip_control_recover;
             STRUCT_TO_USER(&rip_recovery_addr, user_ptr);
             return SUCCESS;
+
+        case CHECK_WIN:
+            long result = won ? SUCCESS : ERROR_GENERIC;
+            won = 0;
+            return result;
 
         default:
             return -ERROR_UNKNOWN_COMMAND;
