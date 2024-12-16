@@ -185,6 +185,8 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
                 STRUCT_TO_USER(&new_entry, data->log_entry_user_ptr);
 
                 // TODO: this should be written atomicly... fix race
+                // this should be rewritten to use user-space memory directly (GUP + kmap)
+                // or just handle buffers in kernel-space and give API to read logs
                 log.next_offset += new_entry.entry_size;
                 log.entry_count++;
             }
@@ -240,9 +242,10 @@ static int sym_lookup(void) {
     return SUCCESS;
 }
 
-static int install_kprobe(kprobe_args* args) {
+static int install_kprobe(kprobe_args* args, kretprobe_wrapper** wrapper) {
     SET_CPU_VAR(_kprobe_disabled, 1);
     kretprobe_wrapper* wr = kzalloc(sizeof(kretprobe_wrapper), GFP_KERNEL);
+    *wrapper = wr;
     if (args->arg_count > 6)
         args->arg_count = 6;
     wr->args = *args;
@@ -256,6 +259,13 @@ static int install_kprobe(kprobe_args* args) {
     if (res) return ERROR_GENERIC;
     LOG("KPROBE: %s: hook installed (addr=0x%llx, name=%pBb)", wr->args.function_name, (uint64_t)wr->kretprobe.kp.addr, wr->kretprobe.kp.addr);
     return SUCCESS;
+}
+
+static void remove_kprobe(kretprobe_wrapper* wr) {
+    SET_CPU_VAR(_kprobe_disabled, 1);
+    unregister_kretprobe(&wr->kretprobe);
+    kfree(wr);
+    SET_CPU_VAR(_kprobe_disabled, 0);
 }
 
 static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
@@ -302,8 +312,16 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
 
         case INSTALL_KPROBE:
             kprobe_args args;
+            kretprobe_wrapper* wrapper_ptr;
             STRUCT_FROM_USER(&args, user_ptr);
-            CHECK_ZERO(install_kprobe(&args), ERROR_GENERIC);
+            CHECK_ZERO(install_kprobe(&args, &wrapper_ptr), ERROR_GENERIC);
+            args.installed_kprobe = wrapper_ptr; // TODO: replace with ID (idr_alloc, also cleanup when the device is closed)
+            STRUCT_TO_USER(&args, user_ptr); // TODO: optimize this
+            return SUCCESS;
+
+        case REMOVE_KPROBE:
+            // TODO: again, use ID instead, now blindly trust user-space to send a correct kernel ptr
+            remove_kprobe(user_ptr);
             return SUCCESS;
 
         case PRINTK:

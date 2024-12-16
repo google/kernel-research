@@ -24,7 +24,7 @@ typedef struct kpwn_message {
     uint8_t gfp_account;
 } kpwn_message;
 
-enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR };
+enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE };
 
 enum kpwn_errors {
     SUCCESS = 0,
@@ -116,6 +116,7 @@ typedef struct {
     uint8_t log_mode; // kprobe_log_mode
     char log_call_stack_filter[128];
     kprobe_log* logs;
+    void* installed_kprobe;
 } kprobe_args;
 
 typedef struct {
