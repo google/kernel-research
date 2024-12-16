@@ -79,7 +79,7 @@ public:
         static const char spaces[] = "                                                                     ";
         if (log_) {
             auto str = format_str(format, args...);
-            log_->log(LogLevel::DEBUG, "%.*s%s%.*s[offs=%u]", log_padding, spaces, str.c_str(), 80 - log_padding - str.size(), spaces, offset_);
+            log_->Log("%.*s%s%.*s[offs=%u]", log_padding, spaces, str.c_str(), 80 - log_padding - str.size(), spaces, offset_);
         }
     }
 

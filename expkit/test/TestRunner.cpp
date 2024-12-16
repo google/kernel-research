@@ -68,15 +68,18 @@ public:
                     continue;
                 }
 
-                logger_->TestBegin(*testSuite, test, test_idx);
+                testSuite->current_test = &test;
                 testSuite->logs.clear();
+                logger_->TestBegin(*testSuite, test, test_idx);
                 try {
                     test.func();
+                    testSuite->AssertLogs(false);
                     logger_->TestSuccess(*testSuite, test, test_idx);
                 } catch(const exception& exc) {
                     success = false;
                     logger_->TestFail(*testSuite, test, test_idx, exc);
                 }
+                testSuite->current_test = nullptr;
                 test_idx++;
             }
             testSuite->deinit();
