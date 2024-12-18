@@ -4,7 +4,9 @@ import re
 import sys
 from elftools.elf.elffile import ELFFile
 from elftools.common.exceptions import ELFError
+from rop_util import setup_logger
 
+logger = setup_logger("gadget_finder")
 
 def get_text_section_range(binary_path):
     """
@@ -51,13 +53,24 @@ class RppBackend(RopGadgetBackend):
 
     def get_gadgets(self):
         try:
+            logger.debug("running gadget finder rp++")
             result = subprocess.check_output(['rp++', '-r', str(self.context_size), '-f',
                                               self.binary_path], text=True)
+            logger.debug("done running gadget finder rp++")
         except FileNotFoundError as e:
             raise FileNotFoundError(
                 "Error: rp++ tool not found. Please make sure it is installed and in your PATH.") from e
 
-        for line in result.splitlines():
+        # rp++ starts by printing a preamble
+        # find the last preamble line
+        lines = result.splitlines()
+        start_line_index = 0
+        for i, l in enumerate(lines):
+            if "gadgets found." in l:
+                start_line_index = i+1
+                break
+
+        for line in lines[start_line_index:]:
             yield line
 
 class TextFileBackend(RopGadgetBackend):

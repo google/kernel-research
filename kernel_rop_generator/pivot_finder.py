@@ -8,7 +8,9 @@ import gadget_finder
 from pivots import *
 from pivot_serializer import PivotSerializer
 
-logger = logging.getLogger(__name__)
+from rop_util import setup_logger
+
+logger = setup_logger("pivot_finder")
 logger.setLevel(logging.INFO)
 
 

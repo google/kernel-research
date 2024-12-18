@@ -1,15 +1,20 @@
 #!/usr/bin/env -S python3 -u
 
 import argparse
-import os
+from multiprocessing import Pool
 import pathlib
+import subprocess
+import tempfile
 
 import angr
 import angrop
 from angrop.rop_gadget import RopGadget
+from angr.misc.loggers import CuteFormatter
 from rop_chain import *
 from rop_ret_patcher import patch_vmlinux_return_thunk
-from rop_util import load_symbols
+from rop_util import load_symbols, setup_logger
+import gadget_finder
+from gadget_filter import GadgetFilter
 
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"
@@ -27,6 +32,8 @@ ROP_C_FORMAT = "*(rop++) = {};"
 ROP_REBASE_C_FORMAT = "*(rop++) = kbase + {};"
 
 KERNEL_BASE_ADDRESS = 0xffffffff81000000
+
+logger = setup_logger("angrop_rop_generator")
 
 
 class RopGeneratorError(Exception):
@@ -46,7 +53,15 @@ class RopGeneratorAngrop:
           vmlinux_path: path to the vmlinux file
         """
         self._vmlinux_path = vmlinux_path
-        self._project = angr.Project(vmlinux_path, perform_relocations=False)
+
+        # load angr on a stripped binary for speed
+        with tempfile.NamedTemporaryFile(delete=True) as tmpfile:
+            stripped_path = tmpfile.name
+            subprocess.run(['strip', vmlinux_path, '-o',
+                           stripped_path], check=True)
+            self._project = angr.Project(
+                stripped_path, perform_relocations=False)
+
         self._symbol_map = load_symbols(vmlinux_path)
         self._addr_to_symbol = {
             addr: name for name, addr in self._symbol_map.items()
@@ -71,11 +86,26 @@ class RopGeneratorAngrop:
         return self._addr_to_symbol.get(addr)
 
     def _load_angrop(self):
-        rop = self._project.analyses.ROP(kernel_mode=True, fast_mode=True)
-        # rop.load_gadgets("angrop_gadgets_1")
-        rop.find_gadgets(processes=os.cpu_count())
-        # rop.save_gadgets("angrop_gadgets_1")
+        rop = self._project.analyses.ROP(
+            kernel_mode=True, fast_mode=True, only_check_near_rets=False)
+        self._find_rop_gadgets(rop)
         return rop
+
+    def _find_rop_gadgets(self, rop):
+        """
+        First finds the gadget with GadgetFinder
+        Filters them with GadgetFilter
+        Analyzes gadgets with angrop
+
+        This is done to avoid the slowness of analyzing the entire kernel binary with angrop
+        """
+        possible_gadgets = gadget_finder.find_gadgets(self._vmlinux_path, 5)
+        logger.debug("gadgets before filter: %d", len(possible_gadgets))
+        gadget_filter = GadgetFilter()
+        possible_gadgets = gadget_filter.filter_gadgets(possible_gadgets)
+        logger.debug("gadgets after filter: %d", len(possible_gadgets))
+        addresses = possible_gadgets.keys()
+        rop.analyze_gadget_list(addresses)
 
     def _find_pop_one_reg(self, reg_name):
         """Finds a gadget that pops one register.

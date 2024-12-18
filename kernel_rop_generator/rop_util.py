@@ -1,4 +1,5 @@
 import subprocess
+import logging
 import re
 
 
@@ -51,3 +52,14 @@ def get_offset(elffile, va):
                 offset_in_segment = va - seg_start_va
                 return segment['p_offset'] + offset_in_segment
     return None  # VA not found in any segment
+
+def setup_logger(name):
+    """
+    Sets up a logger with the name "gadget_finder" that logs to the console.
+
+    Returns:
+    A configured logging.Logger instance.
+    """
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    return logger

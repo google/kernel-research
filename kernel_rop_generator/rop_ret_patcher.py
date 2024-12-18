@@ -1,4 +1,6 @@
 import argparse
+import subprocess
+import tempfile
 from pathlib import Path
 import re
 from elftools.elf.elffile import ELFFile
@@ -73,15 +75,20 @@ def patch_vmlinux_return_thunk(vmlinux_path, output_path):
     """
     Patches return thunks in the vmlinux kernel image.
 
-    This function opens the vmlinux file, loads symbols, identifies return thunk addresses, 
-    and replaces them with a custom patch. The patched binary is saved to a new file 
+    This function opens the vmlinux file, loads symbols, identifies return thunk addresses,
+    and replaces them with a custom patch. The patched binary is saved to a new file
     with the ".thunk_replaced" extension.
 
     Args:
         vmlinux_path (str): The path to the vmlinux file.
     """
 
-    project = angr.Project(vmlinux_path)
+    # load angr on a stripped binary for speed
+    with tempfile.NamedTemporaryFile(delete=True) as tmpfile:
+        stripped_path = tmpfile.name
+        subprocess.run(['strip', vmlinux_path, '-o', stripped_path], check=True)
+        project = angr.Project(stripped_path, perform_relocations=False)
+
     symbols = load_symbols(vmlinux_path)
     return_thunk_addr = symbols["__x86_return_thunk"]
 
