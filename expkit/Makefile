@@ -6,6 +6,7 @@ exp: $(SRCS) target_db.kpwn
 test: bin/test
 
 bin/test: $(SRCS) test/artifacts/target_db_lts-6.1.81.kpwn
+	mkdir -p bin
 	g++ -static -I. -o bin/test test/main.cpp
 
 test/artifacts/target_db_lts-6.1.81.kpwn:
