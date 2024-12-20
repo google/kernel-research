@@ -28,10 +28,10 @@ class RopChainSerializer:
 
 class RopActionSerializer:
   @staticmethod
-  def serialize(rop_actions: dict) -> str:
+  def serialize(rop_actions: dict, indent=None) -> str:
     json_obj = {type_id: RopChainSerializer.serialize(rop_chain)
                 for (type_id, rop_chain) in rop_actions.items()}
-    return json.dumps(json_obj)
+    return json.dumps(json_obj, indent=indent)
 
   @staticmethod
   def deserialize(json_str: str) -> dict:
