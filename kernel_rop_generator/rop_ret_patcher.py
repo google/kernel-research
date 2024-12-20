@@ -5,11 +5,12 @@ from pathlib import Path
 import re
 from elftools.elf.elffile import ELFFile
 import angr
-from rop_util import load_symbols, get_offset
+from rop_util import load_symbols, get_offset, setup_logger
 
 RETURN_THUNK_BYTES_REPLACE = b"\xc3\xcc\xcc\xcc\xcc"
 OUTPUT_FILE_EXTENTION = ".thunk_replaced"
 
+logger = setup_logger("rop_ret_patcher")
 
 def get_executable_ranges(project):
     """
@@ -105,7 +106,7 @@ def patch_vmlinux_return_thunk(vmlinux_path, output_path):
     with open(output_path, "wb") as output_file:
         output_file.write(vmlinux_bytes)
 
-    print(f"Patched vmlinux saved as '{output_path}'")
+    logger.debug(f"Patched vmlinux saved as '{output_path}'")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

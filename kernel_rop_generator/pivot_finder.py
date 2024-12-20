@@ -1,3 +1,4 @@
+#!/usr/bin/env -S python3 -u
 import argparse
 import logging
 import re
