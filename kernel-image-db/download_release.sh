@@ -109,7 +109,7 @@ download_ddeb_and_extract() {
 save() {
     local FILE="$1"
     local COMMAND="$2"
-    if [ -f "$FILE" ]; then return; fi
+    if [ -s "$FILE" ]; then return; fi
 
     echo "Generating $FILE..."
     if ! eval "$COMMAND" > $FILE; then rm $FILE; fi
@@ -130,7 +130,8 @@ process_vmlinux() {
     save rop_gadgets_wo_jop.txt   "ROPgadget --nojop --binary vmlinux"
     save rop_gadgets_filtered.txt "grep ' : \(pop\|cmp\|add rsp\|mov\|push\|xchg\|leave\).* ; ret$' rop_gadgets_wo_jop.txt"
     save rp++.txt                 "rp++ -r 5 -f vmlinux"
-    save stack_pivots.json        "pivot_finder.py --backend text --output json --json-indent 4 rp++.txt"
+    save rop_actions.json         "angrop_rop_generator.py --output json --json-indent 4 vmlinux"
+    save stack_pivots.json        "pivot_finder.py --output json --json-indent 4 vmlinux"
 }
 
 DISTRO="$1"
