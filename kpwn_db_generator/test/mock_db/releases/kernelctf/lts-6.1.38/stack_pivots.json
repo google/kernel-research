@@ -1,0 +1,31 @@
+{
+    "one_gadgets": [
+        {
+            "address": 1337,
+            "instructions": [],
+            "pivot_reg": "rbp",
+            "used_offsets": [1, -2, 3],
+            "next_rip_offset": 8
+        }
+    ],
+    "push_indirects": [
+        {
+            "address": 1234,
+            "instructions": [],
+            "indirect_type": "call",
+            "push_register": "r10",
+            "used_offsets_in_push": [-10],
+            "indirect_register": "rax",
+            "used_offsets_in_indirect_reg": [20],
+            "next_rip_offset": -16
+        }
+    ],
+    "pop_rsps": [
+        {
+            "address": 9876,
+            "instructions": [],
+            "stack_change_before_rsp": 8,
+            "next_rip_offset": 16
+        }
+    ]
+}

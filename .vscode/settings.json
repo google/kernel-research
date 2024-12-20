@@ -1,0 +1,7 @@
+{
+    "python.analysis.extraPaths": ["kernel_rop_generator"],
+    "editor.tabSize": 4,
+    "[python]": {
+        "editor.tabSize": 2
+    },
+}
