@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdarg>
 #include <string>
 #include <vector>
@@ -10,7 +11,7 @@ std::string format_str(const char* format, va_list args) {
     int len = std::vsnprintf(nullptr, 0, format, args_copy);
     va_end(args_copy);
 
-    std::string result(len + 1, '\0');
+    std::string result(len, '\0');
     std::vsnprintf(result.data(), len + 1, format, args);
     va_end(args);
     return result;
@@ -34,11 +35,15 @@ std::string str_concat(const std::string& delimiter, const std::vector<std::stri
     return result;
 }
 
-void replace(std::string& str, const std::string& from, const std::string& to)
-{
+void replace(std::string& str, const std::string& from, const std::string& to) {
     std::string::size_type pos = 0u;
     while ((pos = str.find(from, pos)) != std::string::npos) {
         str.replace(pos, from.length(), to);
         pos += to.length();
     }
+}
+
+void tolower(std::string& str) {
+    std::transform(str.begin(), str.end(), str.begin(),
+        [](unsigned char c){ return std::tolower(c); });
 }

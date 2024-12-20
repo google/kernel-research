@@ -4,6 +4,7 @@
 #include <optional>
 #include <vector>
 #include "test/TestSuite.cpp"
+#include "test/TestEnvironment.cpp"
 #include "test/logging/TestLogger.cpp"
 #include "test/logging/PrintfLogger.cpp"
 #include "util/stdutils.cpp"
@@ -12,16 +13,22 @@ class TestRunner {
     vector<unique_ptr<TestSuite>> test_suites_;
     optional<vector<string>> test_suite_filter_;
     unique_ptr<TestLogger> logger_;
+    TestEnvironment environment;
 
 public:
     TestRunner(): logger_(new PrintfLogger()) { }
 
     void Add(TestSuite* suite) {
+        suite->env = &environment;
         test_suites_.push_back(unique_ptr<TestSuite>(suite));
     }
 
     void SetSuiteFilter(optional<vector<string>> filter) {
         test_suite_filter_ = filter;
+    }
+
+    void SetTargetDbPath(const std::string& target_db_path) {
+        environment.SetTargetDbPath(target_db_path);
     }
 
     const vector<unique_ptr<TestSuite>>& GetTestSuites() {
@@ -61,15 +68,18 @@ public:
                     continue;
                 }
 
-                logger_->TestBegin(*testSuite, test, test_idx);
+                testSuite->current_test = &test;
                 testSuite->logs.clear();
+                logger_->TestBegin(*testSuite, test, test_idx);
                 try {
                     test.func();
+                    testSuite->AssertLogs(false);
                     logger_->TestSuccess(*testSuite, test, test_idx);
                 } catch(const exception& exc) {
                     success = false;
                     logger_->TestFail(*testSuite, test, test_idx, exc);
                 }
+                testSuite->current_test = nullptr;
                 test_idx++;
             }
             testSuite->deinit();

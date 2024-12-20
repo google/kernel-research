@@ -195,7 +195,14 @@ public:
     void SetRspAndRet(uint64_t new_rsp, const std::map<Register, uint64_t>& regs = {}) {
         auto args = ConvertRipArgs(RipAction::Ret, regs);
         args.rsp = new_rsp;
+        args.regs_to_set |= RSP;
         RipControl(args);
+    }
+
+    uint64_t GetRipControlRecoveryAddr() {
+        uint64_t addr;
+        Call(GET_RIP_CONTROL_RECOVERY, &addr);
+        return addr;
     }
 
     Kprobe* InstallKprobe(const char* function_name, uint8_t arg_count = 0, enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN)) {
@@ -216,6 +223,11 @@ public:
     void PrintAllCallLog(bool clear_log = false) {
         for (auto probe: installed_probes_)
             probe->PrintCallLog(clear_log);
+    }
+
+    void CheckWin() {
+        if (Syscalls::ioctl(fd_, CHECK_WIN, nullptr) != SUCCESS)
+            throw ExpKitError("exploit failed, the win_target was not called :(");
     }
 
     ~Kpwn() {

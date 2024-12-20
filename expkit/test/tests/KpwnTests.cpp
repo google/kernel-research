@@ -5,6 +5,7 @@
 #include "test/TestSuite.cpp"
 #include "test/kpwn/kpwn.h"
 #include "util/error.cpp"
+#include "util/Payload.cpp"
 
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;
@@ -12,14 +13,7 @@ public:
     KpwnTests(): TestSuite("KpwnTests", "kpwn kernel module tests") { }
 
     void init() {
-        if (!Kpwn::IsAvailable())
-            throw ExpKitError("the kpwn kernel module is not available");
-
-        kpwn_ = new Kpwn();
-    }
-
-    void deinit() {
-        delete kpwn_;
+        kpwn_ = &env->GetKpwn();
     }
 
     TEST_METHOD(kaslrLeak, "can leak kASLR address") {
@@ -52,6 +46,11 @@ public:
         kpwn_->Kfree(buf_ptr);
     }
 
+    TEST_METHOD(callWinTarget, "call win_target and check result") {
+        kpwn_->CallAddr(kpwn_->WinTarget());
+        kpwn_->CheckWin();
+    }
+
     TEST_METHOD(kprobeTest, "kprobe test") {
         auto kprobe = kpwn_->InstallKprobe("__kmalloc", 2, CALL_LOG);
         auto buf_ptr = kpwn_->AllocBuffer(128, true);
@@ -78,5 +77,14 @@ public:
         ASSERT_EQ("msleep", callLogs[0].function_name.c_str());
         ASSERT_EQ(1, callLogs[0].arguments.size());
         ASSERT_EQ(10, callLogs[0].arguments[0]);
+    }
+
+    TEST_METHOD(stackPivotRecoveryTest, "stack pivot recovery test") {
+        auto rip_recovery = kpwn_->GetRipControlRecoveryAddr();
+        Payload p(128);
+        p.Set(0, rip_recovery);
+        auto buf_addr = kpwn_->AllocBuffer(p.GetData(), true);
+        kpwn_->SetRspAndRet(buf_addr);
+        kpwn_->Kfree(buf_addr);
     }
 };

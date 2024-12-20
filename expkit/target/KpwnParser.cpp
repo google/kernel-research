@@ -7,7 +7,7 @@
 #include <vector>
 #include "target/BinaryReader.cpp"
 #include "target/Target.cpp"
-#include "pivot/Pivot.cpp"
+#include "pivot/Pivots.cpp"
 #include "util/error.cpp"
 #include "util/file.cpp"
 
@@ -230,7 +230,7 @@ public:
 
     Target AutoDetectTarget() {
         auto version_bytes = read_file("/proc/version");
-        std::string version(version_bytes.begin(), version_bytes.end());
+        std::string version(version_bytes.begin(), version_bytes.end() - 1);
         return GetTarget(version);
     }
 };
