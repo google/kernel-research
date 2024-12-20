@@ -9,9 +9,8 @@ output
 **/busybox
 *.cpio
 *.ko
-rootfs/scripts/exp
-rootfs/scripts/exp.sh
-rootfs/lib
-rootfs/kpwn_test
-rootfs/exp*
+rootfs/*
+!rootfs/etc
+!rootfs/scripts
+!rootfs/init
 logs/
