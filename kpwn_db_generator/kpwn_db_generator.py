@@ -55,8 +55,8 @@ def generate_db(args, debug=False):
 def main():
   parser = argparse.ArgumentParser(
       description="Generates kpwn database from kernel-image-db database")
-  parser.add_argument("kernel_image_db_path",
-                      help="Path to the kernel-image-db tool")
+  parser.add_argument("--kernel-image-db-path",
+                      help="Path to the kernel-image-db tool", default="../kernel-image-db")
   parser.add_argument("--release-filter", default=None,
                       help="Regex filter for which '{distro}/{release_name}' to be parsed")
   parser.add_argument("--output-path", default="target_db.kpwn",
