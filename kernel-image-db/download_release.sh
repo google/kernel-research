@@ -130,8 +130,8 @@ process_vmlinux() {
     save rop_gadgets_wo_jop.txt   "ROPgadget --nojop --binary vmlinux"
     save rop_gadgets_filtered.txt "grep ' : \(pop\|cmp\|add rsp\|mov\|push\|xchg\|leave\).* ; ret$' rop_gadgets_wo_jop.txt"
     save rp++.txt                 "rp++ -r 5 -f vmlinux"
-    save rop_actions.json         "angrop_rop_generator.py --output json --json-indent 4 vmlinux"
-    save stack_pivots.json        "pivot_finder.py --output json --json-indent 4 vmlinux"
+    save rop_actions.json         "$SCRIPT_DIR/../kernel_rop_generator/angrop_rop_generator.py --output json --json-indent 4 vmlinux"
+    save stack_pivots.json        "$SCRIPT_DIR/../kernel_rop_generator/pivot_finder.py --output json --json-indent 4 vmlinux"
 }
 
 DISTRO="$1"
