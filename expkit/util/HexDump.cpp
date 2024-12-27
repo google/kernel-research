@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <vector>
 
 class HexDump {
 public:
@@ -29,7 +30,15 @@ public:
         return result;
     }
 
+    static void Dump(const std::vector<uint8_t>& data) {
+        Dump(data.data(), data.size());
+    }
+
     static void Print(const void* buf, int len) {
         puts(Dump(buf, len).c_str());
+    }
+
+    static void Print(const std::vector<uint8_t>& data) {
+        Print(data.data(), data.size());
     }
 };

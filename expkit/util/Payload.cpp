@@ -51,10 +51,13 @@ public:
         return (uint32_t*) &data_[offset];
     }
 
-    void Set(uint64_t offset, std::vector<uint8_t>& bytes) {
-        auto len = bytes.size();
+    void Set(uint64_t offset, void* src, size_t len) {
         Reserve(offset, len);
-        std::memcpy(&data_[offset], bytes.data(), len);
+        std::memcpy(&data_[offset], src, len);
+    }
+
+    void Set(uint64_t offset, std::vector<uint8_t>& bytes) {
+        Set(offset, bytes.data(), bytes.size());
     }
 
     void Set(uint64_t offset, uint32_t value) {

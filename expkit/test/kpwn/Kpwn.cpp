@@ -32,10 +32,13 @@ class Kpwn;
 class Kprobe {
     kprobe_args args_;
 public:
-    Kprobe(const char* function_name, uint8_t arg_count = 0, enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN)) {
+    Kprobe(const char* function_name, uint8_t arg_count = 0, enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN), const char* log_call_stack_filter = nullptr) {
         args_ = { .pid_filter = getpid(), .arg_count = arg_count, .log_mode = (uint8_t) log_mode, .logs = 0 };
         strcpy(args_.function_name, function_name);
         if (args_.log_mode & CALL_LOG) {
+            if (log_call_stack_filter)
+                strncpy(args_.log_call_stack_filter, log_call_stack_filter, sizeof(args_.log_call_stack_filter));
+
             kprobe_log* log = (kprobe_log*) malloc(64 * 1024);
             log->struct_size = 64 * 1024;
             log->missed_logs = 0;
@@ -205,8 +208,8 @@ public:
         return addr;
     }
 
-    Kprobe* InstallKprobe(const char* function_name, uint8_t arg_count = 0, enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN)) {
-        auto* kprobe = new Kprobe(function_name, arg_count, log_mode);
+    Kprobe* InstallKprobe(const char* function_name, uint8_t arg_count = 0, enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN), const char* log_call_stack_filter = nullptr) {
+        auto* kprobe = new Kprobe(function_name, arg_count, log_mode, log_call_stack_filter);
         Call(INSTALL_KPROBE, &kprobe->args_);
         installed_probes_.insert(kprobe);
         if (kprobe->args_.installed_kprobe == nullptr)

@@ -12,9 +12,7 @@
 
 typedef int fd;
 
-struct pipefds {
-    fd fds[2];
-};
+typedef fd pipefds[2];
 
 class Syscalls {
     static void __check(int result, int expected = 0, const char* syscall_name = __builtin_FUNCTION()) {
@@ -52,5 +50,9 @@ public:
 
     static void close(fd fd) {
         __check(::close(fd));
+    }
+
+    static void pipe(pipefds pipefds)  {
+        __check(::pipe(pipefds));
     }
 };

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <cstring>
 #include "util/error.cpp"
 #include "pivot/Pivots.cpp"
 
@@ -91,6 +92,28 @@ struct Target {
         if (it == symbols.end() || it->second == 0)
             throw ExpKitError("symbol (%s) is not available for the target", symbol_names.at(id));
         return it->second;
+    }
+
+    std::vector<uint8_t> GetRopChain(RopActionId id, uint64_t kaslr_base, std::vector<uint64_t> arguments = {}) {
+        std::vector<uint64_t> items;
+        for (auto item : rop_actions[id]) {
+            if (item.type == RopItemType::CONSTANT_VALUE) {
+                items.push_back(item.value);
+            } else if (item.type == RopItemType::ARGUMENT) {
+                if (item.value < arguments.size())
+                    items.push_back(arguments[item.value]);
+                else
+                    throw ExpKitError("not enough arguments for RopAction, got %u arguments, but needed %u", arguments.size(), item.value + 1);
+            } else if (item.type == RopItemType::SYMBOL) {
+                items.push_back(kaslr_base + item.value);
+            } else
+                throw ExpKitError("unexpected RopAction item type %u", item.type);
+        }
+
+        auto result_size = items.size() * sizeof(uint64_t);
+        std::vector<uint8_t> result(result_size);
+        memcpy(result.data(), items.data(), result_size);
+        return result;
     }
 };
 
