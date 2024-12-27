@@ -12,7 +12,13 @@ A work-in-progress Linux Kernel exploitation kit, which will contain the necessa
 
 Currently the exploit kit can be used by including its' source code into the exploits. Its API is not stable yet and cannot be used as a library.
 
-Its functionality (and how it can be used) can be seen by looking at the tests (in the `test/tests` folder).
+Its functionality (and how it can be used) can be seen by looking at the tests (in the `test/tests` folder) and at the samples.
+
+The samples can be built and run as:
+
+```
+make -C samples/stack_pivot_and_rop build run
+```
 
 ## Tests
 

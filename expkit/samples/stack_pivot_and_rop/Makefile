@@ -1,0 +1,11 @@
+build: exp
+
+exp: target_db.kpwn exp.cpp
+	g++ -static -I../.. -o exp exp.cpp
+
+target_db.kpwn:
+	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/latest_full.kpwn
+
+run:
+	cp exp* ../../../kernel-image-runner/rootfs/
+	../../../kernel-image-runner/run.sh kernelctf lts-6.1.81 --custom-modules=kpwn --only-command-output --dmesg=dmesg.txt -- /exp.sh
