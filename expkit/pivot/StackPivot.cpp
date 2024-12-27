@@ -62,8 +62,8 @@ public:
         return one_gadget_ ? one_gadget_->next_rip_offset : pop_gadget_->next_rip_offset;
     }
 
-    void ApplyToPayload(Payload& payload) {
+    void ApplyToPayload(Payload& payload, uint64_t kaslr_base) {
         if (push_gadget_ && pop_gadget_)
-            payload.Set(push_gadget_->next_rip_offset, pop_gadget_->address);
+            payload.Set(push_gadget_->next_rip_offset, kaslr_base + pop_gadget_->address);
     }
 };

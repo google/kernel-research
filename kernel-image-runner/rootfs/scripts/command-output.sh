@@ -15,5 +15,5 @@
 
 dmesg -n 1 # suppress kernel messages
 echo "=== COMMAND-BEGIN: $@ ==="
-eval $@ > /output
+eval $@ > /output 2>/output
 echo "=== COMMAND-END ==="
