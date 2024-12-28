@@ -1,5 +1,6 @@
 """Classes for writing the kpwn file format."""
 from binary_writer import BinaryWriter
+from symbols import SymbolWriter
 from rop_actions import RopActionWriter
 from stack_pivots import StackPivotWriter
 
@@ -79,33 +80,15 @@ VERSION_MINOR = 0
 # uint = generic, variable-sized unsigned integer
 # sint = generic, variable-sized signed integer
 
-class SymbolWriter:
-  """Helper class to handle symbol writing to the db."""
-
-  def __init__(self, symbols_config):
-    self.symbols_config = symbols_config
-
-  def write_meta(self, wr_hdr):
-    wr_hdr.u4(len(self.symbols_config))
-    for [type_id, name] in self.symbols_config.items():
-      with wr_hdr.struct() as wr_struct:
-        wr_struct.u4(type_id)    # type_id
-        wr_struct.zstr_u2(name)  # name_len + name
-
-  def write_target(self, wr_target, target):
-    target_symbols = target.get_symbols()
-    for name in self.symbols_config.values():
-      wr_target.u4(target_symbols.get(name, 0))
-
 
 class KpwnWriter:
   """Class to write the kpwn file format."""
 
-  def __init__(self, config, debug=False):
+  def __init__(self, config):
     self.symbol_writer = SymbolWriter(config.symbols)
     self.rop_action_writer = RopActionWriter(config.rop_actions)
     self.stack_pivot_writer = StackPivotWriter()
-    self.debug = debug
+    self.targets = []
 
   def _write_target(self, wr_root, target):
     version = target.get_version()
@@ -124,7 +107,12 @@ class KpwnWriter:
       # Stack Pivots
       self.stack_pivot_writer.write_target(wr_target, target)
 
-  def write(self, f, targets):
+  def add_target(self, target):
+    writer = BinaryWriter()
+    self._write_target(writer, target)
+    self.targets.append(writer.data)
+
+  def write(self, f):
     wr_root = BinaryWriter(f)
     wr_root.write(bytes(MAGIC, "ascii"))
     wr_root.u2(VERSION_MAJOR)
@@ -139,8 +127,6 @@ class KpwnWriter:
       self.rop_action_writer.write_meta(wr_hdr)
 
     # targets
-    wr_root.u4(len(targets))
-    for target in targets:
-      if self.debug:
-        print(f"Processing target: {target}")
-      self._write_target(wr_root, target)
+    wr_root.u4(len(self.targets))
+    for target_data in self.targets:
+      wr_root.write(target_data)

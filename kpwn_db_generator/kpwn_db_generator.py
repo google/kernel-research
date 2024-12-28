@@ -3,6 +3,7 @@ import argparse
 import os
 import re
 import sys
+import traceback
 import config
 
 sys.path.append(os.path.realpath("../kernel_rop_generator"))
@@ -29,15 +30,14 @@ def collect_targets(releases_dir, release_filter=None):
   return targets
 
 
-def generate_db(args, debug=False):
-  if debug:
-    print("Collecting targets...\n")
+def generate_db(args):
+  print("Collecting targets...\n")
   targets = collect_targets(f"{args.kernel_image_db_path}/releases",
                             args.release_filter)
   targets.sort(key=lambda t: natural_sort_key(str(t)))
 
   targets_with_missing_files = [t for t in targets if t.missing_files]
-  if debug and targets_with_missing_files:
+  if targets_with_missing_files:
     error("[!] The following targets will be skipped as some of the "
           "required files are missing:")
     for target in targets_with_missing_files:
@@ -48,8 +48,17 @@ def generate_db(args, debug=False):
   valid_targets = [t for t in targets if not t.missing_files]
   os.makedirs(os.path.abspath(os.path.dirname(args.output_path)), exist_ok=True)
   with open(args.output_path, "wb") as f:
-    kpwn_writer = KpwnWriter(config, debug)
-    kpwn_writer.write(f, valid_targets)
+    kpwn_writer = KpwnWriter(config)
+    for target in valid_targets:
+      print(f"Processing target: {target}")
+      try:
+        kpwn_writer.add_target(target)
+      except Exception:
+        error(f"[!] Failed processing target: {traceback.format_exc()}")
+
+    kpwn_writer.write(f)
+
+  print("Done.")
 
 
 def main():
@@ -61,7 +70,7 @@ def main():
                       help="Regex filter for which '{distro}/{release_name}' to be parsed")
   parser.add_argument("--output-path", default="target_db.kpwn",
                       help="Full file path to save target_db.kpwn")
-  generate_db(parser.parse_args(), True)
+  generate_db(parser.parse_args())
 
 
 if __name__ == "__main__":
