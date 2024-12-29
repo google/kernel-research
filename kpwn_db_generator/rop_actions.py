@@ -12,7 +12,7 @@ class RopActionArg:
 
 
 class RopActionMeta:
-  ARG_PATTERN = r"ARG_([a-z0-9_]+)(?:=([a-z0-9]+))?"
+  ARG_PATTERN = r"ARG_([a-z0-9_]+)(?:=(0x[0-9a-fA-F]+|[0-9]+))?"
 
   def __init__(self, type_id, desc):
     self.type_id = type_id
@@ -20,7 +20,7 @@ class RopActionMeta:
     self.args = []
     for name, default_value in re.findall(self.ARG_PATTERN, desc):
       self.args.append(RopActionArg(name,
-                                    default_value if default_value else None))
+                                    int(default_value, 0) if default_value else None))
 
   def __repr__(self) -> str:
     return self.desc
