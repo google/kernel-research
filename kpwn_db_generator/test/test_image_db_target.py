@@ -1,7 +1,7 @@
 """Contains tests for the Target class."""
 
 import unittest
-from target import Target
+from image_db_target import ImageDbTarget
 
 
 MOCK_DB_DIR = "test/mock_db"
@@ -13,8 +13,8 @@ class TargetTests(unittest.TestCase):
 
   def setUp(self):
     super().setUp()
-    self.target = Target("kernelctf", "lts-6.1.36",
-                         f"{RELEASES_DIR}/kernelctf/lts-6.1.36")
+    self.target = ImageDbTarget("kernelctf", "lts-6.1.36",
+                                f"{RELEASES_DIR}/kernelctf/lts-6.1.36")
 
   def test_get_version(self):
     self.assertEqual("KernelCTF version 6.1.36 (...)",

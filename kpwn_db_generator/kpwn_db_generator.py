@@ -5,16 +5,14 @@ import re
 import sys
 import traceback
 import config
+import logging
+from data_model import *
 
 sys.path.append(os.path.realpath("../kernel_rop_generator"))
 from kpwn_writer import KpwnWriter
-from target import Target
+from image_db_target import ImageDbTarget
 from utils import list_dirs
 from utils import natural_sort_key
-
-
-def error(msg=""):
-  sys.stderr.write(f"{msg}\n")
 
 
 def collect_targets(releases_dir, release_filter=None):
@@ -25,40 +23,38 @@ def collect_targets(releases_dir, release_filter=None):
       if release_filter and not re.search(release_filter, full_name):
         continue
 
-      target = Target(distro, release_name, f"{releases_dir}/{full_name}")
+      target = ImageDbTarget(distro, release_name, f"{releases_dir}/{full_name}")
       targets.append(target)
   return targets
 
 
-def generate_db(args):
-  print("Collecting targets...\n")
-  targets = collect_targets(f"{args.kernel_image_db_path}/releases",
-                            args.release_filter)
-  targets.sort(key=lambda t: natural_sort_key(str(t)))
+def get_db_from_image_db(image_db_path, release_filter, logger):
+  logger.info("Collecting targets...\n")
+  db_targets = collect_targets(f"{image_db_path}/releases", release_filter)
+  db_targets.sort(key=lambda t: natural_sort_key(str(t)))
 
-  targets_with_missing_files = [t for t in targets if t.missing_files]
+  targets_with_missing_files = [t for t in db_targets if t.missing_files]
   if targets_with_missing_files:
-    error("[!] The following targets will be skipped as some of the "
-          "required files are missing:")
+    error_msg = "The following targets will be skipped as some of the " \
+                "required files are missing:\n"
     for target in targets_with_missing_files:
-      error(f" - {target.distro}/{target.release_name}: "
-            f"{', '.join(target.missing_files)}")
-    error()
+      error_msg += f" - {target.distro}/{target.release_name}: " \
+                   f"{', '.join(target.missing_files)}\n"
+    logger.error(error_msg)
 
-  valid_targets = [t for t in targets if not t.missing_files]
-  os.makedirs(os.path.abspath(os.path.dirname(args.output_path)), exist_ok=True)
-  with open(args.output_path, "wb") as f:
-    kpwn_writer = KpwnWriter(config)
-    for target in valid_targets:
-      print(f"Processing target: {target}")
-      try:
-        kpwn_writer.add_target(target)
-      except Exception:
-        error(f"[!] Failed processing target: {traceback.format_exc()}")
+  valid_targets = [t for t in db_targets if not t.missing_files]
+  meta_config = MetaConfig.from_desc(config.symbols, config.rop_actions)
+  
+  targets = []
+  for db_target in valid_targets:
+    logger.info(f"Processing target: {db_target}")
+    try:
+      targets.append(db_target.process(meta_config))
+    except Exception:
+      logger.error(f"Failed processing target: {traceback.format_exc()}")
 
-    kpwn_writer.write(f)
-
-  print("Done.")
+  logger.info(f"Processed {len(targets)} targets.")
+  return Db(meta_config, targets)
 
 
 def main():
@@ -70,8 +66,16 @@ def main():
                       help="Regex filter for which '{distro}/{release_name}' to be parsed")
   parser.add_argument("--output-path", default="target_db.kpwn",
                       help="Full file path to save target_db.kpwn")
-  generate_db(parser.parse_args())
+  parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="INFO",
+                      help="Set the logging level.")
+  args = parser.parse_args()
 
+  logger = logging.getLogger(__name__)
+  logger.setLevel(getattr(logging, args.log_level))
+  logger.addHandler(logging.StreamHandler())
+
+  db = get_db_from_image_db(args.kernel_image_db_path, args.release_filter, logger)
+  KpwnWriter(db).write_to_file(args.output_path)
 
 if __name__ == "__main__":
   main()

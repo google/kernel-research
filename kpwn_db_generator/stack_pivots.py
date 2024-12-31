@@ -21,7 +21,7 @@ class StackPivotWriter:
       def write_address(g):
         wr.varuint(g.address - (KERNEL_BASE_ADDRESS if g.address >= KERNEL_BASE_ADDRESS else 0))
 
-      pivots = target.get_stack_pivots()
+      pivots = target.stack_pivots
 
       for g in wr_list(pivots.one_gadgets):
         write_address(g)

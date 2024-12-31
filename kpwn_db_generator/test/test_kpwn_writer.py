@@ -5,8 +5,8 @@ import unittest
 from binary_writer import BinaryWriter
 from kpwn_writer import KpwnWriter
 from kpwn_writer import SymbolWriter
-from target import Target
-
+from image_db_target import ImageDbTarget
+from data_model import MetaConfig, Db
 
 def expect(expected, actual):
   for i in range(min(len(expected), len(actual))):
@@ -23,7 +23,8 @@ class SymbolWriterTests(unittest.TestCase):
   """Tests for the SymbolWriter class."""
 
   def test_meta(self):
-    sw = SymbolWriter({0x11223344: "SYMBOL_1", 0x55667788: "SYMBOL_2"})
+    config = MetaConfig.from_desc({0x11223344: "SYMBOL_1", 0x55667788: "SYMBOL_2"})
+    sw = SymbolWriter(config.symbols)
 
     bw = BinaryWriter()
     sw.write_meta(bw)
@@ -38,8 +39,9 @@ class SymbolWriterTests(unittest.TestCase):
            bw.data)
 
   def test_target(self):
-    sw = SymbolWriter({1: "msleep", 2: "anon_pipe_buf_ops"})
-    target = Target("", "", "test/mock_db/releases/kernelctf/lts-6.1.36")
+    config = MetaConfig.from_desc({1: "msleep", 2: "anon_pipe_buf_ops"})
+    sw = SymbolWriter(config.symbols)
+    target = ImageDbTarget("", "", "test/mock_db/releases/kernelctf/lts-6.1.36").process()
 
     bw = BinaryWriter()
     sw.write_target(bw, target)
@@ -54,10 +56,11 @@ class KpwnWriterTests(unittest.TestCase):
 
   EXPECTED_HDR = b"KPWN" + b"\x01\x00" + b"\x00\x00"  # v1.0
 
-  def expect(self, expected, config, targets):
-    writer = KpwnWriter(config)
+  def expect(self, expected, symbols_desc={}, actions_desc={}, targets=[]):
+    meta = MetaConfig.from_desc(symbols_desc, actions_desc)
+    db = Db(meta, targets)
     data = bytearray()
-    writer.write(data, targets)
+    KpwnWriter(db).write(data)
     expect(expected, data)
 
   def test_empty(self):
@@ -65,8 +68,7 @@ class KpwnWriterTests(unittest.TestCase):
                 b"\x08\0\0\0" +  # meta len
                 b"\x00\0\0\0" +  # symbols len
                 b"\x00\0\0\0" +  # ROP actions len
-                b"\x00\0\0\0",   # targets len
-                types.SimpleNamespace(symbols={}, rop_actions={}), [])
+                b"\x00\0\0\0")   # targets len
 
   def test_msleep(self):
     self.expect(self.EXPECTED_HDR +
@@ -77,11 +79,11 @@ class KpwnWriterTests(unittest.TestCase):
                 b"\x06\x00" + b"msleep\0" +  # symbols[0].name == "msleep"
                 b"\x00\0\0\0" +              # ROP actions len
                 b"\x00\0\0\0",               # targets len
-                types.SimpleNamespace(symbols={0x11223344: "msleep"}, rop_actions={}), [])
+                {0x11223344: "msleep"})
 
   def test_target(self):
-    target = Target("kernelCTF", "lts-6.1.36",
-                    "test/mock_db/releases/kernelctf/lts-6.1.36")
+    target = ImageDbTarget("kernelCTF", "lts-6.1.36",
+                           "test/mock_db/releases/kernelctf/lts-6.1.36").process()
 
     self.expect(self.EXPECTED_HDR +
                 b"\x08\0\0\0" +                # meta len
@@ -98,4 +100,4 @@ class KpwnWriterTests(unittest.TestCase):
                 b"\0" +                        # t[0].pivots.push_indirects.len
                 b"\0" +                        # t[0].pivots.pop_rsps.len
                 b"",
-                types.SimpleNamespace(symbols={}, rop_actions={}), [target])
+                targets=[target])

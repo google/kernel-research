@@ -1,10 +1,14 @@
-"""Module containing classes related to targets."""
+"""Processes per-target files from kernel-image-db folders."""
 import os
+import sys
+
+sys.path.append(os.path.realpath("../kernel_rop_generator"))
 from pivot_serializer import PivotSerializer
 from rop_action_serializer import RopActionSerializer
+from data_model import Target
 
-class Target:
-  """Helper class to process per-target files from kernel-image-db folders."""
+class ImageDbTarget:
+  """Processes per-target files from kernel-image-db folders."""
 
   KBASE_ADDR = 0xffffffff81000000
   VERSION_TXT = "version.txt"
@@ -39,13 +43,14 @@ class Target:
     with self.open_file(self.VERSION_TXT) as f:
       return f.read().strip()
 
-  def get_symbols(self):
+  def get_symbols(self, filter_list=None):
     symbols = {}
     with self.open_file(self.SYMBOLS_TXT) as f:
       for line in f:
         if line[0] == " ": continue
         [addr, _, name] = line.rstrip().split(" ")
-        symbols[name] = int(addr, 16) - self.KBASE_ADDR
+        if not filter_list or name in filter_list:
+          symbols[name] = int(addr, 16) - self.KBASE_ADDR
     return symbols
 
   def get_missing_files(self):
@@ -58,3 +63,18 @@ class Target:
   def get_stack_pivots(self):
     with self.open_file(self.STACK_PIVOTS_JSON) as f:
       return PivotSerializer.deserialize(f.read())
+    
+  def process(self, config=None):
+    version = self.get_version()
+    
+    symbol_filter = [s.name for s in config.symbols] if config and config.symbols else None
+    symbols = self.get_symbols(symbol_filter)
+    
+    rop_actions = self.get_rop_actions()
+    if config and config.rop_actions:
+      rop_actions = { type_id: action for (type_id, action) in rop_actions.items() 
+                      if type_id in config.rop_actions }
+
+    stack_pivots = self.get_stack_pivots()
+    return Target(self.distro, self.release_name, version,
+                  symbols, rop_actions, stack_pivots)
