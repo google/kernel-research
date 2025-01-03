@@ -1,7 +1,7 @@
 """Classes handling ROP Action related logic."""
 
 import math
-from rop_chain import *
+from data_model.rop_chain import RopChainConstant, RopChainOffset, RopChainArgument
 
 class RopActionWriter:
   """Helper class to handle ROP Action writing to the db."""
@@ -25,12 +25,13 @@ class RopActionWriter:
 
   def write_target(self, wr_target, target):
     for ra_meta in self.rop_actions_meta:
+      rop_actions = {ra.type_id: ra for ra in target.rop_actions}
       with wr_target.struct() as wr:
-        rop_chain = target.rop_actions.get(ra_meta.type_id)
+        rop_chain = rop_actions.get(ra_meta.type_id)
         if not rop_chain: continue
 
-        wr.u1(len(rop_chain.items))
-        for item in rop_chain.items:
+        wr.u1(len(rop_chain.gadgets))
+        for item in rop_chain.gadgets:
           item_type = None
           value = None
           if isinstance(item, RopChainConstant):

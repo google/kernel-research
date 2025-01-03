@@ -3,13 +3,14 @@ import argparse
 import logging
 import re
 import sys
+import os
 from collections import defaultdict
 import archinfo
 import gadget_finder
-from pivots import *
-from pivot_serializer import PivotSerializer
-
 from rop_util import setup_logger
+
+sys.path.append(os.path.abspath(f"{__file__}/../.."))
+from kpwn_db.data_model.pivots import *
 
 logger = setup_logger("pivot_finder")
 logger.setLevel(logging.INFO)

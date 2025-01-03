@@ -1,11 +1,8 @@
 """Processes per-target files from kernel-image-db folders."""
 import os
-import sys
-
-sys.path.append(os.path.realpath("../kernel_rop_generator"))
-from pivot_serializer import PivotSerializer
-from rop_action_serializer import RopActionSerializer
-from data_model import Target
+from data_model.db import Target
+from data_model.pivots import PivotSerializer
+from data_model.rop_chain import RopActionSerializer
 
 class ImageDbTarget:
   """Processes per-target files from kernel-image-db folders."""
@@ -32,9 +29,9 @@ class ImageDbTarget:
   def open_file(self, fn):
     if not self.file_exists(fn):
       raise FileNotFoundError(f"{fn} file was not found for "
-                              f"release: {self.release_name}")
+                              f"release: {self.release_name} (path={self.dir}/{fn})")
     else:
-      return open(f"{self.dir}/{fn}")
+      return open(f"{self.dir}/{fn}", "rt")
 
   def get_full_name(self):
     return f"{self.distro}/{self.release_name}"
@@ -63,18 +60,18 @@ class ImageDbTarget:
   def get_stack_pivots(self):
     with self.open_file(self.STACK_PIVOTS_JSON) as f:
       return PivotSerializer.deserialize(f.read())
-    
+
   def process(self, config=None):
     version = self.get_version()
-    
+
     symbol_filter = [s.name for s in config.symbols] if config and config.symbols else None
     symbols = self.get_symbols(symbol_filter)
-    
+
     rop_actions = self.get_rop_actions()
     if config and config.rop_actions:
-      rop_actions = { type_id: action for (type_id, action) in rop_actions.items() 
-                      if type_id in config.rop_actions }
+      type_ids = [ra.type_id for ra in config.rop_actions]
+      rop_actions = [ra for ra in rop_actions if ra.type_id in type_ids]
 
     stack_pivots = self.get_stack_pivots()
-    return Target(self.distro, self.release_name, version,
-                  symbols, rop_actions, stack_pivots)
+    return Target(distro=self.distro, release_name=self.release_name, version=version,
+                  symbols=symbols, rop_actions=rop_actions, stack_pivots=stack_pivots)

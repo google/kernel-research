@@ -1,11 +1,8 @@
 """Contains tests for the Target class."""
 
 import unittest
-from image_db_target import ImageDbTarget
-
-
-MOCK_DB_DIR = "test/mock_db"
-RELEASES_DIR = f"{MOCK_DB_DIR}/releases"
+from .utils import *
+from converter.image_db_target import ImageDbTarget
 
 
 class TargetTests(unittest.TestCase):

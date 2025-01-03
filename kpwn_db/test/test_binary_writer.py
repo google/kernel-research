@@ -2,7 +2,7 @@
 
 import contextlib
 import unittest
-from binary_writer import BinaryWriter
+from converter.binary_writer import BinaryWriter
 
 
 class BinaryWriterTests(unittest.TestCase):

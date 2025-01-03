@@ -1,10 +1,10 @@
 """Classes for writing the kpwn file format."""
 import os
 
-from binary_writer import BinaryWriter
-from symbols import SymbolWriter
-from rop_actions import RopActionWriter
-from stack_pivots import StackPivotWriter
+from .binary_writer import BinaryWriter
+from .symbols import SymbolWriter
+from .rop_actions import RopActionWriter
+from .stack_pivots import StackPivotWriter
 
 MAGIC = "KPWN"
 VERSION_MAJOR = 1

@@ -2,11 +2,13 @@
 
 import types
 import unittest
-from binary_writer import BinaryWriter
-from kpwn_writer import KpwnWriter
-from kpwn_writer import SymbolWriter
-from image_db_target import ImageDbTarget
-from data_model import MetaConfig, Db
+from converter.binary_writer import BinaryWriter
+from converter.kpwn_writer import KpwnWriter
+from converter.kpwn_writer import SymbolWriter
+from converter.image_db_target import ImageDbTarget
+from data_model.db import Db
+from data_model.meta import MetaConfig
+from .utils import *
 
 def expect(expected, actual):
   for i in range(min(len(expected), len(actual))):
@@ -41,7 +43,7 @@ class SymbolWriterTests(unittest.TestCase):
   def test_target(self):
     config = MetaConfig.from_desc({1: "msleep", 2: "anon_pipe_buf_ops"})
     sw = SymbolWriter(config.symbols)
-    target = ImageDbTarget("", "", "test/mock_db/releases/kernelctf/lts-6.1.36").process()
+    target = ImageDbTarget("", "", f"{RELEASES_DIR}/kernelctf/lts-6.1.36").process()
 
     bw = BinaryWriter()
     sw.write_target(bw, target)
@@ -83,7 +85,7 @@ class KpwnWriterTests(unittest.TestCase):
 
   def test_target(self):
     target = ImageDbTarget("kernelCTF", "lts-6.1.36",
-                           "test/mock_db/releases/kernelctf/lts-6.1.36").process()
+                           f"{RELEASES_DIR}/kernelctf/lts-6.1.36").process()
 
     self.expect(self.EXPECTED_HDR +
                 b"\x08\0\0\0" +                # meta len

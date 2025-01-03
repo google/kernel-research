@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 import argparse
-import os
 import re
-import sys
 import traceback
-import config
 import logging
-from data_model import *
+import sys
+import os
 
-sys.path.append(os.path.realpath("../kernel_rop_generator"))
-from kpwn_writer import KpwnWriter
-from image_db_target import ImageDbTarget
-from utils import list_dirs
-from utils import natural_sort_key
+KPWN_DB_DIR = os.path.abspath(f"{__file__}/..")
+sys.path.append(KPWN_DB_DIR)
 
+from data_model.db import Db
+from data_model.meta import MetaConfig
+import converter.config as config
+from converter.kpwn_writer import KpwnWriter
+from converter.image_db_target import ImageDbTarget
+from converter.utils import list_dirs
+from converter.utils import natural_sort_key
 
 def collect_targets(releases_dir, release_filter=None):
   targets = []
@@ -44,7 +46,7 @@ def get_db_from_image_db(image_db_path, release_filter, logger):
 
   valid_targets = [t for t in db_targets if not t.missing_files]
   meta_config = MetaConfig.from_desc(config.symbols, config.rop_actions)
-  
+
   targets = []
   for db_target in valid_targets:
     logger.info(f"Processing target: {db_target}")
@@ -61,7 +63,7 @@ def main():
   parser = argparse.ArgumentParser(
       description="Generates kpwn database from kernel-image-db database")
   parser.add_argument("--kernel-image-db-path",
-                      help="Path to the kernel-image-db tool", default="../kernel-image-db")
+                      help="Path to the kernel-image-db tool", default=f"{KPWN_DB_DIR}/../kernel-image-db")
   parser.add_argument("--release-filter", default=None,
                       help="Regex filter for which '{distro}/{release_name}' to be parsed")
   parser.add_argument("--output-path", default="target_db.kpwn",

