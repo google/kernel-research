@@ -11,6 +11,7 @@ from rop_util import setup_logger
 
 sys.path.append(os.path.abspath(f"{__file__}/../.."))
 from kpwn_db.data_model.pivots import *
+from kpwn_db.data_model.serialization import *
 
 logger = setup_logger("pivot_finder")
 logger.setLevel(logging.INFO)
@@ -577,7 +578,7 @@ def main():
     pivots = pivot_finder.find_pivots()
 
     if args.output == "json":
-        print(PivotSerializer.serialize(pivots, indent=args.json_indent))
+        print(to_json(pivots, indent=args.json_indent))
     else:
         combined_pivots = pivots.combined_list()
         sys.stderr.write(f"Found {len(combined_pivots)} pivots.\n")

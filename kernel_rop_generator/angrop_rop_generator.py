@@ -19,6 +19,7 @@ from gadget_filter import GadgetFilter
 
 sys.path.append(os.path.abspath(f"{__file__}/../.."))
 from kpwn_db.data_model.rop_chain import *
+from kpwn_db.data_model.serialization import *
 
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"
@@ -463,7 +464,7 @@ if __name__ == "__main__":
       RopChainArgument(3), RopChainArgument(4))
 
     if args.output == "json":
-        print(RopActionSerializer.serialize([
+        print(to_json([
             action_sleep,
             action_commit_creds,
             action_switch_task_namespace,
@@ -471,7 +472,7 @@ if __name__ == "__main__":
             action_fork,
             action_telefork,
             action_trampoline_ret,
-        ], args.json_indent))
+        ], args.json_indent, RopActions)
     else:
         chain = rop_generator.build_rop_chain()
         payload_code = rop_generator.payload_c_code(chain)

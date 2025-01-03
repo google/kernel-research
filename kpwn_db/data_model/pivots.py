@@ -75,12 +75,3 @@ class Pivots:
 
   def combined_list(self):
     return self.one_gadgets + self.push_indirects + self.pop_rsps
-
-class PivotSerializer:
-    @staticmethod
-    def serialize(pivots, indent=None):
-      return TypeAdapter(Pivots).dump_json(pivots, indent=indent, exclude_none=True).decode('utf-8')
-
-    @staticmethod
-    def deserialize(json_str):
-      return TypeAdapter(Pivots).validate_json(json_str)

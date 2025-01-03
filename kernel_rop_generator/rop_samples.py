@@ -9,6 +9,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from kpwn_db.data_model.rop_chain import *
+from kpwn_db.data_model.serialization import *
 
 rop_actions = {
     "kernelctf/lts-6.1.81": [
@@ -55,4 +56,4 @@ if __name__ == "__main__":
   for (release_name, release_ras) in rop_actions.items():
     dst_fn = f"{args.kernel_image_db_path}/releases/{release_name}/rop_actions.json"
     with open(dst_fn, "wt") as f:
-      f.write(RopActionSerializer.serialize(release_ras, 4))
+      f.write(to_json(release_ras, 4, RopActions))

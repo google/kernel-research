@@ -30,12 +30,3 @@ class RopAction():
   gadgets: List[Union[RopChainConstant, RopChainOffset, RopChainArgument]] = field(default_factory=list)
 
 RopActions = List[RopAction]
-
-class RopActionSerializer:
-  @staticmethod
-  def serialize(actions: RopActions, indent=None) -> str:
-    return TypeAdapter(RopActions).dump_json(actions, indent=indent, exclude_none=True).decode('utf-8')
-
-  @staticmethod
-  def deserialize(json_str: str) -> RopActions:
-    return TypeAdapter(RopActions).validate_json(json_str)

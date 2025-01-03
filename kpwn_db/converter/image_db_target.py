@@ -1,8 +1,9 @@
 """Processes per-target files from kernel-image-db folders."""
 import os
 from data_model.db import Target
-from data_model.pivots import PivotSerializer
-from data_model.rop_chain import RopActionSerializer
+from data_model.pivots import Pivots
+from data_model.rop_chain import RopActions
+from data_model.serialization import from_json
 
 class ImageDbTarget:
   """Processes per-target files from kernel-image-db folders."""
@@ -55,11 +56,11 @@ class ImageDbTarget:
 
   def get_rop_actions(self):
     with self.open_file(self.ROP_ACTIONS_JSON) as f:
-      return RopActionSerializer.deserialize(f.read())
+      return from_json(RopActions, f.read())
 
   def get_stack_pivots(self):
     with self.open_file(self.STACK_PIVOTS_JSON) as f:
-      return PivotSerializer.deserialize(f.read())
+      return from_json(Pivots, f.read())
 
   def process(self, config=None):
     version = self.get_version()
