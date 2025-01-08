@@ -40,12 +40,10 @@ targets[num_targets]
     offset (u4)
   rop_actions[num_rop_actions]
     struct_size (u2) - 0 means this ROP action is not supported
-    num_items (u1)
-    items[num_items]
-      type (b4) - enum, 0 = constant_value, 1 = symbol, 2 = argument
-      size (b4) - value is stored as 2^size
-                  (0 -> 1 byte, 1 -> 2 bytes, 2 -> 4 bytes, 3 -> 8 bytes)
-      value (depends on size)
+    items[varsize]
+      type_and_value (uint) - "(value << 2) | type"
+        the 2 LSB bits: enum, 0 = constant_value, 1 = symbol, 2 = argument
+        other bits: value
   stack_pivots
     struct_size (u2) - to skip stack_pivots if we don't care
     one_gadgets[varsize]

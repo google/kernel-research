@@ -30,26 +30,13 @@ class RopActionWriter:
         rop_chain = rop_actions.get(ra_meta.type_id)
         if not rop_chain: continue
 
-        wr.u1(len(rop_chain.gadgets))
+        wr.varuint(len(rop_chain.gadgets))
         for item in rop_chain.gadgets:
-          item_type = None
-          value = None
           if isinstance(item, RopChainConstant):
-            item_type = 0
-            value = item.value
+            wr.varuint(0x00 | (item.value << 2))
           elif isinstance(item, RopChainOffset):
-            item_type = 1
-            value = item.kernel_offset
+            wr.varuint(0x01 | (item.kernel_offset << 2))
           elif isinstance(item, RopChainArgument):
-            item_type = 2
-            value = item.argument_index
+            wr.varuint(0x02 | (item.argument_index << 2))
           else:
             raise TypeError("Unknown RopChainItem type")
-
-          byte_count = math.ceil(math.log((value if value else 1) + 1, 256))
-          # value is stored as 2^size
-          byte_count_log = math.ceil(math.log(byte_count, 2))
-          # 1 -> 1, 2 -> 2, 3..4 -> 4, 5..8 -> 8
-          byte_count = 2 ** byte_count_log
-          wr.u1((item_type << 4) | byte_count_log)
-          wr.uint(byte_count, value)

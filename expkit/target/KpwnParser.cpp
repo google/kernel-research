@@ -68,15 +68,11 @@ protected:
             // skip if this ROP action is not supported
             if (!BeginStruct(2)) continue;
 
-            auto num_items = ReadU8();
+            auto num_items = ReadUInt();
             std::vector<RopItem> rop_items;
             for (int i = 0; i < num_items; i++) {
-                auto type_and_size = ReadU8();
-                auto type = (RopItemType)(type_and_size >> 4);
-                auto size = type_and_size & 0xf;
-                auto read_size = 1 << size;
-                uint64_t value = Uint(read_size);
-                rop_items.push_back(RopItem(type, value));
+                auto type_and_value = ReadUInt();
+                rop_items.push_back(RopItem((RopItemType)(type_and_value & 0x03), type_and_value >> 2));
             }
 
             auto type_id = rop_action_ids_[i_action];
