@@ -54,7 +54,7 @@ struct TargetDbTests: TestSuite {
     TEST_METHOD(ropActionsMetaLts6181, "rop actions metadata is correct (lts-6.1.81)") {
         auto parser = getParser();
         parser.ParseHeader(true);
-        ASSERT_EQ(5, parser.rop_action_meta_.size());
+        ASSERT_EQ(7, parser.rop_action_meta_.size());
         auto& msleep_meta = parser.rop_action_meta_[RopActionId::MSLEEP];
         ASSERT_EQ(RopActionId::MSLEEP, msleep_meta.type_id);
         ASSERT_EQ("msleep(ARG_time_msec)", msleep_meta.desc.c_str());
@@ -78,26 +78,26 @@ struct TargetDbTests: TestSuite {
 
     TEST_METHOD(pivotsLts6181, "stack pivots are correct (lts-6.1.81)") {
         auto pivots = getLts6181().pivots;
-        ASSERT_EQ(37, pivots.one_gadgets.size());
-        ASSERT_EQ(344, pivots.push_indirects.size());
-        ASSERT_EQ(13, pivots.pop_rsps.size());
+        ASSERT_EQ(6, pivots.one_gadgets.size());
+        ASSERT_EQ(187, pivots.push_indirects.size());
+        ASSERT_EQ(3, pivots.pop_rsps.size());
 
         auto& g1 = pivots.one_gadgets[0];
-        ASSERT_EQ(0x169f080, g1.address);
+        ASSERT_EQ(0x840463, g1.address);
         ASSERT_EQ(Register::RBP, g1.pivot_reg.reg);
         ASSERT_EQ(0, g1.pivot_reg.used_offsets.size());
         ASSERT_EQ(8, g1.next_rip_offset);
 
         auto& g2 = pivots.push_indirects[0];
-        ASSERT_EQ(0x338ae98, g2.address);
-        ASSERT_EQ(IndirectType::JMP, g2.indirect_type);
-        ASSERT_EQ(Register::R10, g2.push_reg.reg);
-        ASSERT_EQ(Register::RDX, g2.indirect_reg.reg);
-        ASSERT_EQ(82, g2.next_rip_offset);
+        ASSERT_EQ(0xcbbce1, g2.address);
+        ASSERT_EQ(IndirectType::CALL, g2.indirect_type);
+        ASSERT_EQ(Register::R11, g2.push_reg.reg);
+        ASSERT_EQ(Register::R13, g2.indirect_reg.reg);
+        ASSERT_EQ(72, g2.next_rip_offset);
 
         auto& g3 = pivots.pop_rsps[0];
-        ASSERT_EQ(0x19213e5, g3.address);
-        ASSERT_EQ(8, g3.stack_change_before_rsp);
-        ASSERT_EQ(0, g3.next_rip_offset);
+        ASSERT_EQ(0x12c7be, g3.address);
+        ASSERT_EQ(0, g3.stack_change_before_rsp);
+        ASSERT_EQ(8, g3.next_rip_offset);
     }
 };

