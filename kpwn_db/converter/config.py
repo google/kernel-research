@@ -25,6 +25,6 @@ rop_actions = {
     0x03: "switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
     0x04: "write_what_where_64(ARG_address, ARG_new_value)",
     0x05: "fork()",
-    0x06: "telefork(ARG_time_msec=5000)",
+    0x06: "telefork(ARG_sleep_msec=0xffffffff)",
     0x07: "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
 }

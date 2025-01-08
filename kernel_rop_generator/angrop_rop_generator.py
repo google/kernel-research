@@ -412,7 +412,7 @@ class RopGeneratorAngrop:
 
         return RopAction(
           type_id=0x06,
-          description="telefork(ARG_time_msec=5000)",
+          description="telefork(ARG_sleep_msec)",
           gadgets=items)
 
     def rop_action_write_what_where_64(self, address, value):

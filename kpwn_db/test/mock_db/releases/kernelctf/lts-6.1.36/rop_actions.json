@@ -110,7 +110,7 @@
     },
     {
         "type_id": 6,
-        "description": "telefork(ARG_time_msec=5000)",
+        "description": "telefork(ARG_sleep_msec=0xffffffff)",
         "gadgets": [
             {
                 "kernel_offset": 1632512,
