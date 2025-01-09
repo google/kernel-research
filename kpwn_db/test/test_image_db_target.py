@@ -1,11 +1,11 @@
-"""Contains tests for the Target class."""
+"""Tests for the ImageDbTarget class."""
 
 import unittest
 from converter.image_db_target import ImageDbTarget
 from test.utils import RELEASES_DIR
 
-class TargetTests(unittest.TestCase):
-  """Tests for the Target class."""
+class ImageDbTargetTests(unittest.TestCase):
+  """Tests for the ImageDbTarget class."""
 
   def setUp(self):
     super().setUp()

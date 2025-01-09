@@ -12,51 +12,8 @@ sys.path.append(KPWN_DB_DIR)
 from data_model.db import Db
 from data_model.meta import MetaConfig
 import converter.config as config
+from converter.image_db_utils import get_targets_from_image_db
 from converter.kpwn_writer import KpwnWriter
-from converter.image_db_target import ImageDbTarget
-from converter.utils import list_dirs
-from converter.utils import natural_sort_key
-
-def collect_targets(releases_dir, release_filter=None):
-  targets = []
-  for distro in list_dirs(releases_dir):
-    for release_name in list_dirs(f"{releases_dir}/{distro}"):
-      full_name = f"{distro}/{release_name}"
-      if release_filter and not re.search(release_filter, full_name):
-        continue
-
-      target = ImageDbTarget(distro, release_name, f"{releases_dir}/{full_name}")
-      targets.append(target)
-  return targets
-
-
-def get_db_from_image_db(image_db_path, release_filter, logger):
-  logger.info("Collecting targets...\n")
-  db_targets = collect_targets(f"{image_db_path}/releases", release_filter)
-  db_targets.sort(key=lambda t: natural_sort_key(str(t)))
-
-  targets_with_missing_files = [t for t in db_targets if t.missing_files]
-  if targets_with_missing_files:
-    error_msg = "The following targets will be skipped as some of the " \
-                "required files are missing:\n"
-    for target in targets_with_missing_files:
-      error_msg += f" - {target.distro}/{target.release_name}: " \
-                   f"{', '.join(target.missing_files)}\n"
-    logger.error(error_msg)
-
-  valid_targets = [t for t in db_targets if not t.missing_files]
-  meta_config = MetaConfig.from_desc(config.symbols, config.rop_actions)
-
-  targets = []
-  for db_target in valid_targets:
-    logger.info(f"Processing target: {db_target}")
-    try:
-      targets.append(db_target.process(meta_config))
-    except Exception:
-      logger.error(f"Failed processing target: {traceback.format_exc()}")
-
-  logger.info(f"Processed {len(targets)} targets.")
-  return Db(meta_config, targets)
 
 
 def main():
@@ -76,8 +33,10 @@ def main():
   logger.setLevel(getattr(logging, args.log_level))
   logger.addHandler(logging.StreamHandler())
 
-  db = get_db_from_image_db(args.kernel_image_db_path, args.release_filter, logger)
-  KpwnWriter(db).write_to_file(args.output_path)
+  meta = MetaConfig.from_desc(config.symbols, config.rop_actions)
+  targets = get_targets_from_image_db(meta, args.kernel_image_db_path, args.release_filter, logger)
+  db = Db(meta, targets)
+  KpwnWriter(db).write_to_file(args.output_file)
 
 if __name__ == "__main__":
   main()
