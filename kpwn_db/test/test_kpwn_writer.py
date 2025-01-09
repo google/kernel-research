@@ -1,14 +1,13 @@
 """Contains tests for KpwnWriter."""
 
-import types
 import unittest
 from converter.binary_writer import BinaryWriter
+from converter.image_db_target import ImageDbTarget
 from converter.kpwn_writer import KpwnWriter
 from converter.kpwn_writer import SymbolWriter
-from converter.image_db_target import ImageDbTarget
 from data_model.db import Db
 from data_model.meta import MetaConfig
-from .utils import *
+from test.utils import RELEASES_DIR
 
 def expect(expected, actual):
   for i in range(min(len(expected), len(actual))):

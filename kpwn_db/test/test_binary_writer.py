@@ -4,7 +4,6 @@ import contextlib
 import unittest
 from converter.binary_writer import BinaryWriter
 
-
 class BinaryWriterTests(unittest.TestCase):
   """Tests for the BinaryWriter class."""
 

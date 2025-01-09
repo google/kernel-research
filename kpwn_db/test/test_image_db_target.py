@@ -1,9 +1,8 @@
 """Contains tests for the Target class."""
 
 import unittest
-from .utils import *
 from converter.image_db_target import ImageDbTarget
-
+from test.utils import RELEASES_DIR
 
 class TargetTests(unittest.TestCase):
   """Tests for the Target class."""
