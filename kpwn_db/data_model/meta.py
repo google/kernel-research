@@ -10,13 +10,8 @@ class SymbolMeta():
 @dataclass
 class RopActionArg():
   name: str
-  default_value: Optional[int] = None
-  required: bool = True  # Calculated field
-
-  # Post-init to set required based on default_value
-  def __init__(self, **data):
-    super().__init__(**data)
-    self.required = self.default_value is None
+  required: bool
+  default_value: Optional[int]
 
 @dataclass
 class RopActionMeta():
@@ -29,10 +24,8 @@ class RopActionMeta():
     ARG_PATTERN = r"ARG_([a-z0-9_]+)(?:=(0x[0-9a-fA-F]+|[0-9]+))?"
     args = []
     for name, default_value in re.findall(ARG_PATTERN, desc):
-      args.append(
-          RopActionArg(
-              name=name,
-              default_value=int(default_value, 0) if default_value else None))
+      args.append(RopActionArg(name, not default_value,
+        int(default_value, 0) if default_value else None))
     return cls(type_id=type_id, desc=desc, args=args)
 
 @dataclass

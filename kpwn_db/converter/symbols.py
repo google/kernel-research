@@ -1,3 +1,5 @@
+from data_model.meta import SymbolMeta
+
 class SymbolWriter:
   """Helper class to handle symbol writing to the db."""
 
@@ -15,3 +17,21 @@ class SymbolWriter:
     for meta in self.symbols_meta:
       wr_target.u4(target.symbols.get(meta.name, 0))
 
+
+class SymbolReader:
+  """Helper class to handle symbol reading from the db."""
+
+  def __init__(self):
+    self.meta = []
+
+  def read_meta(self, reader):
+    len_ = reader.u4()
+    for _ in range(len_):
+      r = reader.struct()
+      type_id = r.u4()
+      name = r.zstr_u2()
+      self.meta.append(SymbolMeta(type_id, name))
+    return self.meta
+
+  def read_target(self, reader):
+    return {s.name: reader.u4() for s in self.meta}

@@ -1,7 +1,7 @@
 """Classes handling ROP Action related logic."""
 
-import math
-from data_model.rop_chain import RopChainConstant, RopChainOffset, RopChainArgument
+from data_model.meta import RopActionArg, RopActionMeta
+from data_model.rop_chain import RopChainConstant, RopChainOffset, RopChainArgument, RopAction
 
 class RopActionWriter:
   """Helper class to handle ROP Action writing to the db."""
@@ -40,3 +40,42 @@ class RopActionWriter:
             wr.varuint(0x02 | (item.argument_index << 2))
           else:
             raise TypeError("Unknown RopChainItem type")
+
+class RopActionReader:
+  """Helper class to handle ROP Action parsing from the db."""
+
+  def read_meta(self, r_hdr):
+    self.meta = []
+    for _ in range(r_hdr.u4()):
+      r = r_hdr.struct()
+      type_id = r.u4()
+      desc = r.zstr_u2()
+
+      args = []
+      for _ in range(r.u1()):
+        name = r.zstr_u2()
+        flags = r.u1()
+        required = (flags & 0x01) != 0x00
+        default_value = r.u8() if not required else None
+        args.append(RopActionArg(name, required, default_value))
+
+      self.meta.append(RopActionMeta(type_id, desc, args))
+    return self.meta
+
+  def read_target(self, r_target):
+    item_types = [RopChainConstant, RopChainOffset, RopChainArgument]
+    actions = []
+    for ra_meta in self.meta:
+      r = r_target.struct()
+      if not r: continue
+
+      items = []
+      for _ in range(r.varuint()):
+        type_and_value = r.varuint()
+        type_ = type_and_value & 0x03
+        value = type_and_value >> 2
+        if type_ >= len(item_types):
+            raise TypeError(f"Unknown RopChainItem type ({type_})")
+        items.append(item_types[type_](value))
+      actions.append(RopAction(ra_meta.type_id, ra_meta.desc, items))
+    return actions

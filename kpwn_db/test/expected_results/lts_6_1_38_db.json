@@ -1,0 +1,173 @@
+{
+    "meta": {
+        "symbols": [
+            {
+                "type_id": 16777217,
+                "name": "prepare_kernel_cred"
+            },
+            {
+                "type_id": 16777218,
+                "name": "commit_creds"
+            },
+            {
+                "type_id": 16777219,
+                "name": "find_task_by_vpid"
+            },
+            {
+                "type_id": 16777220,
+                "name": "switch_task_namespaces"
+            },
+            {
+                "type_id": 16777221,
+                "name": "__x64_sys_fork"
+            },
+            {
+                "type_id": 16777222,
+                "name": "msleep"
+            },
+            {
+                "type_id": 33554433,
+                "name": "init_nsproxy"
+            },
+            {
+                "type_id": 50331649,
+                "name": "anon_pipe_buf_ops"
+            }
+        ],
+        "rop_actions": [
+            {
+                "type_id": 1,
+                "desc": "msleep(ARG_time_msec)",
+                "args": [
+                    {
+                        "name": "time_msec",
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "type_id": 2,
+                "desc": "commit_kernel_cred(prepare_kernel_cred(0))",
+                "args": []
+            },
+            {
+                "type_id": 3,
+                "desc": "switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
+                "args": []
+            },
+            {
+                "type_id": 4,
+                "desc": "write_what_where_64(ARG_address, ARG_new_value)",
+                "args": [
+                    {
+                        "name": "address",
+                        "required": true
+                    },
+                    {
+                        "name": "new_value",
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "type_id": 5,
+                "desc": "fork()",
+                "args": []
+            },
+            {
+                "type_id": 6,
+                "desc": "telefork(ARG_sleep_msec=0xffffffff)",
+                "args": [
+                    {
+                        "name": "sleep_msec",
+                        "required": false,
+                        "default_value": 4294967295
+                    }
+                ]
+            },
+            {
+                "type_id": 7,
+                "desc": "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+                "args": [
+                    {
+                        "name": "user_rip",
+                        "required": true
+                    },
+                    {
+                        "name": "user_cs",
+                        "required": true
+                    },
+                    {
+                        "name": "user_rflags",
+                        "required": true
+                    },
+                    {
+                        "name": "user_sp",
+                        "required": true
+                    },
+                    {
+                        "name": "user_ss",
+                        "required": true
+                    }
+                ]
+            }
+        ]
+    },
+    "targets": [
+        {
+            "distro": "kernelctf",
+            "release_name": "lts-6.1.38",
+            "version": "KernelCTF version 6.1.38 (...)",
+            "symbols": {
+                "prepare_kernel_cred": 0,
+                "commit_creds": 0,
+                "find_task_by_vpid": 0,
+                "switch_task_namespaces": 0,
+                "__x64_sys_fork": 0,
+                "msleep": 0,
+                "init_nsproxy": 0,
+                "anon_pipe_buf_ops": 0
+            },
+            "rop_actions": [],
+            "stack_pivots": {
+                "one_gadgets": [
+                    {
+                        "address": 1337,
+                        "instructions": [],
+                        "pivot_reg": "rbp",
+                        "used_offsets": [
+                            1,
+                            -2,
+                            3
+                        ],
+                        "next_rip_offset": 8
+                    }
+                ],
+                "push_indirects": [
+                    {
+                        "address": 1234,
+                        "instructions": [],
+                        "indirect_type": "call",
+                        "push_register": "r10",
+                        "used_offsets_in_push": [
+                            -10
+                        ],
+                        "indirect_register": "rax",
+                        "used_offsets_in_indirect_reg": [
+                            20
+                        ],
+                        "next_rip_offset": -16
+                    }
+                ],
+                "pop_rsps": [
+                    {
+                        "address": 9876,
+                        "instructions": [],
+                        "stack_change_before_rsp": 8,
+                        "next_rip_offset": 16
+                    }
+                ]
+            }
+        }
+    ]
+}

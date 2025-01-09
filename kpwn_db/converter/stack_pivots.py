@@ -1,9 +1,9 @@
-REGISTER_ENUM = {"rax":  0, "rbx":  1, "rcx":  2, "rdx":  3,
-                 "rsi":  4, "rdi":  5, "rbp":  6, "rsp":  7,
-                 "r8":   8, "r9":   9, "r10": 10, "r11": 11,
-                 "r12": 12, "r13": 13, "r14": 14, "r15": 15 }
+from data_model.pivots import OneGadgetPivot, PushIndirectPivot, PopRspPivot, Pivots
 
-INDIRECT_TYPE_ENUM = {"jmp": 0, "call": 1}
+REGISTERS = ["rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp",
+             "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"]
+
+INDIRECT_TYPES = ["jmp", "call"]
 
 KERNEL_BASE_ADDRESS = 0xffffffff81000000
 
@@ -25,16 +25,16 @@ class StackPivotWriter:
 
       for g in wr_list(pivots.one_gadgets):
         write_address(g)
-        wr.varuint(REGISTER_ENUM[g.pivot_reg])
+        wr.varuint(REGISTERS.index(g.pivot_reg))
         write_int_list(g.used_offsets)
         wr.varsint(g.next_rip_offset)
 
       for g in wr_list(pivots.push_indirects):
         write_address(g)
-        wr.varuint(INDIRECT_TYPE_ENUM[g.indirect_type])
-        wr.varuint(REGISTER_ENUM[g.push_register])
+        wr.varuint(INDIRECT_TYPES.index(g.indirect_type))
+        wr.varuint(REGISTERS.index(g.push_register))
         write_int_list(g.used_offsets_in_push)
-        wr.varuint(REGISTER_ENUM[g.indirect_register])
+        wr.varuint(REGISTERS.index(g.indirect_register))
         write_int_list(g.used_offsets_in_indirect_reg)
         wr.varsint(g.next_rip_offset)
 
@@ -42,3 +42,40 @@ class StackPivotWriter:
         write_address(g)
         wr.varuint(g.stack_change_before_rsp)
         wr.varsint(g.next_rip_offset)
+
+class StackPivotReader:
+  def read_target(self, r_target):
+    p = Pivots()
+
+    def read_int_list():
+      result = []
+      for _ in range(r.varuint()):
+        result.append(r.varsint())
+      return result
+
+    r = r_target.struct()
+    for _ in range(r.varuint()):
+      address = r.varuint()
+      pivot_reg = REGISTERS[r.varuint()]
+      used_offsets = read_int_list()
+      next_rip_offset = r.varsint()
+      p.one_gadgets.append(OneGadgetPivot(address, [], pivot_reg, used_offsets, next_rip_offset))
+
+    for _ in range(r.varuint()):
+      address = r.varuint()
+      indirect_type = INDIRECT_TYPES[r.varuint()]
+      push_register = REGISTERS[r.varuint()]
+      used_offsets_in_push = read_int_list()
+      indirect_register = REGISTERS[r.varuint()]
+      used_offsets_in_indirect_reg = read_int_list()
+      next_rip_offset = r.varsint()
+      p.push_indirects.append(PushIndirectPivot(address, [], indirect_type, push_register, used_offsets_in_push,
+        indirect_register, used_offsets_in_indirect_reg, next_rip_offset))
+
+    for _ in range(r.varuint()):
+      address = r.varuint()
+      stack_change_before_rsp = r.varuint()
+      next_rip_offset = r.varsint()
+      p.pop_rsps.append(PopRspPivot(address, [], stack_change_before_rsp, next_rip_offset))
+
+    return p
