@@ -11,7 +11,7 @@ class SymbolMeta():
 class RopActionArg():
   name: str
   required: bool
-  default_value: Optional[int]
+  default_value: Optional[int] = None
 
 @dataclass
 class RopActionMeta():
