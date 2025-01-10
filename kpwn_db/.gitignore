@@ -1,1 +1,3 @@
-target_db.kpwn
+*db*.kpwn
+*db*.json
+*db*.yaml
