@@ -66,14 +66,31 @@ struct TargetDbTests: TestSuite {
 
     TEST_METHOD(ropActionsLts6181, "rop actions are correct (lts-6.1.81)") {
         auto target = getLts6181();
-        auto& msleep = target.rop_actions[RopActionId::MSLEEP];
-        ASSERT_EQ(3, msleep.size());
-        ASSERT_EQ(RopItemType::SYMBOL, msleep[0].type);
-        ASSERT_EQ(0x21f5 /* POP_RDI */, msleep[0].value);
-        ASSERT_EQ(RopItemType::ARGUMENT, msleep[1].type);
-        ASSERT_EQ(0, msleep[1].value);
-        ASSERT_EQ(RopItemType::SYMBOL, msleep[2].type);
-        ASSERT_EQ(0x227a50 /* MSLEEP */, msleep[2].value);
+
+        auto& telefork = target.rop_actions[RopActionId::TELEFORK];
+        ASSERT_EQ(4, telefork.size());
+        ASSERT_EQ(RopItemType::SYMBOL, telefork[0].type);
+        ASSERT_EQ(0x18f0d0 /* FORK */, telefork[0].value);
+        ASSERT_EQ(RopItemType::SYMBOL, telefork[1].type);
+        ASSERT_EQ(0x21f5 /* POP_RDI */, telefork[1].value);
+        ASSERT_EQ(RopItemType::ARGUMENT, telefork[2].type);
+        ASSERT_EQ(0, telefork[2].value);
+        ASSERT_EQ(RopItemType::SYMBOL, telefork[3].type);
+        ASSERT_EQ(0x227a50 /* MSLEEP */, telefork[3].value);
+    }
+
+    TEST_METHOD(ropChainLts6181, "rop chain generation is correct (lts-6.1.81)") {
+        auto target = getLts6181();
+
+        auto kaslr_base = 0x100000000ul;
+        RopChain rop(kaslr_base);
+        target.AddRopAction(rop, RopActionId::TELEFORK, { 5000 });
+
+        ASSERT_EQ(4, rop.items_.size());
+        ASSERT_EQ(kaslr_base + 0x18f0d0 /* FORK */, rop.items_[0]);
+        ASSERT_EQ(kaslr_base + 0x21f5 /* POP_RDI */, rop.items_[1]);
+        ASSERT_EQ(5000 /* time_msec */, rop.items_[2]);
+        ASSERT_EQ(kaslr_base + 0x227a50 /* MSLEEP */, rop.items_[3]);
     }
 
     TEST_METHOD(pivotsLts6181, "stack pivots are correct (lts-6.1.81)") {

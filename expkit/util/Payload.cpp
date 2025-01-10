@@ -56,8 +56,8 @@ public:
         std::memcpy(&data_[offset], src, len);
     }
 
-    void Set(uint64_t offset, std::vector<uint8_t>& bytes) {
-        Set(offset, bytes.data(), bytes.size());
+    void Set(uint64_t offset, const std::vector<uint8_t>& bytes) {
+        Set(offset, (void*) bytes.data(), bytes.size());
     }
 
     void Set(uint64_t offset, uint32_t value) {

