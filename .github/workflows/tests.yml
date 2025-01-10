@@ -1,0 +1,41 @@
+name: Run tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions: {}
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Linux package prerequisites
+        run: sudo apt-get update && sudo apt install -yq --no-install-recommends build-essential flex bison bc ca-certificates libelf-dev libssl-dev cpio pahole qemu-system-x86 libkeyutils-dev
+
+      - name: Install tool prerequisites
+        run: |
+          cd kpwn_db
+          pip install -r requirements.txt
+
+      - name: Download cached kpwn module # to skip compilation and speedup tests
+        run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v1.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
+
+      - name: Test kpwn_db
+        working-directory: ./kpwn_db
+        run: ./test.sh
+
+      - name: Test expkit (QEMU)
+        working-directory: ./expkit
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh
+
+      - name: Test expkit samples
+        working-directory: ./expkit
+        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop test

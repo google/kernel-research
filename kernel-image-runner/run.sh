@@ -57,15 +57,15 @@ if [ -z "$RELEASE_NAME" ]; then
     exit 1
 fi
 
-$SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules"
+$SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules" 1>&2
 
 ARGS="$VMLINUZ"
 if [ "$GDB" == "1" ]; then ARGS+=" --gdb"; fi
 if [ "$SNAPSHOT" == "1" ]; then ARGS+=" --snapshot"; fi
 if [ -d "$MODULES_PATH" ]; then ARGS+=" --modules-path=$MODULES_PATH"; fi
 
-if [ "$CUSTOM_MODULES" != "keep" ]; then
-    $SCRIPT_DIR/compile_custom_modules.sh "$DISTRO" "$RELEASE_NAME" "$CUSTOM_MODULES"
+if [ "$CUSTOM_MODULES" != "keep" ] && [ -z "$CUSTOM_MODULES_KEEP" ]; then
+    $SCRIPT_DIR/compile_custom_modules.sh "$DISTRO" "$RELEASE_NAME" "$CUSTOM_MODULES" 1>&2
 fi
 
 if [ ! -z "$CUSTOM_MODULES" ]; then ARGS+=" --custom-modules-tar=$RELEASE_DIR/custom_modules.tar"; fi

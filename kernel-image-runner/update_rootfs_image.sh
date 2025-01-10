@@ -51,7 +51,7 @@ regenerate_initramfs() {
     download_busybox_if_missing
     pushd $ROOTFS_DIR > /dev/null
     # if this "rm" line is removed then the file gets into an inconsistent state when run from multiple threads
-    rm ../$INITRAMFS || true
+    rm ../$INITRAMFS 2>/dev/null || true
     find . ! -name 'guestfish*' -print0 | cpio --owner 0:0 --null -ov --format=newc > ../$INITRAMFS 2>/dev/null
     popd > /dev/null
 }

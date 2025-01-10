@@ -1,5 +1,7 @@
 bin/
 dmesg.txt
-actual_results/
+tap_results.txt
+output.txt
+actual_results/*
 samples/**/exp
 samples/**/*.kpwn

