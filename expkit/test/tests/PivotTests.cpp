@@ -3,7 +3,6 @@
 #include <cstdio>
 #include "pivot/PivotFinder.cpp"
 #include "test/TestSuite.cpp"
-#include "test/TestUtils.cpp"
 #include "util/Payload.cpp"
 
 class PivotTests: public TestSuite {
@@ -11,7 +10,8 @@ public:
     PivotTests(): TestSuite("PivotTests", "kpwn db stack pivot tests") { }
 
     TEST_METHOD(findsPivotsForLts6181, "find all pivots for LTS 6.1.81") {
-        auto target = env->GetKpwnParser().GetTarget("kernelctf", "lts-6.1.81");
+        auto parser = KpwnParser::FromFile("test/artifacts/target_db_lts-6.1.81.kpwn");
+        auto target = parser.GetTarget("kernelctf", "lts-6.1.81");
         Payload p(128);
         for (int r = (int)Register::RAX; r <= (int)Register::R15; r++) {
             PivotFinder finder(target.pivots, (Register) r, p);
