@@ -26,7 +26,10 @@ def main():
                       help="Full file path to the source target_db.{kpwn,json,yaml}")
   parser.add_argument("-o", "--output-file", required=True,
                       help="Full file path to the destination target_db.{kpwn,json,yaml}")
-  parser.add_argument("--indent", type=int, default=None)
+  parser.add_argument("--indent", type=int, default=None,
+                      help="How much intendation to use in JSON output file")
+  parser.add_argument('--minimal', action=argparse.BooleanOptionalAction,
+                      help="Minimalize output kpwn size (skip well-known meta information)")
   parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="INFO",
                       help="Set the logging level.")
   args = parser.parse_args()
@@ -52,7 +55,7 @@ def main():
   targets = {str(t): t for t in targets}.values()
 
   db = Db(meta, targets)
-  write_kpwn_db(args.output_file, db, indent=args.indent)
+  write_kpwn_db(args.output_file, db, indent=args.indent, minimal=args.minimal)
 
 if __name__ == "__main__":
   main()

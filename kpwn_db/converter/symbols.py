@@ -6,11 +6,13 @@ class SymbolWriter:
   def __init__(self, symbols_meta):
     self.symbols_meta = symbols_meta
 
-  def write_meta(self, wr_hdr):
+  def write_meta(self, wr_hdr, minimal=False):
     wr_hdr.u4(len(self.symbols_meta))
     for meta in self.symbols_meta:
       with wr_hdr.struct() as wr_struct:
         wr_struct.u4(meta.type_id)    # type_id
+        if minimal:
+          continue
         wr_struct.zstr_u2(meta.name)  # name_len + name
 
   def write_target(self, wr_target, target):

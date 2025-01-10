@@ -9,11 +9,13 @@ class RopActionWriter:
   def __init__(self, rop_actions_meta):
     self.rop_actions_meta = rop_actions_meta
 
-  def write_meta(self, wr_hdr):
+  def write_meta(self, wr_hdr, minimal=False):
     wr_hdr.u4(len(self.rop_actions_meta))
     for ra in self.rop_actions_meta:
       with wr_hdr.struct() as wr:
         wr.u4(ra.type_id)                  # type_id
+        if minimal:
+          continue
         wr.zstr_u2(ra.desc)                # desc_len + desc
 
         wr.u1(len(ra.args))                # num_args

@@ -29,11 +29,11 @@ def read_kpwn_db(fn):
     case _:
       raise Exception(f"Unsupported file extension '{ext}'. Only .kpwn, .json and .yaml are supported.")
 
-def write_kpwn_db(fn, db, indent=None):
+def write_kpwn_db(fn, db, indent=None, minimal=False):
   _, ext = os.path.splitext(fn)
   match ext:
     case ".kpwn":
-      KpwnWriter(db).write_to_file(fn)
+      KpwnWriter(db).write_to_file(fn, minimal)
     case ".json":
       with open(fn, "wt") as f:
         f.write(to_json(db, indent=indent))
