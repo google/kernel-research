@@ -68,6 +68,7 @@ PIVOT_REGISTER_NAMES = [
     'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', 'r15'
 ]
 
+MAX_SHIFT = 0x200
 
 class PivotFinder:
     def __init__(self, rop_gadget_backend) -> None:
@@ -352,6 +353,57 @@ class PivotFinder:
         if rip_offset_range & write_offsets:
             raise BadPivot("Memory write collides with next rip")
 
+    def _check_for_shift_gadget(self, address, gadget):
+        """
+        Checks if the gadget is a stack shifting gadget.
+        Uses strict checks which only match a few instructions.
+        Does not track clobbered registers.
+
+        add rsp, 0x20; ret;  -> ret_offset 0x20; total_shift 0x28
+        retn 0x10; -> ret_offset 0, total_shift 0x18
+        pop rax; pop rdi; pop rsi; ret -> ret_offset 0x18, total_shift 0x20
+        """
+
+        total_shift = 0
+        ret_offset = None
+
+        if gadget[-1] != "ret" and not gadget[-1].startswith("retn"):
+            return None
+
+        # all instructions must be one of: pop, add rsp, ret, retn
+        for inst in gadget:
+            if (match := re.match(r"pop\s+([a-z0-9]+)", inst)) is not None:
+                reg = match.group(1)
+                # special registers should not be used
+                if reg not in BASE_REGISTER_NAMES or reg == "rsp":
+                    return None
+                total_shift += 8
+            elif (match := re.match(r"add rsp, (0x[0-9a-fA-F]+)", inst)) is not None:
+                val = int(match.group(1), 0)
+                if val % 8 != 0 or val < 0:
+                    return None
+                total_shift += val
+            elif (match := re.match(r"retn (0x[0-9a-fA-F]+)", inst)) is not None:
+                val = int(match.group(1), 0)
+                if val % 8 != 0:
+                    return None
+                ret_offset = total_shift
+                total_shift += val+8
+            elif inst == "ret" or inst == "retn":
+                ret_offset = total_shift
+                total_shift += 8
+            else:
+                # invalid stack shift pivot
+                return None
+
+        # sanity check
+        assert 0 <= ret_offset < total_shift
+
+        if total_shift >= MAX_SHIFT:
+            return None
+
+        return StackShift(address, gadget, ret_offset, total_shift)
+
     def _try_match_poprsp_pivot(self, address, gadget):
         """
         After finding a gadget which starts with a pop
@@ -480,7 +532,7 @@ class PivotFinder:
         if jump_reg not in PIVOT_REGISTER_NAMES:
             raise BadPivot("Indirect register not allowlisted")
 
-        if offset < -0x80 or offset >= 0x200:
+        if offset < -0x80 or offset >= MAX_SHIFT:
             # These offsets are arbitrary
             raise BadPivot("Indirect gadget has large offset")
 
@@ -519,6 +571,10 @@ class PivotFinder:
         """
         first_inst = gadget[0]
         last_inst = gadget[-1]
+
+        # check for stack shifts
+        if (stack_shift := self._check_for_shift_gadget(address, gadget)) is not None:
+            return stack_shift
 
         # check if first instruction is a single pivot instruction
         for pattern in SINGLE_INSTRUCTION_PIVOT_PATTERNS:

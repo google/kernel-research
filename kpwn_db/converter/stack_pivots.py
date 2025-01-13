@@ -1,4 +1,4 @@
-from data_model.pivots import OneGadgetPivot, PushIndirectPivot, PopRspPivot, Pivots
+from data_model.pivots import OneGadgetPivot, PushIndirectPivot, PopRspPivot, StackShift, Pivots
 
 REGISTERS = ["rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp",
              "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"]
@@ -43,6 +43,11 @@ class StackPivotWriter:
         wr.varuint(g.stack_change_before_rsp)
         wr.varsint(g.next_rip_offset)
 
+      for g in wr_list(pivots.stack_shifts):
+        write_address(g)
+        wr.varuint(g.ret_offset)
+        wr.varuint(g.shift_amount)
+
 class StackPivotReader:
   def read_target(self, r_target):
     p = Pivots()
@@ -78,4 +83,11 @@ class StackPivotReader:
       next_rip_offset = r.varsint()
       p.pop_rsps.append(PopRspPivot(address, [], stack_change_before_rsp, next_rip_offset))
 
+    for _ in range(r.varuint()):
+      address = r.varuint()
+      ret_offset = r.varuint()
+      shift_amount = r.varuint()
+      p.stack_shifts.append(StackShift(address, [], ret_offset, shift_amount))
+
     return p
+

@@ -13,6 +13,21 @@ class Pivot:
     raise NotImplementedError
 
 @dataclass
+class StackShift(Pivot):
+    """
+    This pivot shifts the stack pointer by a specified amount.
+    Examples include:
+        add rsp, 0x10; ret
+        retn 0x10;
+    """
+    ret_offset: int  # Offset of the return address
+    shift_amount: int # The amount by which the stack pointer is shifted]
+
+    def debug_print(self):
+        print("StackShift: ", self.ret_offset, self.shift_amount)
+        print(self.instructions)
+
+@dataclass
 class OneGadgetPivot(Pivot):
   """
   This pivot doesn't need to be paired with other pivots. 
@@ -64,6 +79,7 @@ class Pivots:
   one_gadgets: List[OneGadgetPivot] = field(default_factory=list)
   push_indirects: List[PushIndirectPivot] = field(default_factory=list)
   pop_rsps: List[PopRspPivot] = field(default_factory=list)
+  stack_shifts: List[StackShift] = field(default_factory=list)
 
   def append(self, pivot):
     if isinstance(pivot, OneGadgetPivot):
@@ -72,6 +88,10 @@ class Pivots:
       self.push_indirects.append(pivot)
     elif isinstance(pivot, PopRspPivot):
       self.pop_rsps.append(pivot)
+    elif isinstance(pivot, StackShift):
+      self.stack_shifts.append(pivot)
+    else:
+      raise ValueError("Unexpected type")
 
   def combined_list(self):
-    return self.one_gadgets + self.push_indirects + self.pop_rsps
+    return self.one_gadgets + self.push_indirects + self.pop_rsps + self.stack_shifts

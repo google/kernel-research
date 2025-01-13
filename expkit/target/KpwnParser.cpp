@@ -127,6 +127,17 @@ protected:
             target.pivots.pop_rsps.push_back(pivot);
         }
 
+        auto num_stack_shifts = ReadUInt();
+        DebugLog("ParsePivots(): num_stack_shifts = %u", num_stack_shifts);
+        for (int i = 0; i < num_stack_shifts; i++) {
+            StackShiftPivot pivot;
+            pivot.address = ReadUInt();
+            pivot.ret_offset = ReadUInt();
+            pivot.shift_amount = ReadUInt();
+            target.pivots.stack_shifts.push_back(pivot);
+            DebugLog("stack_shift[%u]: address=0x%x, ret_offset=%u, shift_amount=%d", i, pivot.address, pivot.ret_offset, pivot.shift_amount);
+        }
+
         EndStruct();
     }
 

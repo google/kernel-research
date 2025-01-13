@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <optional>
 #include "pivot/Pivots.cpp"
 #include "pivot/StackPivot.cpp"
@@ -70,6 +71,32 @@ public:
 
     std::vector<StackPivot> FindAll() {
         return Find(false);
+    }
+
+    std::optional<StackShiftPivot> FindShift(uint64_t min_shift, uint64_t upper_bound = std::numeric_limits<uint64_t>::max()) {
+        // copy for sorting
+        std::vector<StackShiftPivot> sorted_shifts = pivots_.stack_shifts;
+
+        // Sort pivots by shift_amount
+        std::sort(sorted_shifts.begin(), sorted_shifts.end(),
+                    [](const StackShiftPivot& a, const StackShiftPivot& b) {
+                    return a.shift_amount < b.shift_amount;
+                    });
+
+        // Find the minimum shift_amount >= min_shift
+        for (const auto &pivot : sorted_shifts)
+        {
+            // Only consider shifts which have the next rip in the last position for now
+            if (pivot.shift_amount >= min_shift &&
+                pivot.shift_amount < upper_bound &&
+                pivot.ret_offset == pivot.shift_amount - 8)
+            {
+                return pivot;
+            }
+        }
+
+        // No match found
+        return std::nullopt;
     }
 
     std::optional<StackPivot> Find() {

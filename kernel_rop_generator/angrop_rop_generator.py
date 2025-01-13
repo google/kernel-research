@@ -472,7 +472,7 @@ if __name__ == "__main__":
             action_fork,
             action_telefork,
             action_trampoline_ret,
-        ], args.json_indent, RopActions)
+        ], args.json_indent, RopActions))
     else:
         chain = rop_generator.build_rop_chain()
         payload_code = rop_generator.payload_c_code(chain)
