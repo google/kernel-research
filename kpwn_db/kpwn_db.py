@@ -24,12 +24,14 @@ def main():
                       help="Regex filter for which '{distro}/{release_name}' to be parsed")
   parser.add_argument("-i", "--input-file",
                       help="Full file path to the source target_db.{kpwn,json,yaml}")
-  parser.add_argument("-o", "--output-file", required=True,
+  parser.add_argument("-o", "--output-file", default=None,
                       help="Full file path to the destination target_db.{kpwn,json,yaml}")
   parser.add_argument("--indent", type=int, default=None,
                       help="How much intendation to use in JSON output file")
   parser.add_argument('--minimal', action=argparse.BooleanOptionalAction,
                       help="Minimalize output kpwn size (skip well-known meta information)")
+  parser.add_argument('--list-targets', action=argparse.BooleanOptionalAction, 
+                      help="List the targets in the database")
   parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="INFO",
                       help="Set the logging level.")
   args = parser.parse_args()
@@ -46,7 +48,7 @@ def main():
     meta = MetaConfig.from_desc(config.symbols, config.rop_actions)
     targets = []
   else:
-    return parser.error("at least one of --input-file and --kernel_image_db_path required")
+    return parser.error("at least one of --input-file or --kernel_image_db_path required")
 
   if args.kernel_image_db_path:
     targets += get_targets_from_image_db(meta, args.kernel_image_db_path, args.release_filter, logger)
@@ -55,7 +57,14 @@ def main():
   targets = {str(t): t for t in targets}.values()
 
   db = Db(meta, targets)
-  write_kpwn_db(args.output_file, db, indent=args.indent, minimal=args.minimal)
+
+  if args.list_targets:
+    for t in targets:
+      print(f"{t.distro}/{t.release_name}")
+  elif args.output_file:
+    write_kpwn_db(args.output_file, db, indent=args.indent, minimal=args.minimal)
+  else:
+    return parser.error("at least one of --output-file or --list-targets required")
 
 if __name__ == "__main__":
   main()
