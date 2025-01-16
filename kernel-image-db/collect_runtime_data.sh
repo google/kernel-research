@@ -16,6 +16,8 @@
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 RUNNER_DIR="$SCRIPT_DIR/../kernel-image-runner"
 
+cd $SCRIPT_DIR
+
 for RELEASE_DIR in releases/*/*; do
     RELEASE_DIR_PARTS=(${RELEASE_DIR//\// })
     DISTRO=${RELEASE_DIR_PARTS[1]}

@@ -1,6 +1,9 @@
 name: Run tests
 on:
   push:
+    paths:
+     - 'kpwn_db/**'
+     - 'expkit/**'
   pull_request:
   workflow_dispatch:
 permissions: {}

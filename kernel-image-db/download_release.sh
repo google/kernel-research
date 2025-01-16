@@ -20,6 +20,7 @@ KERNELCTF_BASE_URL="https://storage.googleapis.com/kernelctf-build/releases"
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
+    --only-db) ONLY_DB=1; shift;;
     --) # stop processing special arguments after "--"
         shift
         while [[ $# -gt 0 ]]; do ARGS+=("$1"); shift; done
@@ -32,7 +33,7 @@ done
 set -- "${ARGS[@]}"
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) (list|<release-name>) (vmlinuz|dbgsym|headers|modules|all)";
+    echo "Usage: $0 (kernelctf|ubuntu) (list|<release-name>) (vmlinuz|dbgsym|headers|modules|process|all)";
     exit 1;
 }
 
@@ -116,20 +117,23 @@ save() {
 }
 
 process_vmlinux() {
-    if [ ! -f "btf" ]; then
-        echo "Extracting pahole BTF information..."
-        pahole --btf_encode_detached btf vmlinux;
+    if [ "$ONLY_DB" == "" ]; then
+        if [ ! -f "btf" ]; then
+            echo "Extracting pahole BTF information..."
+            pahole --btf_encode_detached btf vmlinux;
+        fi
+
+        save btf.json                 "bpftool btf dump -j file btf"
+        save btf_formatted.json       "jq . btf.json"
+        save pahole.txt               "pahole vmlinux"
+        save .config                  "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
+        save rop_gadgets.txt          "ROPgadget --binary vmlinux"
+        save rop_gadgets_wo_jop.txt   "ROPgadget --nojop --binary vmlinux"
+        save rop_gadgets_filtered.txt "grep ' : \(pop\|cmp\|add rsp\|mov\|push\|xchg\|leave\).* ; ret$' rop_gadgets_wo_jop.txt"
+        save rp++.txt                 "rp++ -r 5 -f vmlinux"
     fi
 
-    save btf.json                 "bpftool btf dump -j file btf"
-    save btf_formatted.json       "jq . btf.json"
-    save pahole.txt               "pahole vmlinux"
     save symbols.txt              "nm vmlinux"
-    save .config                  "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
-    save rop_gadgets.txt          "ROPgadget --binary vmlinux"
-    save rop_gadgets_wo_jop.txt   "ROPgadget --nojop --binary vmlinux"
-    save rop_gadgets_filtered.txt "grep ' : \(pop\|cmp\|add rsp\|mov\|push\|xchg\|leave\).* ; ret$' rop_gadgets_wo_jop.txt"
-    save rp++.txt                 "rp++ -r 5 -f vmlinux"
     save rop_actions.json         "$SCRIPT_DIR/../kernel_rop_generator/angrop_rop_generator.py --output json --json-indent 4 vmlinux"
     save stack_pivots.json        "$SCRIPT_DIR/../kernel_rop_generator/pivot_finder.py --output json --json-indent 4 vmlinux"
 }
@@ -139,7 +143,7 @@ RELEASE_NAME="$2"
 DOWNLOAD_TYPE="$3"
 
 if [ -z "$DOWNLOAD_TYPE" ]; then DOWNLOAD_TYPE="all"; fi
-if [ "$DOWNLOAD_TYPE" = "all" ]; then DOWNLOAD_TYPE="vmlinuz,dbgsym,headers,modules"; fi
+if [ "$DOWNLOAD_TYPE" = "all" ]; then DOWNLOAD_TYPE="vmlinuz,dbgsym,headers,modules,process"; fi
 if [[ ! "$DISTRO" =~ ^(kernelctf|ubuntu)$ ]]; then usage; fi
 
 if [[ -z "$RELEASE_NAME" || "$RELEASE_NAME" == "list" ]]; then
@@ -231,7 +235,7 @@ case $DISTRO in
     usage ;;
 esac
 
-if [ -f "vmlinux" ]; then
+if [[ "$DOWNLOAD_TYPE" =~ "process" ]]; then
     process_vmlinux
 fi
 
