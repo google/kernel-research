@@ -25,7 +25,7 @@ gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kpwn db.kpwn
 
 # missing_releases = kernelctf_releases without db_releases and skipped_releases
 curl -s https://raw.githubusercontent.com/google/security-research/master/kernelctf/server/releases.yaml | grep -Eoh "^[^: ]*"  > kernelctf_releases.txt
-cat kernelctf_releases.txt | grep -v -f db_releases.txt | grep -v -f <(cat skipped_releases.txt | sed 's/\s*#.*//') > missing_releases.txt
+cat kernelctf_releases.txt | grep -v -f db_releases.txt | grep -v -f <(cat skipped_releases.txt | sed 's/\s*#.*//') || true > missing_releases.txt
 if [[ ! -s "missing_releases.txt" ]]; then echo "Nothing is missing from the database, exiting..."; exit 0; fi
 
 printf "The following releases missing from the DB, adding them now:\n\n"
