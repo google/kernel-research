@@ -4,7 +4,7 @@ exp: target_db.kpwn exp.cpp
 	g++ -static -I../.. -o exp exp.cpp
 
 target_db.kpwn:
-	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/latest_full.kpwn
+	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
 
 run: build
 	cp exp* ../../../kernel-image-runner/rootfs/
