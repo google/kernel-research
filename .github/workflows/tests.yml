@@ -36,6 +36,11 @@ jobs:
         working-directory: ./kpwn_db
         run: ./test.sh
 
+      - name: Test expkit (local tests only)
+        if: ${{ success() || failure() }}
+        working-directory: ./expkit
+        run: "make test && bin/test --test-suites StaticTests"
+
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit

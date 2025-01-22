@@ -15,6 +15,17 @@ class TestRunner {
     unique_ptr<TestLogger> logger_;
     TestEnvironment environment;
 
+    bool ShouldSkip(const std::string& class_name) {
+        if (!test_suite_filter_)
+            return false;
+
+        for (auto& filter : *test_suite_filter_)
+            if (class_name.find(filter) != std::string::npos)
+                return false;
+
+        return true;
+    }
+
 public:
     TestRunner(): logger_(new PrintfLogger()) { }
 
@@ -46,7 +57,7 @@ public:
 
         logger_->Begin(test_suites_, test_count);
         for (auto& testSuite : test_suites_) {
-            if (test_suite_filter_ && !contains(*test_suite_filter_, testSuite->class_name)) {
+            if (ShouldSkip(testSuite->class_name)) {
                 logger_->TestSuiteSkip(*testSuite, test_idx);
                 test_idx += testSuite->tests.size();
                 continue;

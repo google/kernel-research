@@ -10,7 +10,7 @@
 struct TargetDbTests: TestSuite {
     std::vector<uint8_t> kpwn_db_lts6181;
 
-    TargetDbTests(): TestSuite("TargetDbTests", "target.kpwn database tests") { }
+    TargetDbTests(): TestSuite("TargetDbStaticTests", "target.kpwn database tests") { }
 
     void init() {
         kpwn_db_lts6181 = read_file("test/artifacts/target_db_lts-6.1.81.kpwn");

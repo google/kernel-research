@@ -10,7 +10,7 @@
 
 class SymbolsTest: public TestSuite {
 public:
-    SymbolsTest(): TestSuite("SymbolsTest", "kpwn db symbols tests") { }
+    SymbolsTest(): TestSuite("SymbolsRuntimeTest", "kpwn db symbols tests") { }
 
     TEST_METHOD(symbolsCheck, "check if the database contains the correct symbols") {
         auto kaslr_base = env->GetKpwn().KaslrLeak();

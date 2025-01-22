@@ -7,7 +7,7 @@
 
 class PivotTests: public TestSuite {
 public:
-    PivotTests(): TestSuite("PivotTests", "kpwn db stack pivot tests") { }
+    PivotTests(): TestSuite("PivotStaticTests", "stack pivot static tests") { }
 
     TEST_METHOD(findsPivotsForLts6181, "find all pivots for LTS 6.1.81") {
         auto parser = KpwnParser::FromFile("test/artifacts/target_db_lts-6.1.81.kpwn");
@@ -22,6 +22,27 @@ public:
             Log("");
         }
     }
+
+    TEST_METHOD(findsPivotForAllKernelCtfReleases, "finds the right pivots via RDI and RSI for all kernelCTF releases") {
+        auto parser = KpwnParser::FromFile("test/artifacts/kernelctf.kpwn");
+        auto targets = parser.GetAllTargets();
+        if (targets.empty())
+            Error("The database does not contain any targets.");
+
+        for (auto target : targets) {
+            for (auto buf_reg : std::vector<Register>{ Register::RDI, Register::RSI }) {
+                Payload p(128);
+                PivotFinder finder(target.pivots, buf_reg, p);
+                if (!finder.Find().has_value())
+                    Error("could not find stack pivot via %s register for target %s/%s", register_names[(int)buf_reg], target.distro.c_str(), target.release_name.c_str());
+            }
+        }
+    }
+};
+
+class PivotKpwnTests: public TestSuite {
+public:
+    PivotKpwnTests(): TestSuite("PivotRuntimeTests", "stack pivot runtime tests") { }
 
     TEST_METHOD(pivotWinTargetTest, "call win_target via stack pivot") {
         Payload p(128);
@@ -43,21 +64,5 @@ public:
         kpwn.CallAddr(kaslr + pivot.GetGadgetOffset(), { { buf_reg, buf_addr } });
         kpwn.CheckWin();
         kpwn.Kfree(buf_addr);
-    }
-
-    TEST_METHOD(findsPivotForAllKernelCtfReleases, "finds the right pivots via RDI and RSI for all kernelCTF releases") {
-        auto parser = KpwnParser::FromFile("test/artifacts/kernelctf.kpwn");
-        auto targets = parser.GetAllTargets();
-        if (targets.empty())
-            Error("The database does not contain any targets.");
-
-        for (auto target : targets) {
-            for (auto buf_reg : std::vector<Register>{ Register::RDI, Register::RSI }) {
-                Payload p(128);
-                PivotFinder finder(target.pivots, buf_reg, p);
-                if (!finder.Find().has_value())
-                    Error("could not find stack pivot via %s register for target %s/%s", register_names[(int)buf_reg], target.distro.c_str(), target.release_name.c_str());
-            }
-        }
     }
 };
