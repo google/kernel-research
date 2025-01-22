@@ -10,7 +10,7 @@
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;
 public:
-    KpwnTests(): TestSuite("KpwnTests", "kpwn kernel module tests") { }
+    KpwnTests(): TestSuite("KpwnRuntimeTests", "kpwn kernel module tests") { }
 
     void init() {
         kpwn_ = &env->GetKpwn();

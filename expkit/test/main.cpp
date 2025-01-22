@@ -28,6 +28,7 @@ public:
         runner_.Add(new KpwnTests());
         runner_.Add(new SymbolsTest());
         runner_.Add(new PivotTests());
+        runner_.Add(new PivotKpwnTests());
 
         runner_.SetSuiteFilter(args_.getListOption("test-suites"));
         runner_.SetTargetDbPath(args_.getOption("target-db").value_or("test/artifacts/targets.kpwn"));
