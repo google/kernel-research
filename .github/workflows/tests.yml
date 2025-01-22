@@ -32,13 +32,16 @@ jobs:
         run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v1.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
 
       - name: Test kpwn_db
+        if: ${{ success() || failure() }}
         working-directory: ./kpwn_db
         run: ./test.sh
 
       - name: Test expkit (QEMU)
+        if: ${{ success() || failure() }}
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh
 
       - name: Test expkit samples
+        if: ${{ success() || failure() }}
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop test
