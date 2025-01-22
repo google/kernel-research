@@ -24,8 +24,10 @@ struct TestSuite: ILog {
     std::string desc;
     std::vector<Test> tests;
     std::vector<std::string> logs;
+    std::vector<std::string> errors;
     TestEnvironment* env;
     Test* current_test;
+    bool had_errors = false;
 
     TestSuite() {}
     TestSuite(std::string class_name, std::string desc): class_name(class_name), desc(desc) { }
@@ -37,6 +39,13 @@ struct TestSuite: ILog {
         va_list args;
         va_start(args, format);
         logs.push_back(format_str(format, args));
+    }
+
+    void Error(const char* format, ...) {
+        va_list args;
+        va_start(args, format);
+        logs.push_back(format_str(format, args));
+        had_errors = true;
     }
 
     Test& RegisterTest(Test test) {
@@ -71,5 +80,10 @@ struct TestSuite: ILog {
                 str_concat("\n", logs));
             throw;
         }
+    }
+
+    void AssertNoErrors() {
+        if (had_errors)
+            throw ExpKitError("the test failed with errors");
     }
 };

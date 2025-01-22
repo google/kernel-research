@@ -141,7 +141,9 @@ protected:
         EndStruct();
     }
 
-    Target ParseTarget(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version) {
+    std::vector<Target> ParseTargets(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version) {
+        std::vector<Target> result;
+
         if (offset_targets_ == 0)
             ParseHeader();
 
@@ -171,21 +173,31 @@ protected:
                 (version.has_value() && strcmp(version->c_str(), t_version)))
                 continue;
 
-            Target result;
-            result.distro = t_distro;
-            result.release_name = t_release;
-            result.version = t_version;
+            Target target;
+            target.distro = t_distro;
+            target.release_name = t_release;
+            target.version = t_version;
 
-            ParseSymbols(result);
-            ParseRopActions(result);
-            ParsePivots(result);
-            return result;
+            ParseSymbols(target);
+            ParseRopActions(target);
+            ParsePivots(target);
+            result.push_back(target);
         }
 
+        return result;
+    }
+
+    Target ParseTarget(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version) {
+        auto targets = ParseTargets(distro, release_name, version);
+
+        if (targets.size() == 1)
+            return targets[0];
+
+        auto error = targets.size() > 1 ? "multiple targets were found" : "target was not found";
         if (version.has_value())
-            throw ExpKitError("target was not found for version: %s", version->c_str());
+            throw ExpKitError("%s for version: %s", error, version->c_str());
         else
-            throw ExpKitError("target was not found for release: %s/%s", distro->c_str(), release_name->c_str());
+            throw ExpKitError("%s for release: %s/%s", error, distro->c_str(), release_name->c_str());
     }
 
 public:
@@ -239,5 +251,9 @@ public:
         auto version_bytes = read_file("/proc/version");
         std::string version(version_bytes.begin(), version_bytes.end() - 1);
         return GetTarget(version);
+    }
+
+    std::vector<Target> GetAllTargets() {
+        return ParseTargets(std::nullopt, std::nullopt, std::nullopt);
     }
 };
