@@ -44,4 +44,20 @@ public:
         kpwn.CheckWin();
         kpwn.Kfree(buf_addr);
     }
+
+    TEST_METHOD(findsPivotForAllKernelCtfReleases, "finds the right pivots via RDI and RSI for all kernelCTF releases") {
+        auto parser = KpwnParser::FromFile("test/artifacts/kernelctf.kpwn");
+        auto targets = parser.GetAllTargets();
+        if (targets.empty())
+            Error("The database does not contain any targets.");
+
+        for (auto target : targets) {
+            for (auto buf_reg : std::vector<Register>{ Register::RDI, Register::RSI }) {
+                Payload p(128);
+                PivotFinder finder(target.pivots, buf_reg, p);
+                if (!finder.Find().has_value())
+                    Error("could not find stack pivot via %s register for target %s/%s", register_names[(int)buf_reg], target.distro.c_str(), target.release_name.c_str());
+            }
+        }
+    }
 };

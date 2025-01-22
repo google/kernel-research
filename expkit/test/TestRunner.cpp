@@ -70,10 +70,12 @@ public:
 
                 testSuite->current_test = &test;
                 testSuite->logs.clear();
+                testSuite->had_errors = false;
                 logger_->TestBegin(*testSuite, test, test_idx);
                 try {
                     test.func();
                     testSuite->AssertLogs(false);
+                    testSuite->AssertNoErrors();
                     logger_->TestSuccess(*testSuite, test, test_idx);
                 } catch(const exception& exc) {
                     success = false;
