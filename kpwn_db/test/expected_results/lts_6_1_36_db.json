@@ -247,7 +247,8 @@
             "stack_pivots": {
                 "one_gadgets": [],
                 "push_indirects": [],
-                "pop_rsps": []
+                "pop_rsps": [],
+                "stack_shifts": []
             }
         }
     ]

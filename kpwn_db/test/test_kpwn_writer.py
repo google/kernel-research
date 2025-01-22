@@ -91,14 +91,15 @@ class KpwnWriterTests(unittest.TestCase):
                 b"\x00\0\0\0" +                # symbols len
                 b"\x00\0\0\0" +                # ROP actions len
                 b"\x01\0\0\0" +                # targets len
-                b"\x3f\0\0\0" +                # t[0].sizeof
+                b"\x40\0\0\0" +                # t[0].sizeof
                 b"\x09\0" + b"kernelCTF\0" +   # t[0].distro
                 b"\x0a\0" + b"lts-6.1.36\0" +  # t[0].release_name
                 # t[0].version
                 b"\x1e\0" + b"KernelCTF version 6.1.36 (...)\x00" +
-                b"\x03\x00" +                  # t[0].pivots.struct_size
+                b"\x04\x00" +                  # t[0].pivots.struct_size
                 b"\0" +                        # t[0].pivots.one_gadgets.len
                 b"\0" +                        # t[0].pivots.push_indirects.len
                 b"\0" +                        # t[0].pivots.pop_rsps.len
+                b"\0" +                        # t[0].pivots.stack_shifts.len
                 b"",
                 targets=[target])
