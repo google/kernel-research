@@ -27,5 +27,13 @@
             "stack_change_before_rsp": 8,
             "next_rip_offset": 16
         }
+    ],
+    "stack_shifts": [
+        {
+            "address": 31337,
+            "instructions": [],
+            "ret_offset": 16,
+            "shift_amount": 24
+        }
     ]
 }
