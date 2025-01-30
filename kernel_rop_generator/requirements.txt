@@ -1,2 +1,1 @@
--e git+https://github.com/angr/angrop.git#egg=angrop
-
+-e git+https://github.com/angr/angrop.git@6b0b5355649c83bd1e14753df8bd5de0a5034318#egg=angrop
