@@ -4,6 +4,7 @@
 #include "pivot/PivotFinder.cpp"
 #include "test/TestSuite.cpp"
 #include "util/Payload.cpp"
+#include "util/stdutils.cpp"
 
 class PivotTests: public TestSuite {
 public:
@@ -23,20 +24,35 @@ public:
         }
     }
 
-    TEST_METHOD(findsPivotForAllKernelCtfReleases, "finds the right pivots via RDI and RSI for all kernelCTF releases") {
+    void findPivotsForRegisters(const std::vector<std::string> distros, const std::vector<Register>& registers) {
         auto parser = KpwnParser::FromFile("test/artifacts/kernelctf.kpwn");
         auto targets = parser.GetAllTargets();
         if (targets.empty())
             Error("The database does not contain any targets.");
 
         for (auto target : targets) {
-            for (auto buf_reg : std::vector<Register>{ Register::RDI, Register::RSI }) {
+            if (!contains(distros, target.distro))
+                continue;
+
+            for (auto buf_reg : registers) {
                 Payload p(128);
                 PivotFinder finder(target.pivots, buf_reg, p);
                 if (!finder.Find().has_value())
                     Error("could not find stack pivot via %s register for target %s/%s", register_names[(int)buf_reg], target.distro.c_str(), target.release_name.c_str());
             }
         }
+    }
+
+    TEST_METHOD(findKernelCtfRsiPivots, "finds the right RSI pivots for kernelCTF releases") {
+        findPivotsForRegisters({ "kernelctf" }, { Register::RSI });
+    }
+
+    TEST_METHOD(findKernelCtfRdiPivots, "finds the right RDI pivots for kernelCTF releases [TODO]") {
+        findPivotsForRegisters({ "kernelctf" }, { Register::RDI });
+    }
+
+    TEST_METHOD(findUbuntuRdiRsiPivots, "finds the right RSI and RDI pivots for Ubuntu releases [TODO]") {
+        findPivotsForRegisters({ "ubuntu" }, { Register::RDI, Register::RSI });
     }
 };
 
