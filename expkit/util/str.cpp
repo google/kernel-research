@@ -47,3 +47,26 @@ void tolower(std::string& str) {
     std::transform(str.begin(), str.end(), str.begin(),
         [](unsigned char c){ return std::tolower(c); });
 }
+
+std::vector<std::string> split(const std::string& str, const std::string& delimiter) {
+    std::vector<std::string> results;
+    size_t start = 0;
+    size_t end = str.find(delimiter);
+
+    while (end != std::string::npos) {
+        results.push_back(str.substr(start, end - start));
+        start = end + delimiter.length();
+        end = str.find(delimiter, start);
+    }
+
+    results.push_back(str.substr(start));
+    return results;
+}
+
+bool contains(const std::string& str, const std::string& pattern) {
+    return str.find(pattern) != std::string::npos;
+}
+
+bool startsWith(const std::string& str, const std::string& prefix) {
+    return str.compare(0, prefix.length(), prefix) == 0;
+}

@@ -7,23 +7,68 @@
 #include "test/TestEnvironment.cpp"
 #include "test/logging/TestLogger.cpp"
 #include "test/logging/PrintfLogger.cpp"
-#include "util/stdutils.cpp"
+#include "util/str.cpp"
+
+struct TextFilter {
+    bool must_not_exist;
+    string text;
+};
+
+class ConditionMatcher {
+    vector<vector<TextFilter>> filter_;
+
+public:
+    void SetFilter(const optional<string>& filter_expression) {
+        filter_.clear();
+        if (!filter_expression.has_value())
+            return;
+
+        for (auto& cond_expr : split(filter_expression.value(), ",")) {
+            vector<TextFilter> conditions;
+            for (auto& label : split(cond_expr, "+")) {
+                if (startsWith(label, "^"))
+                    conditions.push_back(TextFilter { true, label.substr(1) });
+                else
+                    conditions.push_back(TextFilter { false, label });
+            }
+            filter_.push_back(conditions);
+        }
+    }
+
+    bool Match(const string& raw = "", const string& as_label = "") {
+        if (filter_.empty())
+            return true;
+
+        for (auto& filter : filter_) {
+            bool match = true;
+            for (auto& lf : filter) {
+                bool found = contains(raw, lf.text) ||
+                    contains(as_label, "[" + lf.text + "]");
+                match &= lf.must_not_exist ? !found : found;
+                if (!match)
+                    break;
+            }
+            if (match)
+                return true;
+        }
+
+        return false;
+    }
+};
 
 class TestRunner {
     vector<unique_ptr<TestSuite>> test_suites_;
-    optional<vector<string>> test_suite_filter_;
+    ConditionMatcher test_suite_filter_;
+    ConditionMatcher test_filter_;
     unique_ptr<TestLogger> logger_;
     TestEnvironment environment;
 
-    bool ShouldSkip(const std::string& class_name) {
-        if (!test_suite_filter_)
-            return false;
+    bool ShouldSkipSuite(const TestSuite& test_suite) {
+        return !test_suite_filter_.Match(test_suite.class_name, test_suite.desc);
+    }
 
-        for (auto& filter : *test_suite_filter_)
-            if (class_name.find(filter) != std::string::npos)
-                return false;
-
-        return true;
+    bool ShouldSkipTest(const Test& test) {
+        return !test_filter_.Match(test.func_name, test.desc);
     }
 
 public:
@@ -34,8 +79,12 @@ public:
         test_suites_.push_back(unique_ptr<TestSuite>(suite));
     }
 
-    void SetSuiteFilter(optional<vector<string>> filter) {
-        test_suite_filter_ = filter;
+    void SetSuiteFilter(optional<string> filter) {
+        test_suite_filter_.SetFilter(filter);
+    }
+
+    void SetTestFilter(optional<string> filter) {
+        test_filter_.SetFilter(filter);
     }
 
     void SetTargetDbPath(const std::string& target_db_path) {
@@ -57,7 +106,7 @@ public:
 
         logger_->Begin(test_suites_, test_count);
         for (auto& testSuite : test_suites_) {
-            if (ShouldSkip(testSuite->class_name)) {
+            if (ShouldSkipSuite(*testSuite)) {
                 logger_->TestSuiteSkip(*testSuite, test_idx);
                 test_idx += testSuite->tests.size();
                 continue;
@@ -74,7 +123,7 @@ public:
             }
 
             for (auto& test : testSuite->tests) {
-                if (skip > test_idx) {
+                if (skip > test_idx || ShouldSkipTest(test)) {
                     logger_->TestSkip(*testSuite, test, test_idx++);
                     continue;
                 }

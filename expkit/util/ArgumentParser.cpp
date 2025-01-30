@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <optional>
-#include <sstream>
+#include "util/str.cpp"
 
 using namespace std;
 
@@ -55,15 +55,7 @@ public:
 
     optional<vector<string>> getListOption(const string& name) const {
         auto it = options_.find(name);
-        if (it == options_.end())
-            return nullopt;
-
-        vector<string> result;
-        stringstream ss(it->second);
-        string item;
-        while (getline(ss, item, ','))
-            result.push_back(item);
-        return result;
+        return it != options_.end() ? optional(split(it->second, ",")) : nullopt;
     }
 
     const vector<string>& getPositionalArgs() const {
