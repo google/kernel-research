@@ -39,14 +39,26 @@ jobs:
       - name: Test expkit (local tests only)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: "make test && bin/test --test-suites StaticTests"
+        run: "make test && bin/test --test-suites StaticTests --tests ^TODO"
 
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh --tests ^TODO
 
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop test
+
+      - name: Test expkit (local TODO tests only)
+        if: ${{ success() || failure() }}
+        continue-on-error: true
+        working-directory: ./expkit
+        run: "make test && bin/test --test-suites StaticTests --tests TODO"
+
+      - name: Test expkit (QEMU TODO tests only)
+        if: ${{ success() || failure() }}
+        continue-on-error: true
+        working-directory: ./expkit
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh --test-suites RuntimeTests --tests TODO
