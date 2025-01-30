@@ -3,6 +3,7 @@ import argparse
 import logging
 import os
 import sys
+import re
 
 
 KPWN_DB_DIR = os.path.abspath(f"{__file__}/..")
@@ -55,6 +56,9 @@ def main():
 
   # make targets unique
   targets = {str(t): t for t in targets}.values()
+
+  if args.release_filter:
+    targets = [t for t in targets if re.search(args.release_filter, f"{t.distro}/{t.release_name}")]
 
   db = Db(meta, targets)
 
