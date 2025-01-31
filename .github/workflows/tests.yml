@@ -70,13 +70,19 @@ jobs:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_EXPKIT }}
         with:
           script: |
-            const url = `https://github.com/google/kernel-research/actions/runs/${github.run_id}`;
-            const title = github.event.pull_request?.title || github.event.push.head_commit?.message || "???";
+            const url = `https://github.com/google/kernel-research/actions/runs/${context.runId}`;
+            const pp = context.payload;
+
+            let title = "???";
+            if (pp.pull_request)
+              title = `PR #${pp.pull_request.number} ("${pp.pull_request.title}")`;
+            else if (pp.head_commit)
+              title = `commit ${pp.head_commit.id.substr(0,7)} ("${pp.head_commit.message}")`;
+
             await fetch(process.env.WEBHOOK_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                "text": `*GHA test failure*: commit "[$title]($url)" by ${{ github.actor }}`
+                "text": `*GHA FAIL*: workflow <${url}|${context.workflow}> failed for ${title} by ${context.actor}`
               })
             });
-
