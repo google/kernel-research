@@ -11,4 +11,4 @@ run: build
 	../../../kernel-image-runner/run.sh kernelctf lts-6.1.81 --custom-modules=kpwn --only-command-output --dmesg=dmesg.txt -- /exp.sh|tee output.txt
 
 test: run
-	grep "CTF{secret_flag_deadbeef}" output.txt || { echo "Failed to leak the flag."; exit 1; }
+	grep "CTF{secret_flag_deadbeef}" output.txt || { echo "Failed to leak the flag."; echo "dmesg content: "; cat dmesg.txt; exit 1; }
