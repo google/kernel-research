@@ -229,9 +229,12 @@ class GadgetFilter:
 
         # anything that uses segment registers
         bad_regs = ["cs", "ds", "es", "fs", "gs", ":", "seg"]
-        for reg in bad_regs:
-            if reg in gadget_str:
-                return False
+        # Use regex to avoid matching partial words
+        escaped_regs = [re.escape(reg) for reg in bad_regs]
+        pattern = r"\b(" + "|".join(escaped_regs) + r")\b"
+
+        if re.search(pattern, gadget_str):
+            return False
 
         # input and output
         if "in" in gadget_str or "out" in gadget_str:
