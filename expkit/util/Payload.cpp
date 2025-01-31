@@ -10,11 +10,16 @@
 class Payload {
     std::vector<uint8_t> data_;
     std::vector<bool> used_bytes_;
+    uint64_t used_size_;
 
 public:
-    Payload(int size): data_(size), used_bytes_(size, 0) { }
+    Payload(int size): data_(size), used_bytes_(size, 0), used_size_(0) { }
 
     std::vector<uint8_t>& GetData() { return data_; }
+
+    std::vector<uint8_t> GetUsedData() {
+        return std::vector<uint8_t>(data_.begin(), data_.begin() + used_size_);
+    }
 
     bool CheckFree(uint64_t offset, uint64_t len, bool throws = false) {
         if (offset + len > data_.size()) {
@@ -36,6 +41,8 @@ public:
     uint8_t* Reserve(uint64_t offset, uint64_t len) {
         CheckFree(offset, len, true);
         std::fill_n(used_bytes_.begin() + offset, len, true);
+        if (offset + len > used_size_)
+            used_size_ = offset + len;
         return data_.data() + offset;
     }
 
@@ -90,5 +97,6 @@ public:
     void Restore(const Payload& snapshot) {
         data_ = snapshot.data_;
         used_bytes_ = snapshot.used_bytes_;
+        used_size_ = snapshot.used_size_;
     }
 };

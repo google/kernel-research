@@ -35,7 +35,7 @@ public:
     }
 
     static void Print(const void* buf, int len) {
-        puts(Dump(buf, len).c_str());
+        printf("%s", Dump(buf, len).c_str());
     }
 
     static void Print(const std::vector<uint8_t>& data) {

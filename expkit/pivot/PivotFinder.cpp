@@ -11,11 +11,11 @@ class PivotFinder {
     Register buf_reg_;
     Payload& payload_;
 
-    std::vector<StackPivot> Find(bool only_one) {
+    std::vector<StackPivot> FindInternal(bool only_one, uint64_t free_bytes_after = 0) {
         std::vector<StackPivot> result;
 
         for (auto& gadget : pivots_.one_gadgets) {
-            if (!CheckOneGadget(gadget))
+            if (!CheckOneGadget(gadget, free_bytes_after))
                 continue;
 
             result.push_back(StackPivot(gadget));
@@ -24,13 +24,13 @@ class PivotFinder {
         }
 
         for (auto& push : pivots_.push_indirects) {
-            if (!CheckPushIndirect(push))
+            if (!CheckPushIndirect(push, free_bytes_after))
                 continue;
 
             for (auto& pop : pivots_.pop_rsps) {
                 auto push_change = push.indirect_type == IndirectType::CALL ? 8 : 0;
                 if (pop.stack_change_before_rsp != push_change ||
-                    !payload_.CheckFree(pop.next_rip_offset, 8))
+                    !payload_.CheckFree(pop.next_rip_offset, 8 + free_bytes_after))
                         continue;
 
                     result.push_back(StackPivot(push, pop));
@@ -58,19 +58,19 @@ public:
         return true;
     }
 
-    bool CheckOneGadget(const OneGadgetPivot& pivot) {
+    bool CheckOneGadget(const OneGadgetPivot& pivot, uint64_t free_bytes_after = 0) {
         return CheckRegister(pivot.pivot_reg) &&
-               payload_.CheckFree(pivot.next_rip_offset, 8);
+               payload_.CheckFree(pivot.next_rip_offset, 8 + free_bytes_after);
     }
 
-    bool CheckPushIndirect(const PushIndirectPivot& pivot) {
+    bool CheckPushIndirect(const PushIndirectPivot& pivot, uint64_t free_bytes_after = 0) {
         return CheckRegister(pivot.push_reg) &&
                CheckRegister(pivot.indirect_reg) &&
-               payload_.CheckFree(pivot.next_rip_offset, 8);
+               payload_.CheckFree(pivot.next_rip_offset, 8 + free_bytes_after);
     }
 
     std::vector<StackPivot> FindAll() {
-        return Find(false);
+        return FindInternal(false);
     }
 
     std::optional<StackShiftPivot> FindShift(uint64_t min_shift, uint64_t upper_bound = std::numeric_limits<uint64_t>::max()) {
@@ -99,8 +99,15 @@ public:
         return std::nullopt;
     }
 
-    std::optional<StackPivot> Find() {
-        auto result = Find(true);
+    std::optional<StackPivot> Find(uint64_t free_bytes_after = 0) {
+        auto result = FindInternal(true, free_bytes_after);
         return result.empty() ? std::nullopt : std::optional(result[0]);
+    }
+
+    std::optional<PopRspPivot> GetPopRsp() {
+        for (const auto &pivot : pivots_.pop_rsps)
+            if (pivot.stack_change_before_rsp == 0 && pivot.next_rip_offset == 0)
+                return std::optional(pivot);
+        return std::nullopt;
     }
 };
