@@ -62,3 +62,21 @@ jobs:
         continue-on-error: true
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh --test-suites RuntimeTests --tests TODO
+
+      - name: Send Google Chat Notification (on failure)
+        if: failure()
+        uses: actions/github-script@v6
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_EXPKIT }}
+        with:
+          script: |
+            const url = `https://github.com/google/kernel-research/actions/runs/${github.run_id}`;
+            const title = github.event.pull_request?.title || github.event.push.head_commit?.message || "???";
+            await fetch(process.env.WEBHOOK_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                "text": `*GHA test failure*: commit "[$title]($url)" by ${{ github.actor }}`
+              })
+            });
+
