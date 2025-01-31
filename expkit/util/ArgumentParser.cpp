@@ -48,6 +48,10 @@ public:
         return it != options_.end() ? optional(it->second) : nullopt;
     }
 
+    bool hasOption(const string& name) const {
+        return options_.find(name) != options_.end();
+    }
+
     optional<long> getInt(const string& name) const {
         auto it = options_.find(name);
         return it != options_.end() ? optional(stoi(it->second)) : nullopt;
