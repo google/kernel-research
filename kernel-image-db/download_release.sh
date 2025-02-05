@@ -124,6 +124,7 @@ process_vmlinux() {
         fi
 
         save btf.json                 "bpftool btf dump -j file btf"
+        save structs.json             "$SCRIPT_DIR/extract_structures.py"
         save btf_formatted.json       "jq . btf.json"
         save pahole.txt               "pahole vmlinux"
         save .config                  "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
