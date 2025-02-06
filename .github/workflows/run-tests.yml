@@ -47,6 +47,13 @@ jobs:
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
         run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v1.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
 
+      - name: Download target release
+        if: ${{ steps.vars.outputs.target != 'kernelctf lts-6.1.81' }}
+        working-directory: ./kernel-image-db
+        run: |
+          ./download_release.sh ${{steps.vars.outputs.target}} "vmlinuz,modules"
+          ./collect_runtime_data.sh  # we need version.txt for compiling the correct kpwn module
+
       - name: Test kpwn_db
         if: ${{ success() || failure() }}
         working-directory: ./kpwn_db
@@ -65,7 +72,7 @@ jobs:
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop test
+        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop TARGET="${{steps.vars.outputs.target}}" test
 
       - name: Test expkit (local TODO tests only)
         if: ${{ success() || failure() }}
@@ -89,16 +96,14 @@ jobs:
             const url = `https://github.com/google/kernel-research/actions/runs/${context.runId}`;
             const pp = context.payload;
 
-            let title = "???";
+            let text = `*GHA FAIL*: workflow <${url}|${context.workflow}> by ${context.actor} failed`;
             if (pp.pull_request)
-              title = `PR #${pp.pull_request.number} ("${pp.pull_request.title}")`;
+              text += ` for PR #${pp.pull_request.number} ("${pp.pull_request.title}")`;
             else if (pp.head_commit)
-              title = `commit ${pp.head_commit.id.substr(0,7)} ("${pp.head_commit.message}")`;
+              text += ` for commit ${pp.head_commit.id.substr(0,7)} ("${pp.head_commit.message}")`;
 
             await fetch(process.env.WEBHOOK_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                "text": `*GHA FAIL*: workflow <${url}|${context.workflow}> failed for ${title} by ${context.actor}`
-              })
+              body: JSON.stringify({ "text": text })
             });

@@ -64,7 +64,7 @@ if [ "$GDB" == "1" ]; then ARGS+=" --gdb"; fi
 if [ "$SNAPSHOT" == "1" ]; then ARGS+=" --snapshot"; fi
 if [ -d "$MODULES_PATH" ]; then ARGS+=" --modules-path=$MODULES_PATH"; fi
 
-if [ "$CUSTOM_MODULES" != "keep" ] && [ -z "$CUSTOM_MODULES_KEEP" ]; then
+if [[ "$CUSTOM_MODULES" != "keep" && ( -z "$CUSTOM_MODULES_KEEP" || ! -f "$RELEASE_DIR/custom_modules.tar") ]]; then
     $SCRIPT_DIR/compile_custom_modules.sh "$DISTRO" "$RELEASE_NAME" "$CUSTOM_MODULES" 1>&2
 fi
 
