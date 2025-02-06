@@ -6,11 +6,26 @@ on:
      - 'expkit/**'
   pull_request:
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Distro and release name'
+        type: string
+        required: false
+  workflow_call:
+    inputs:
+      target:
+        type: string
 permissions: {}
 jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
+      - name: Fix input variables
+        id: vars
+        env:
+          target: ${{inputs.target}}
+        run: echo "target=${target:-kernelctf lts-6.1.81}" >> $GITHUB_OUTPUT
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -29,6 +44,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Download cached kpwn module # to skip compilation and speedup tests
+        if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
         run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v1.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
 
       - name: Test kpwn_db
@@ -44,7 +60,7 @@ jobs:
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh --tests ^TODO
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --tests ^TODO
 
       - name: Test expkit samples
         if: ${{ success() || failure() }}
@@ -61,7 +77,7 @@ jobs:
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh --test-suites RuntimeTests --tests TODO
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --test-suites RuntimeTests --tests TODO
 
       - name: Send Google Chat Notification (on failure)
         if: failure()
