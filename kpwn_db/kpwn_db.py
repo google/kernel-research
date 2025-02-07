@@ -22,7 +22,9 @@ def main():
   parser.add_argument("--kernel-image-db-path",
                       help="Path to the kernel-image-db tool to add targets from")
   parser.add_argument("--release-filter", default=None,
-                      help="Regex filter for which '{distro}/{release_name}' to be parsed")
+                      help="Regex filter for which '{distro}/{release_name}' to be saved in the output database")
+  parser.add_argument("--release-filter-add", default=None,
+                      help="Regex filter for which '{distro}/{release_name}' to be added to the database")
   parser.add_argument("-i", "--input-file",
                       help="Full file path to the source target_db.{kpwn,json,yaml}")
   parser.add_argument("-o", "--output-file", default=None,
@@ -31,7 +33,7 @@ def main():
                       help="How much intendation to use in JSON output file")
   parser.add_argument('--minimal', action=argparse.BooleanOptionalAction,
                       help="Minimalize output kpwn size (skip well-known meta information)")
-  parser.add_argument('--list-targets', action=argparse.BooleanOptionalAction, 
+  parser.add_argument('--list-targets', action=argparse.BooleanOptionalAction,
                       help="List the targets in the database")
   parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="INFO",
                       help="Set the logging level.")
@@ -52,7 +54,7 @@ def main():
     return parser.error("at least one of --input-file or --kernel_image_db_path required")
 
   if args.kernel_image_db_path:
-    targets += get_targets_from_image_db(meta, args.kernel_image_db_path, args.release_filter, logger)
+    targets += get_targets_from_image_db(meta, args.kernel_image_db_path, args.release_filter_add, logger)
 
   # make targets unique
   targets = {str(t): t for t in targets}.values()
