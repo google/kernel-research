@@ -18,7 +18,7 @@ def check_tap():
   missing_tests = set(range(1, test_count + 1)) - ok_tests
 
   if missing_tests:
-    print(f"The following tests were not run successfully: {missing_tests}")
+    print(f"The following tests were not run successfully: {', '.join(str(x) for x in sorted(missing_tests))}")
 
   return not missing_tests
 

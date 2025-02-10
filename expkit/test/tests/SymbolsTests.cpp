@@ -18,7 +18,13 @@ public:
         for (auto pair : symbol_names) {
             std::string func_name(pair.second);
             tolower(func_name);
-            TestUtils::eq(env->GetKpwn().SymAddr(func_name.c_str()) - kaslr_base,
+            auto sym_addr = env->GetKpwn().SymAddrOpt(func_name.c_str());
+
+            // releases without CONFIG_KALLSYMS_ALL only contain function addresses
+            if (!sym_addr.has_value() && ((pair.first & SYM_TYPE) != SYM_FUNC))
+                continue;
+
+            TestUtils::eq(sym_addr.value() - kaslr_base,
                 env->GetTarget().GetSymbolOffset(pair.first), pair.second);
         }
     }
