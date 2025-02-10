@@ -50,10 +50,12 @@ if [ ! -z "$MOUNT_CUSTOM_MODULES" ]; then
     tar -xvf "$MOUNT_CUSTOM_MODULES" -C /custom_modules
 fi
 
-
 # disable LoadPin
-if [ -e /proc/sys/kernel/loadpin/enforce ]; then echo 0 > /proc/sys/kernel/loadpin/enforce; fi
-if [ -e /proc/sys/kernel/loadpin/enabled ]; then echo 0 > /proc/sys/kernel/loadpin/enabled; fi
+for name in "enforce" "enabled"; do
+    if [ -e "/proc/sys/kernel/loadpin/$name" ] && [ "$(cat /proc/sys/kernel/loadpin/$name)" != "0" ]; then
+        echo 0 > "/proc/sys/kernel/loadpin/$name";
+    fi
+done
 
 for MODULE_FN in $(find /custom_modules -name '*.ko' 2>/dev/null); do
     echo "Loading custom module: $MODULE_FN"
