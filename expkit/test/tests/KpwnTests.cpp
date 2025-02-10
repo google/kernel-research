@@ -80,11 +80,18 @@ public:
     }
 
     TEST_METHOD(stackPivotRecoveryTest, "stack pivot recovery test") {
+        auto win_target = kpwn_->WinTarget();
         auto rip_recovery = kpwn_->GetRipControlRecoveryAddr();
+        Log("win_target = 0x%lx, rip_recovery = 0x%lx", win_target, rip_recovery);
+
         Payload p(128);
-        p.Set(0, rip_recovery);
+        p.Set(0, win_target);
+        p.Set(8, rip_recovery);
         auto buf_addr = kpwn_->AllocBuffer(p.GetData(), true);
+        Log("buf_addr = 0x%lx", buf_addr);
+
         kpwn_->SetRspAndRet(buf_addr);
+        kpwn_->CheckWin();
         kpwn_->Kfree(buf_addr);
     }
 };
