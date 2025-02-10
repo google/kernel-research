@@ -46,6 +46,12 @@ public:
         return data_.data() + offset;
     }
 
+    void Release(uint64_t offset, uint64_t len) {
+        std::fill_n(used_bytes_.begin() + offset, len, false);
+        if (offset + len == used_size_)
+            used_size_ = offset;
+    }
+
     // this assumes that the buffer won't be moved in memory
     uint64_t* ReserveU64(uint64_t offset) {
         Reserve(offset, sizeof(uint64_t));
