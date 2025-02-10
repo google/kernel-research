@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dmesg -n 1 # suppress kernel messages
 echo "=== COMMAND-BEGIN: $@ ==="
 eval $@ > /output 2>/output
 echo "=== COMMAND-END ==="
