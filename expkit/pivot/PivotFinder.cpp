@@ -27,6 +27,8 @@ class PivotFinder {
             if (!CheckPushIndirect(push, free_bytes_after))
                 continue;
 
+            payload_.Reserve(push.next_rip_offset, 8);
+
             for (auto& pop : pivots_.pop_rsps) {
                 auto push_change = push.indirect_type == IndirectType::CALL ? 8 : 0;
                 if (pop.stack_change_before_rsp != push_change ||
@@ -35,8 +37,13 @@ class PivotFinder {
 
                     result.push_back(StackPivot(push, pop));
                     if (only_one)
-                        return result;
+                        break;
             }
+
+            payload_.Release(push.next_rip_offset, 8);
+
+            if (only_one && !result.empty())
+                break;
         }
 
         return result;

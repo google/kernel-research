@@ -62,22 +62,22 @@ public:
 
     TEST_METHOD(pivotWinTargetTest, "call win_target via stack pivot") {
         Payload p(128);
-        Register buf_reg = Register::RDI;
+        Register buf_reg = Register::RSI;
 
         PivotFinder finder(env->GetTarget().pivots, buf_reg, p);
-        StackPivot pivot = finder.Find().value();
-        Log("selected pivot: %s", pivot.GetDescription().c_str());
+        auto pivot = finder.Find(8);
+        Log("selected pivot: %s", pivot->GetDescription().c_str());
 
         auto& kpwn = env->GetKpwn();
         auto kaslr = kpwn.KaslrLeak();
-        pivot.ApplyToPayload(p, kaslr);
+        pivot->ApplyToPayload(p, kaslr);
 
-        auto offs = pivot.GetDestinationOffset();
+        auto offs = pivot->GetDestinationOffset();
         p.Set(offs, kpwn.WinTarget());
         p.Set(offs + 8, kpwn.GetRipControlRecoveryAddr());
 
         auto buf_addr = kpwn.AllocBuffer(p.GetData(), true);
-        kpwn.CallAddr(kaslr + pivot.GetGadgetOffset(), { { buf_reg, buf_addr } });
+        kpwn.CallAddr(kaslr + pivot->GetGadgetOffset(), { { buf_reg, buf_addr } });
         kpwn.CheckWin();
         kpwn.Kfree(buf_addr);
     }
