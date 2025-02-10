@@ -117,6 +117,8 @@ save() {
 }
 
 process_vmlinux() {
+    save symbols.txt              "nm vmlinux"
+
     if [ "$ONLY_DB" == "" ]; then
         if [ ! -f "btf" ]; then
             echo "Extracting pahole BTF information..."
@@ -134,7 +136,6 @@ process_vmlinux() {
         save rp++.txt                 "rp++ -r 5 -f vmlinux"
     fi
 
-    save symbols.txt              "nm vmlinux"
     save rop_actions.json         "$SCRIPT_DIR/../kernel_rop_generator/angrop_rop_generator.py --output json --json-indent 4 vmlinux"
     save stack_pivots.json        "$SCRIPT_DIR/../kernel_rop_generator/pivot_finder.py --output json --json-indent 4 vmlinux"
 }

