@@ -21,7 +21,9 @@ uint64_t saved_rsp;
 void rip_control(rip_control_args* regs) {
     register rip_control_args* regs_asm asm("r15") = regs;
 
-    LOG("rip_control: action=0x%llx, rsp=0x%llx, value@rsp=0x%llx, regs_to_set=0x%llx, rip=0x%llx", regs->action, regs->rsp, regs->rsp == 0 ? 0 : *(uint64_t*)regs->rsp, regs->regs_to_set, regs->rip);
+    LOG("rip_control: action=0x%llx, rsp=0x%llx, value@rsp=0x%llx, regs_to_set=0x%llx, rip=0x%llx, saved_rsp=0x%llx, value@saved_rsp=0x%llx",
+        regs->action, regs->rsp, regs->rsp == 0 ? 0 : *(uint64_t*)regs->rsp, regs->regs_to_set, regs->rip, saved_rsp, *(uint64_t*)saved_rsp);
+
     if (regs->action != JMP_RIP && regs->action != CALL_RIP && regs->action != RET && regs->action != NONE) {
         LOG("rip_control: invalid action (0x%llx)!", regs->action);
         return;
@@ -142,7 +144,7 @@ void rip_control(rip_control_args* regs) {
     LOG("kpwn: rip_control, after asm");
 }
 
-void rip_control_wrapper(rip_control_args* regs) {
+void noinline rip_control_wrapper(rip_control_args* regs) {
     __asm__ (
         ".intel_syntax noprefix\n"
         "mov saved_rsp, rsp\n"
