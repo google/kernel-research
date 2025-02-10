@@ -11,6 +11,7 @@
 #define SYM_FUNC   0x01000000
 #define SYM_STRUCT 0x02000000
 #define SYM_OPS    0x03000000
+#define SYM_TYPE   0xff000000
 
 enum SymbolId: uint32_t {
     PREPARE_KERNEL_CRED =    SYM_FUNC | 0x01,

@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         target:
-          # oldest 6.1
-          - kernelctf lts-6.1.31
+          # oldest 6.1 (which also have vmlinux file)
+          - kernelctf lts-6.1.35
           # newest 6.1
           - kernelctf lts-6.1.81
           # oldest 6.6

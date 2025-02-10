@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <map>
+#include <optional>
 #include <set>
 #include "./kpwn.h"
 #include "util/error.cpp"
@@ -107,6 +108,12 @@ class Kpwn {
         return args;
     }
 
+    kpwn_error CallRaw(enum kpwn_cmd cmd, void* arg) const {
+        kpwn_error error_code = (kpwn_error) -::ioctl(fd_, cmd, arg);
+        if (error_code == SUCCESS || ERROR_GENERIC <= error_code && error_code <= ERROR_UNKNOWN_SYMBOL) return error_code;
+        throw ExpKitError("kpwn command %s failed with unknown error code 0x%x");
+    }
+
 public:
     static bool IsAvailable() {
         return access(DEVICE_PATH, F_OK) != -1;
@@ -116,10 +123,16 @@ public:
         fd_ = Syscalls::open("/dev/kpwn", O_RDWR);
     }
 
+    kpwn_error Call(enum kpwn_cmd cmd, void* arg, kpwn_error expected_error) const {
+        auto error = CallRaw(cmd, arg);
+        if (error != SUCCESS && error != expected_error)
+            throw ExpKitError("kpwn command %s failed with error code 0x%x (%s)", kpwn_cmd_names[cmd - 0x1000], error,
+                kpwn_errors_names[error - ERROR_GENERIC]);
+        return error;
+    }
+
     void Call(enum kpwn_cmd cmd, void* arg) const {
-        auto result = Syscalls::ioctl(fd_, cmd, arg);
-        if (result != SUCCESS)
-            throw ExpKitError("kpwn command %u failed with 0x%x", cmd, result);
+        Call(cmd, arg, SUCCESS);
     }
 
     uint64_t AllocBuffer(uint64_t size, bool gfp_account) const {
@@ -167,11 +180,18 @@ public:
         return win_target_addr;
     }
 
-    uint64_t SymAddr(const char* name) {
+    std::optional<uint64_t> SymAddrOpt(const char* name) {
         sym_addr sym_addr;
         strncpy(sym_addr.symbol_name, name, sizeof(sym_addr.symbol_name));
-        Call(SYM_ADDR, &sym_addr);
-        return sym_addr.symbol_addr;
+        auto error = Call(SYM_ADDR, &sym_addr, ERROR_UNKNOWN_SYMBOL);
+        return error == SUCCESS ? std::optional(sym_addr.symbol_addr) : std::nullopt;
+    }
+
+    uint64_t SymAddr(const char* name) {
+        auto addr = SymAddrOpt(name);
+        if (!addr.has_value())
+            throw ExpKitError("symbol '%s' was not found in the kernel", name);
+        return addr.value();
     }
 
     void RipControl(const rip_control_args& args) {

@@ -30,7 +30,11 @@ typedef struct kpwn_message {
 
 enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE, GET_RIP_CONTROL_RECOVERY, CHECK_WIN };
 
-enum kpwn_errors {
+const char* kpwn_cmd_names[] = { "ALLOC_BUFFER", "KFREE", "KASLR_LEAK", "WIN_TARGET",
+    "RIP_CONTROL", "ARB_READ", "ARB_WRITE", "INSTALL_KPROBE", "PRINTK", "SYM_ADDR",
+    "REMOVE_KPROBE", "GET_RIP_CONTROL_RECOVERY", "CHECK_WIN" };
+
+enum kpwn_error {
     SUCCESS = 0,
     ERROR_GENERIC = 0x1000,
     ERROR_UNKNOWN_COMMAND = 0x1001,
@@ -41,6 +45,17 @@ enum kpwn_errors {
     ERROR_COPY_TO_USER_DATA = 0x1006,
     ERROR_UNKNOWN_SYMBOL = 0x1007,
 };
+
+const char* kpwn_errors_names[] = {
+    "ERROR_GENERIC",
+    "ERROR_UNKNOWN_COMMAND",
+    "ERROR_ALLOC",
+    "ERROR_COPY_FROM_USER_STRUCT",
+    "ERROR_COPY_FROM_USER_DATA",
+    "ERROR_COPY_TO_USER_STRUCT",
+    "ERROR_COPY_TO_USER_DATA",
+    "ERROR_UNKNOWN_SYMBOL",
+ };
 
 enum regs_to_set: unsigned long {
     RAX = 0x000001,
