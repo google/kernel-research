@@ -11,10 +11,15 @@ on:
         description: 'Distro and release name'
         type: string
         required: false
+        default: 'kernelctf lts-6.1.81'
   workflow_call:
     inputs:
       target:
         type: string
+      silence_notifications:
+        type: boolean
+        required: false
+        default: true
 permissions: {}
 jobs:
   tests:
@@ -87,23 +92,7 @@ jobs:
         run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --test-suites RuntimeTests --tests TODO
 
       - name: Send Google Chat Notification (on failure)
-        if: failure()
-        uses: actions/github-script@v6
+        if: ${{ failure() && !inputs.silence_notifications }}
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_EXPKIT }}
-        with:
-          script: |
-            const url = `https://github.com/google/kernel-research/actions/runs/${context.runId}`;
-            const pp = context.payload;
-
-            let text = `*GHA FAIL*: workflow <${url}|${context.workflow}> by ${context.actor} failed`;
-            if (pp.pull_request)
-              text += ` for PR #${pp.pull_request.number} ("${pp.pull_request.title}")`;
-            else if (pp.head_commit)
-              text += ` for commit ${pp.head_commit.id.substr(0,7)} ("${pp.head_commit.message}")`;
-
-            await fetch(process.env.WEBHOOK_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ "text": text })
-            });
+        run: node ./scripts/send_notification.js
