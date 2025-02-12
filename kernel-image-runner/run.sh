@@ -18,18 +18,18 @@ set -e
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld,kpwn] [--only-command-output [--dmesg=<path>]] [--gdb] [--snapshot] -- [<commands-to-run-in-vm>]";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld,kpwn] [--only-command-output [--dmesg=<path>]] [--gdb] [--snapshot] [--nokaslr] -- [<commands-to-run-in-vm>]";
     exit 1;
 }
 
 DMESG="/dev/null"
 ARGS=()
+RUN_ARGS=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --only-command-output) ONLY_COMMAND_OUTPUT=1; shift;;
     --dmesg=*) DMESG="${1#*=}"; shift;;
-    --gdb) GDB=1; shift;;
-    --snapshot) SNAPSHOT=1; shift;;
+    --gdb|--snapshot|--nokaslr) RUN_ARGS+=" $1"; shift;;
     --custom-modules=*) CUSTOM_MODULES="${1#*=}"; shift;;
     --) # stop processing special arguments after "--"
         shift
@@ -59,21 +59,19 @@ fi
 
 $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules" 1>&2
 
-ARGS="$VMLINUZ"
-if [ "$GDB" == "1" ]; then ARGS+=" --gdb"; fi
-if [ "$SNAPSHOT" == "1" ]; then ARGS+=" --snapshot"; fi
-if [ -d "$MODULES_PATH" ]; then ARGS+=" --modules-path=$MODULES_PATH"; fi
+RUN_ARGS="$VMLINUZ$RUN_ARGS"
+if [ -d "$MODULES_PATH" ]; then RUN_ARGS+=" --modules-path=$MODULES_PATH"; fi
 
 if [[ "$CUSTOM_MODULES" != "keep" && ( -z "$CUSTOM_MODULES_KEEP" || ! -f "$RELEASE_DIR/custom_modules.tar") ]]; then
     $SCRIPT_DIR/compile_custom_modules.sh "$DISTRO" "$RELEASE_NAME" "$CUSTOM_MODULES" 1>&2
 fi
 
-if [ ! -z "$CUSTOM_MODULES" ]; then ARGS+=" --custom-modules-tar=$RELEASE_DIR/custom_modules.tar"; fi
+if [ ! -z "$CUSTOM_MODULES" ]; then RUN_ARGS+=" --custom-modules-tar=$RELEASE_DIR/custom_modules.tar"; fi
 
 # only-command-output handling + running the VM
 
 if [ "$ONLY_COMMAND_OUTPUT" == "1" ]; then
-    $SCRIPT_DIR/run_vmlinuz.sh $ARGS --stdout-file=$DMESG "/scripts/command-output.sh" -- "$COMMAND_TO_RUN"
+    $SCRIPT_DIR/run_vmlinuz.sh $RUN_ARGS --stdout-file=$DMESG "/scripts/command-output.sh" -- "$COMMAND_TO_RUN"
 else
-    $SCRIPT_DIR/run_vmlinuz.sh $ARGS -- "$COMMAND_TO_RUN"
+    $SCRIPT_DIR/run_vmlinuz.sh $RUN_ARGS -- "$COMMAND_TO_RUN"
 fi
