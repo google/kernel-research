@@ -10,7 +10,7 @@ import os
 import angr
 import angrop
 from angrop.rop_gadget import RopGadget
-from rop_ret_patcher import patch_vmlinux_return_thunk
+from rop_instruction_patcher import RopInstructionPatcher
 from rop_util import load_symbols, setup_logger
 import gadget_finder
 from gadget_filter import GadgetFilter
@@ -514,7 +514,7 @@ if __name__ == "__main__":
     ).with_suffix(".thunk_replaced")
 
     if not patched_vmlinux_path.exists():
-        patch_vmlinux_return_thunk(args.vmlinux_path, patched_vmlinux_path)
+        RopInstructionPatcher(args.vmlinux_path).apply_patches(patched_vmlinux_path)
 
     rop_generator = RopGeneratorAngrop(patched_vmlinux_path)
     action_sleep = rop_generator.rop_action_msleep(RopChainArgument(0))
