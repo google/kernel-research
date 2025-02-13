@@ -55,7 +55,7 @@ def get_offset(elffile, va):
 
 def setup_logger(name):
     """
-    Sets up a logger with the name "gadget_finder" that logs to the console.
+    Sets up a logger with a name that logs to the console.
 
     Returns:
     A configured logging.Logger instance.
