@@ -418,7 +418,7 @@ class RopGeneratorAngrop:
         items.append(self._find_symbol(SWITCH_TASK_NAMESPACES))
 
         return RopAction(
-          type_id=0x04,
+          type_id=0x03,
           description="switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
           gadgets=items)
 
