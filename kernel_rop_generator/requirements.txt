@@ -1,1 +1,2 @@
 -e git+https://github.com/angr/angrop.git@62a08ab3a6c7fb46bee326afbd45225bcb3ec449#egg=angrop
+keystone-engine==0.9.2
