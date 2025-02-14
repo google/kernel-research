@@ -52,3 +52,24 @@ jobs:
     secrets: inherit
     with:
       release: kernelctf ${{matrix.release}}
+
+  merge_db:
+    runs-on: ubuntu-latest
+    needs: process_release
+    if: ${{ needs.get_missing_releases.outputs.releases != '[]' }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{secrets.DB_GCS_SA_KEY}}'
+
+      - name: Install kpwn_db prerequisites
+        working-directory: kpwn_db
+        run: pip install -r requirements.txt
+
+      - name: Merge DB
+        working-directory: scripts
+        run: ./db_merge.sh
