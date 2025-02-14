@@ -1,52 +1,54 @@
 name: Update target db
 on:
   workflow_dispatch:
+    inputs:
+      rebuild:
+        description: 'Rebuild the database from scratch'
+        type: boolean
+        required: false
+        default: false
   schedule:
     - cron: '0 0 * * *'
 permissions: {}
 jobs:
-  update_db:
+  get_missing_releases:
     runs-on: ubuntu-latest
+    outputs:
+      releases: ${{ steps.get_missing_releases.outputs.releases }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Enable KVM group perms
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{secrets.DB_GCS_SA_KEY}}'
 
-      - name: Install Linux package prerequisites
-        run: sudo apt-get update && sudo apt install -yq --no-install-recommends pahole python3-ropgadget qemu-system-x86
-
-      - name: Install rp++
-        run: |
-          wget https://github.com/0vercl0k/rp/releases/download/v2.1.3/rp-lin-gcc.zip
-          unzip rp-lin-gcc.zip
-          mv ./rp-lin rp++
-          chmod u+x rp++
-          echo "$PWD" >> "$GITHUB_PATH"
-
       - name: Install kpwn_db prerequisites
         working-directory: kpwn_db
         run: pip install -r requirements.txt
 
-      - name: Install kernel_rop_generator prerequisites
-        working-directory: kernel_rop_generator
-        run: pip install -r requirements.txt
-
-      - name: Update db
-        working-directory: ./scripts
-        run: ./update_kpwn_db.sh --auto-cleanup
+      - name: Get missing releases
+        id: get_missing_releases
+        working-directory: scripts
+        run: |
+          ./db_get_missing_releases.sh ${{inputs.rebuild && '--rebuild'}}
+          echo "releases=$(cat missing_releases.txt | jq -Rsc 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           path: 'scripts/*.txt'
+
+  process_release:
+    needs: get_missing_releases
+    if: ${{ needs.get_missing_releases.outputs.releases != '[]' }}
+    strategy:
+      matrix:
+        release: ${{ fromJson(needs.get_missing_releases.outputs.releases) }}
+      fail-fast: false
+    uses: ./.github/workflows/generate-db-for-release.yml
+    secrets: inherit
+    with:
+      release: ${{matrix.release}}
