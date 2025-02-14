@@ -419,7 +419,7 @@ class RopGeneratorAngrop:
 
         return RopAction(
           type_id=0x03,
-          description="switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
+          description="switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)",
           gadgets=items)
 
     def rop_action_ret_via_kpti_retpoline(
