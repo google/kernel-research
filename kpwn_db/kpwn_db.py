@@ -54,7 +54,11 @@ def main():
     return parser.error("at least one of --input-file or --kernel_image_db_path required")
 
   if args.kernel_image_db_path:
-    targets += get_targets_from_image_db(meta, args.kernel_image_db_path, args.release_filter_add, logger)
+    new_targets = get_targets_from_image_db(meta, args.kernel_image_db_path, args.release_filter_add, logger)
+    if not new_targets:
+      sys.stderr.write("No new targets to add. Exiting...\n")
+      os._exit(1)
+    targets += new_targets
 
   # make targets unique
   targets = {str(t): t for t in targets}.values()
