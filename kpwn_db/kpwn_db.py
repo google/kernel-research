@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import glob
 import logging
 import os
 import sys
@@ -43,10 +44,14 @@ def main():
   logger.setLevel(getattr(logging, args.log_level))
   logger.addHandler(logging.StreamHandler())
 
+  targets = []
   if args.input_file:
-    db = read_kpwn_db(args.input_file)
-    meta = db.meta
-    targets = db.targets
+    input_files = sorted(glob.glob(args.input_file, recursive=True))
+    for input_file in input_files:
+      logger.info("Processing input file: %s", input_file)
+      db = read_kpwn_db(input_file)
+      meta = db.meta
+      targets += db.targets
   elif args.kernel_image_db_path:
     meta = MetaConfig.from_desc(config.symbols, config.rop_actions)
     targets = []
