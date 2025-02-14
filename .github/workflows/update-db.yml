@@ -51,4 +51,4 @@ jobs:
     uses: ./.github/workflows/generate-db-for-release.yml
     secrets: inherit
     with:
-      release: ${{matrix.release}}
+      release: kernelctf ${{matrix.release}}

@@ -30,7 +30,7 @@ echo "Collecting runtime data..."
 "$IMAGE_DB_DIR/collect_runtime_data.sh"
 
 echo "Creating db for release $DISTRO $RELEASE"
-"$KPWN_DB_DIR/kpwn_db.py" -i db.kpwn -o db.kpwn --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
+"$KPWN_DB_DIR/kpwn_db.py" -o db.kpwn --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
 "$KPWN_DB_DIR/kpwn_db.py" -i db.kpwn -o db.json --indent 4
 
 echo "Uploading dbs"
