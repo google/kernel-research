@@ -53,6 +53,25 @@ def get_offset(elffile, va):
                 return segment['p_offset'] + offset_in_segment
     return None  # VA not found in any segment
 
+
+def get_segment_by_addr(elffile, va):
+    """Returns segment containing an address.
+
+    Args:
+        elffile: An ELFFile object.
+        va: The virtual address to convert.
+
+    Returns:
+        The corresponding file offset, or None if the VA is not found in any segment.
+    """
+    for segment in elffile.iter_segments():
+        if segment['p_type'] == 'PT_LOAD':  # Look for loadable segments
+            seg_start_va = segment['p_vaddr']
+            seg_end_va = seg_start_va + segment['p_memsz']
+            if seg_start_va <= va < seg_end_va:  # Check if VA is within segment range
+                return segment
+
+
 def setup_logger(name):
     """
     Sets up a logger with a name that logs to the console.
