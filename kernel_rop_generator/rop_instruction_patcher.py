@@ -31,7 +31,7 @@ Jumps/Calls to __x86_indirect_thunk_*:
     These are replaced with jmp/call reg + 0xcc
 gs:0x20c80:
     In kernels with relocations, these values seem to be sometimes changed at load time.
-    These are replaces with 0xcc
+    These are replaced with 0xcc
 """
 
 
@@ -266,6 +266,10 @@ class RopInstructionPatcher:
                 for addr in self.indirect_thunk_jumps[reg]:
                     self.replace_bytes(
                         vmlinux_bytes, elffile, addr, replacement)
+
+            for addr in self.other_relocations:
+                self.replace_bytes(vmlinux_bytes, elffile,
+                                   addr, RUNTIME_RELOCATED_BYTES_REPLACE)
 
         # Write the patched data to the new file
         with open(output_path, "wb") as output_file:
