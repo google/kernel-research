@@ -14,6 +14,9 @@ mount proc /proc -t proc
 mkdir -p /sys
 mount -t sysfs sysfs /sys
 
+mkdir -p /tmp
+mount -t tmpfs tmpfs /tmp
+
 if [ ! -e /output ]; then
     ln -s /dev/ttyS1 /output
 fi
