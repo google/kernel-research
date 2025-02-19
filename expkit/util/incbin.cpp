@@ -8,4 +8,5 @@
     ); \
     extern const unsigned char var_name[]; \
     extern const unsigned char var_name ## _end[]; \
+    __asm__(".section .bss\n"); \
     extern const size_t var_name ## _size = var_name ## _end - var_name;
