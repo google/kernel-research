@@ -1,9 +1,10 @@
-TARGET ?= kernelctf lts-6.1.36
+#TARGET ?= kernelctf lts-6.1.36
+TARGET ?= kernelctf cos-97-16919.353.23
 
 build: exp
 
 exp: target_db.kpwn exploit.cpp
-	g++ -Wno-format -static -I../.. -o exp exploit.cpp
+	g++ -O2 -Wno-format -static -I../.. -o exp exploit.cpp
 
 target_db.kpwn:
 	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
