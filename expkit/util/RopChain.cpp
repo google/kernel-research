@@ -15,10 +15,14 @@ public:
         items_.push_back((offset ? kaslr_base_ : 0) + item);
     }
 
-    std::vector<uint8_t> GetData() {
+    std::vector<uint8_t> GetData() const {
         auto result_size = items_.size() * sizeof(uint64_t);
         std::vector<uint8_t> result(result_size);
         memcpy(result.data(), items_.data(), result_size);
         return result;
+    }
+
+    uint64_t GetByteSize() const {
+        return items_.size() * sizeof(uint64_t);
     }
 };

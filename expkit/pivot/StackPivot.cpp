@@ -4,6 +4,7 @@
 #include <string>
 #include <set>
 #include "pivot/Pivots.cpp"
+#include "util/error.cpp"
 #include "util/str.cpp"
 #include "util/Payload.cpp"
 
@@ -18,17 +19,18 @@ public:
     StackPivot(const PushIndirectPivot& push_gadget, const PopRspPivot& pop_gadget)
         : push_gadget_(push_gadget), pop_gadget_(pop_gadget) { }
 
-    std::string GetDescription(bool include_clobbers = true) {
+    std::string GetDescription(bool include_clobbers = true) const {
         std::string result;
         if (one_gadget_) {
             result = format_str("OneGadget @ 0x%llx: set RSP to %s + 0x%llx", one_gadget_->address,
                 register_names[(uint) one_gadget_->pivot_reg.reg], one_gadget_->next_rip_offset);
         } else if (push_gadget_ && pop_gadget_) {
-            result = format_str("PushIndirect @ 0x%llx: push %s and %s [%s + 0x%llx]; PopRsp @ 0x%llx: pivots to buf + 0x%llx", 
+            result = format_str("PushIndirect @ 0x%llx: push %s and %s [%s + 0x%llx]; PopRsp @ 0x%llx: pivots to buf + 0x%llx",
                 push_gadget_->address, register_names[(uint) push_gadget_->push_reg.reg],
                 push_gadget_->indirect_type == IndirectType::JMP ? "jmp" : "call", register_names[(uint) push_gadget_->indirect_reg.reg],
                 push_gadget_->next_rip_offset, pop_gadget_->address, pop_gadget_->next_rip_offset);
-        }
+        } else
+            throw ExpKitError("Invalid Pivot.");
 
         if (include_clobbers) {
             std::set<int64_t> used_offsets;
@@ -58,7 +60,7 @@ public:
         return one_gadget_ ? one_gadget_->address : push_gadget_->address;
     }
 
-    uint64_t GetDestinationOffset() {
+    uint64_t GetDestinationOffset() const {
         return one_gadget_ ? one_gadget_->next_rip_offset : pop_gadget_->next_rip_offset;
     }
 
