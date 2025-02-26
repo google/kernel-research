@@ -2,8 +2,16 @@
 
 #include <algorithm>
 #include <vector>
+#include <functional>
 
 template <typename T, typename T2>
 bool contains(const std::vector<T>& vec, const T2& value) {
     return std::find(vec.begin(), vec.end(), value) != vec.end();
+}
+
+template <typename T>
+void sortByField(std::vector<T>& vec, std::function<int64_t(const T&)> fieldGetter) {
+    std::sort(vec.begin(), vec.end(), [&fieldGetter](const T& obj1, const T& obj2) {
+        return fieldGetter(obj1) < fieldGetter(obj2);
+    });
 }
