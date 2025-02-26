@@ -4,9 +4,9 @@
 #include <optional>
 #include "pivot/Pivots.cpp"
 #include "pivot/StackPivot.cpp"
-#include "util/Payload.cpp"
+#include "payloads/Payload.cpp"
+#include "payloads/RopChain.cpp"
 #include "util/stdutils.cpp"
-#include "util/RopChain.cpp"
 
 struct StackShiftInfo {
     uint64_t from_offset;

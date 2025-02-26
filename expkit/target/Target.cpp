@@ -5,7 +5,6 @@
 #include <string>
 #include <cstring>
 #include "util/error.cpp"
-#include "util/RopChain.cpp"
 #include "pivot/Pivots.cpp"
 
 enum struct RopActionId: uint32_t {
@@ -74,24 +73,11 @@ struct Target {
         return it->second;
     }
 
-    void AddRopAction(RopChain& rop, RopActionId id, std::vector<uint64_t> arguments = {}) {
+    std::vector<RopItem> GetItemsForAction(RopActionId id) {
         if (rop_actions.find(id) == rop_actions.end()){
             throw ExpKitError("missing RopActionID %u", id);
         }
-
-        for (auto item : rop_actions[id]) {
-            if (item.type == RopItemType::CONSTANT_VALUE) {
-                rop.Add(item.value);
-            } else if (item.type == RopItemType::ARGUMENT) {
-                if (item.value < arguments.size())
-                    rop.Add(arguments[item.value]);
-                else
-                    throw ExpKitError("not enough arguments for RopAction, got %u arguments, but needed %u", arguments.size(), item.value + 1);
-            } else if (item.type == RopItemType::SYMBOL) {
-                rop.Add(item.value, true);
-            } else
-                throw ExpKitError("unexpected RopAction item type %u", item.type);
-        }
+        return rop_actions[id];
     }
 };
 
