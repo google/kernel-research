@@ -18,6 +18,8 @@ struct RegisterUsage {
 struct StackShiftPivot: Pivot {
     uint64_t ret_offset;
     uint64_t shift_amount;
+
+    bool JumpsToShift() const { return ret_offset == shift_amount - 8; }
 };
 
 struct OneGadgetPivot: Pivot {
