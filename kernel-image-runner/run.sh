@@ -30,6 +30,7 @@ while [[ $# -gt 0 ]]; do
     --only-command-output) ONLY_COMMAND_OUTPUT=1; shift;;
     --dmesg=*) DMESG="${1#*=}"; shift;;
     --gdb|--snapshot|--nokaslr) RUN_ARGS+=" $1"; shift;;
+    --dbgsym) DBGSYM=1; shift;;
     --custom-modules=*) CUSTOM_MODULES="${1#*=}"; shift;;
     --) # stop processing special arguments after "--"
         shift
@@ -57,7 +58,11 @@ if [ -z "$RELEASE_NAME" ]; then
     exit 1
 fi
 
-$SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules" 1>&2
+if [ -z "$DBGSYM" ]; then
+    $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules" 1>&2
+else
+    $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules,dbgsym" 1>&2
+fi
 
 RUN_ARGS="$VMLINUZ$RUN_ARGS"
 if [ -d "$MODULES_PATH" ]; then RUN_ARGS+=" --modules-path=$MODULES_PATH"; fi
@@ -67,6 +72,16 @@ if [[ "$CUSTOM_MODULES" != "keep" && ( -z "$CUSTOM_MODULES_KEEP" || ! -f "$RELEA
 fi
 
 if [ ! -z "$CUSTOM_MODULES" ]; then RUN_ARGS+=" --custom-modules-tar=$RELEASE_DIR/custom_modules.tar"; fi
+
+if [[ "$RUN_ARGS" == *"--gdb"* ]]; then
+    if [ -z "$DBGSYM" ]; then
+        printf "\nDebugging command:\n";
+	printf "gdb -ex=\"target remote :1234\"\n";
+    else
+	printf "\nDebugging command:\n";
+        printf "gdb -ex=\"target remote :1234\" $RELEASE_DIR/vmlinux\n";
+    fi	
+fi
 
 # only-command-output handling + running the VM
 
