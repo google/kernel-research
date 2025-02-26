@@ -6,7 +6,7 @@
 #include "pivot/Pivots.cpp"
 #include "util/error.cpp"
 #include "util/str.cpp"
-#include "util/Payload.cpp"
+#include "payloads/Payload.cpp"
 
 class StackPivot {
     std::optional<const OneGadgetPivot> one_gadget_;

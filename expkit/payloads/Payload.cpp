@@ -17,6 +17,11 @@ class Payload {
 public:
     Payload(int size): data_(size), used_bytes_(size, 0), used_size_(0) { }
 
+    Payload(const Payload& other)
+        : data_(other.data_),
+          used_bytes_(other.used_bytes_),
+          used_size_(other.used_size_) {}
+
     size_t Size() { return data_.size(); }
 
     std::vector<uint8_t>& GetData() { return data_; }
@@ -103,9 +108,7 @@ public:
     }
 
     Payload Snapshot() {
-        Payload clone(data_.size());
-        clone.Restore(*this);
-        return clone;
+        return Payload(*this);
     }
 
     void Restore(const Payload& snapshot) {
