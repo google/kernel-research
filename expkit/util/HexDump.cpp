@@ -30,8 +30,8 @@ public:
         return result;
     }
 
-    static void Dump(const std::vector<uint8_t>& data) {
-        Dump(data.data(), data.size());
+    static std::string Dump(const std::vector<uint8_t>& data) {
+        return Dump(data.data(), data.size());
     }
 
     static void Print(const void* buf, int len) {

