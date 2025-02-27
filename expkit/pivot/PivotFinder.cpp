@@ -44,7 +44,7 @@ struct RopPivotInfo {
 
 class PivotFinder {
     Pivots pivots_;
-    Register buf_reg_;
+    std::set<Register> buf_regs_;
     Payload& payload_;
 
     std::vector<StackPivot> FindInternal(bool only_one, uint64_t free_bytes_after = 0) {
@@ -85,16 +85,33 @@ class PivotFinder {
         return result;
     }
 
-public:
-    PivotFinder(const Pivots& pivots, Register buf_reg, Payload& payload): pivots_(pivots), buf_reg_(buf_reg), payload_(payload) {
+    void SortFields(){
         sortByField<OneGadgetPivot>(pivots_.one_gadgets, [](auto& a) { return a.next_rip_offset; });
         sortByField<PushIndirectPivot>(pivots_.push_indirects, [](auto& a) { return a.next_rip_offset; });
         sortByField<PopRspPivot>(pivots_.pop_rsps, [](auto& a) { return a.next_rip_offset; });
         sortByField<StackShiftPivot>(pivots_.stack_shifts, [](auto& a) { return a.shift_amount; });
     }
 
+public:
+    PivotFinder(const Pivots &pivots,
+                Register buf_reg,
+                Payload &payload)
+        : pivots_(pivots), buf_regs_({buf_reg}), payload_(payload)
+    {
+        SortFields();
+    }
+
+    PivotFinder(const Pivots &pivots,
+                std::vector<Register> buf_regs,
+                Payload &payload)
+        : pivots_(pivots), buf_regs_(buf_regs.begin(), buf_regs.end()), payload_(payload)
+    {
+        SortFields();
+    }
+
     bool CheckRegister(const RegisterUsage& reg) {
-        if (reg.reg != buf_reg_)
+        // Check it's using a register pointing at this buffer
+        if (buf_regs_.find(reg.reg) == buf_regs_.end())
             return false;
 
         // TODO: it can be used as long as it is not used for RIP control (just pre-RIP control vuln trigger)
