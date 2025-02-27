@@ -5,8 +5,11 @@ import re
 import sys
 import os
 from collections import defaultdict
+import pathlib
+
 import archinfo
 import gadget_finder
+from rop_instruction_patcher import RopInstructionPatcher
 from rop_util import setup_logger
 
 sys.path.append(os.path.abspath(f"{__file__}/../.."))
@@ -628,7 +631,13 @@ def main():
     if args.backend == "text":
         backend = gadget_finder.TextFileBackend(args.input_file, args.vmlinux)
     else:
-        backend = gadget_finder.RppBackend(args.input_file, CONTEXT_SIZE)
+        patched_vmlinux_path = pathlib.Path(
+            args.input_file
+        ).with_suffix(".thunk_replaced")
+
+        if not patched_vmlinux_path.exists():
+            RopInstructionPatcher(args.input_file).apply_patches(patched_vmlinux_path)
+        backend = gadget_finder.RppBackend(patched_vmlinux_path, CONTEXT_SIZE)
 
     pivot_finder = PivotFinder(backend)
     pivots = pivot_finder.find_pivots()
