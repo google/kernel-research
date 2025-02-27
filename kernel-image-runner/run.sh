@@ -58,11 +58,7 @@ if [ -z "$RELEASE_NAME" ]; then
     exit 1
 fi
 
-if [ -z "$DBGSYM" ]; then
-    $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules" 1>&2
-else
-    $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules,dbgsym" 1>&2
-fi
+$SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules${DBGSYM:+",dbgsym"}" 1>&2
 
 RUN_ARGS="$VMLINUZ$RUN_ARGS"
 if [ -d "$MODULES_PATH" ]; then RUN_ARGS+=" --modules-path=$MODULES_PATH"; fi
@@ -74,13 +70,8 @@ fi
 if [ ! -z "$CUSTOM_MODULES" ]; then RUN_ARGS+=" --custom-modules-tar=$RELEASE_DIR/custom_modules.tar"; fi
 
 if [[ "$RUN_ARGS" == *"--gdb"* ]]; then
-    if [ -z "$DBGSYM" ]; then
-        printf "\nDebugging command:\n";
-	printf "gdb -ex=\"target remote :1234\"\n";
-    else
-	printf "\nDebugging command:\n";
-        printf "gdb -ex=\"target remote :1234\" $RELEASE_DIR/vmlinux\n";
-    fi	
+    printf "\nDebugging command:\n";
+    printf "gdb -ex=\"target remote :1234\" ${DBGSYM:+"$RELEASE_DIR/vmlinux"}\n\n";
 fi
 
 # only-command-output handling + running the VM
