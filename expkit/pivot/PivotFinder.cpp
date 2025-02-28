@@ -29,6 +29,17 @@ struct RopPivotInfo {
     uint64_t rop_min_offset;
     uint64_t rop_offset;
     StackShiftingInfo stack_shift;
+
+    // TODO: make this more universal
+    void PrintDebugInfo() const {
+        printf("[+] Selected stack pivot: %s\n", pivot.GetDescription().c_str());
+
+        for (auto& shift : stack_shift.stack_shifts)
+            printf("[+] Stack jump @0x%lx: 0x%lx -> 0x%lx (size: 0x%lx)\n", shift.pivot.address,
+                shift.from_offset, shift.from_offset + shift.pivot.shift_amount, shift.pivot.shift_amount);
+
+        printf("[+] ROP chain offset: 0x%lx\n", rop_offset);
+    }
 };
 
 class PivotFinder {
