@@ -206,7 +206,7 @@ public:
             payload_.Restore(snapshot);
             pivot.ApplyToPayload(payload_, rop.kaslr_base_);
 
-            auto rop_min_offset = payload_.FindEmpty(padding_before_rop + rop.GetByteSize(), 8);
+            auto rop_min_offset = payload_.FindEmpty(padding_before_rop + rop.GetByteSize(), 8, pivot.GetDestinationOffset());
             if (!rop_min_offset)
                 continue; // not enough space for the ROP chain
 
