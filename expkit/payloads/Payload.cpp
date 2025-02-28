@@ -30,6 +30,10 @@ public:
         return std::vector<uint8_t>(data_.begin(), data_.begin() + used_size_);
     }
 
+    int Size() {
+        return data_.size();
+    }
+
     bool CheckFree(uint64_t offset, uint64_t len, bool throws = false) {
         if (offset + len > data_.size()) {
             if (throws)
@@ -90,18 +94,30 @@ public:
         *ReserveU64(offset) = value;
     }
 
-    std::optional<uint64_t> FindEmpty(uint64_t len, uint64_t alignment = 1) {
+    std::optional<uint64_t> FindEmpty(uint64_t len, uint64_t alignment = 1, uint64_t min_offset=0) {
         if (len > used_bytes_.size())
             return std::nullopt;
 
-        // O(n * k) - switch to interval tree structure?
-        for (uint64_t i = 0; i < used_bytes_.size() - len; i++) {
-            uint64_t j;
-            for (j = 0; j < len; j++)
-                if (used_bytes_[i + j])
+        // Ensure min_offset is aligned.
+        min_offset = align(min_offset, alignment);
+
+        // check for len contiguous unused bytes
+        // When we encounter a used_byte we increment i beyond it
+        // algorithm is O(n)
+        uint64_t i = min_offset;
+        while (i <= used_bytes_.size() - len) {
+            bool found = true;
+            for (uint64_t j = 0; j < len; j++) {
+                if (used_bytes_[i + j]) {
+                    found = false;
+                    i = align(i+j+1, alignment); //Increment past the used byte, and ensure alignment.
                     break;
-            if (j == len)
-                return align(i, alignment);
+                }
+            }
+
+            if (found) {
+                return i;
+            }
         }
 
         return std::nullopt;
