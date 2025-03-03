@@ -30,7 +30,7 @@ public:
         return std::vector<uint8_t>(data_.begin(), data_.begin() + used_size_);
     }
 
-    int Size() {
+    uint64_t Size() {
         return data_.size();
     }
 
