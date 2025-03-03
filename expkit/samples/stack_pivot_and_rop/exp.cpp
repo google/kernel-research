@@ -99,7 +99,7 @@ int main(int argc, const char** argv) {
 
     for (auto& shift : rop_pivot.stack_shift.stack_shifts)
         printf("[+] Stack jump @0x%lx: 0x%lx -> 0x%lx (size: 0x%lx)\n", shift.pivot.address,
-            shift.from_offset, shift.from_offset + shift.pivot.shift_amount, shift.pivot.shift_amount);
+            shift.ret_offset, shift.ret_offset + shift.pivot.shift_amount, shift.pivot.shift_amount);
     printf("[+] ROP chain offset: 0x%lx\n", rop_pivot.rop_offset);
 
     printf("[+] Payload:\n");

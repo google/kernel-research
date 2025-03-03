@@ -53,6 +53,15 @@ public:
         return result;
     }
 
+    std::vector<uint64_t> GetDataWords() const {
+        // Collect the actions into a single uint64_t vector
+        std::vector<uint64_t> items;
+        for (const auto& action : actions_) {
+            items.insert(items.end(), action.values.begin(), action.values.end());
+        }
+        return items;
+    }
+
     uint64_t GetByteSize() const {
         uint64_t size = 0;
         for (const auto& action : actions_) {
