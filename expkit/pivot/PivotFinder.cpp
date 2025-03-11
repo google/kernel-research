@@ -16,12 +16,14 @@ struct StackShiftInfo {
 
 struct StackShiftingInfo {
     std::vector<StackShiftInfo> stack_shifts;
+    uint64_t from_offset;
     uint64_t to_offset;
     uint64_t next_ret_offset;
 
     void Apply(uint64_t kaslr_base, Payload& payload) {
-        for (auto& shift : stack_shifts)
+        for (auto& shift : stack_shifts) {
             payload.Set(shift.ret_offset, kaslr_base + shift.pivot.address);
+        }
     }
 };
 
@@ -50,6 +52,7 @@ class PivotFinder {
     Payload& payload_;
 
     std::vector<StackPivot> FindInternal(bool only_one, uint64_t free_bytes_after = 0) {
+        auto snapshot = payload_.Snapshot(); // run on snapshot to avoid increasing bytes used
         std::vector<StackPivot> result;
 
         for (auto& gadget : pivots_.one_gadgets) {
@@ -65,12 +68,12 @@ class PivotFinder {
             if (!CheckPushIndirect(push, free_bytes_after))
                 continue;
 
-            payload_.Reserve(push.next_rip_offset, 8);
+            snapshot.Reserve(push.next_rip_offset, 8);
 
             for (auto& pop : pivots_.pop_rsps) {
                 auto push_change = push.indirect_type == IndirectType::CALL ? 8 : 0;
                 if (pop.stack_change_before_rsp != push_change ||
-                    !payload_.CheckFree(pop.next_rip_offset, 8 + free_bytes_after))
+                    !snapshot.CheckFree(pop.next_rip_offset, 8 + free_bytes_after))
                         continue;
 
                     result.push_back(StackPivot(push, pop));
@@ -78,7 +81,7 @@ class PivotFinder {
                         break;
             }
 
-            payload_.Release(push.next_rip_offset, 8);
+            snapshot.Release(push.next_rip_offset, 8);
 
             if (only_one && !result.empty())
                 break;
@@ -179,11 +182,11 @@ public:
         return shift_info;
     }
 
-    std::optional<StackShiftingInfo> GetShiftToRop(uint64_t from_offset, const RopChain& rop, bool include_extra_slot) {
+    std::optional<StackShiftingInfo> GetShiftToRop(uint64_t from_offset, uint64_t byte_size, bool include_extra_slot) {
         // search for min_next_space = rop_size-8
         // because the first gadget is put in the next_ret_offset
-        if(rop.GetByteSize() == 0) throw ExpKitError("rop size is 0");
-        uint64_t search_size = rop.GetByteSize()-8;
+        if(byte_size == 0) throw ExpKitError("byte_size is 0");
+        uint64_t search_size = byte_size-8;
         if (include_extra_slot) search_size += 8;
         return FindShiftsInternal(from_offset, std::nullopt, search_size);
     }
@@ -234,6 +237,12 @@ public:
             std::vector<StackShiftPivot> current_path = std::move(q.front().second);
             q.pop();
 
+            if ((!min_to_offset || sp >= *min_to_offset) &&
+                        (!min_next_space || payload_.CheckFree(sp, *min_next_space))) {
+                finished.push_back({sp, current_path});
+                continue;
+            }
+
             // check each pivot to see if it is applicable
             for (int i = 0; i < pivots_.stack_shifts.size(); i++) {
                 StackShiftPivot pivot = pivots_.stack_shifts[i];
@@ -255,16 +264,9 @@ public:
                 std::vector<StackShiftPivot> copy = current_path;
                 copy.push_back(pivot);
 
-                // check if it's reached the goal
-                if ((!min_to_offset || new_sp >= *min_to_offset) &&
-                         (!min_next_space || payload_.CheckFree(new_sp, *min_next_space))) {
-                    finished.push_back({new_sp, std::move(copy)});
-                } else {
-                    // otherwise add new path to queue
-                    q.push({new_sp, std::move(copy)});
-                    // mark visited
-                    visited[new_sp] = true;
-                }
+                q.push({new_sp, std::move(copy)});
+                // mark visited
+                visited[new_sp] = true;
             }
         }
 
@@ -293,14 +295,14 @@ public:
 
         // first address is stored at "from_offset"
         uint64_t ret_offset = from_offset;
-        from_offset += 8; // move one slot for first ret
+        uint64_t sp_offset = from_offset + 8; // move one slot for first ret
         for (const StackShiftPivot stack_shift : chain) {
-            uint64_t next_ret = from_offset + stack_shift.ret_offset;
-            from_offset += stack_shift.shift_amount;
+            uint64_t next_ret = sp_offset + stack_shift.ret_offset;
+            sp_offset += stack_shift.shift_amount;
             shift_info.push_back({ret_offset, stack_shift});
             ret_offset = next_ret;
         }
-        return StackShiftingInfo { shift_info, from_offset, ret_offset};
+        return StackShiftingInfo { shift_info, from_offset, sp_offset, ret_offset};
     }
 
     uint64_t ApplyShift(uint64_t kaslr_base, uint64_t from_offset, uint64_t min_to_offset) {
@@ -317,7 +319,7 @@ public:
             payload_.Restore(snapshot);
             pivot.ApplyToPayload(payload_, rop.kaslr_base_);
 
-            auto shifts = GetShiftToRop(pivot.GetDestinationOffset(), rop, false);
+            auto shifts = GetShiftToRop(pivot.GetDestinationOffset(), rop.GetByteSize(), false);
             if(!shifts) continue;
 
             shifts->Apply(rop.kaslr_base_, payload_);

@@ -8,10 +8,11 @@
 #include "util/str.cpp"
 #include "payloads/Payload.cpp"
 
+// TODO use subclasses?
 class StackPivot {
-    std::optional<const OneGadgetPivot> one_gadget_;
-    std::optional<const PushIndirectPivot> push_gadget_;
-    std::optional<const PopRspPivot> pop_gadget_;
+    std::optional<OneGadgetPivot> one_gadget_;
+    std::optional<PushIndirectPivot> push_gadget_;
+    std::optional<PopRspPivot> pop_gadget_;
 public:
     StackPivot(const OneGadgetPivot& one_gadget)
         : one_gadget_(one_gadget) { }
