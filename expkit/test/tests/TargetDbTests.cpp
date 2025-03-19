@@ -117,4 +117,24 @@ struct TargetDbTests: TestSuite {
         ASSERT_EQ(0, g3.stack_change_before_rsp);
         ASSERT_EQ(8, g3.next_rip_offset);
     }
+
+    TEST_METHOD(structLts6181, "structs are correct (lts-6.1.81)") {
+        auto structs = getLts6181().structs;
+        ASSERT_EQ(5, structs.size());
+
+        ASSERT_EQ(40, structs["pipe_buffer"].size);
+        ASSERT_EQ(1, structs["pipe_buffer"].fields.size());
+        ASSERT_EQ(16, structs["pipe_buffer"].fields["ops"].offset);
+        ASSERT_EQ(8, structs["pipe_buffer"].fields["ops"].size);
+
+        ASSERT_EQ(48, structs["msg_msg"].size);
+        ASSERT_EQ(6, structs["msg_msg"].fields.size());
+        ASSERT_EQ(32, structs["msg_msg"].fields["next"].offset);
+        ASSERT_EQ(8, structs["msg_msg"].fields["next"].size);
+
+        ASSERT_EQ(8, structs["msg_msgseg"].size);
+
+        ASSERT_EQ(752, structs["hfsc_class"].size);
+        ASSERT_EQ(312, structs["hfsc_class"].fields["cl_cvtmin"].offset);
+    }
 };
