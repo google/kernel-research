@@ -1,0 +1,81 @@
+{
+    "pipe_buffer": {
+        "size": 40,
+        "fields": {
+            "page": {
+                "offset": 0,
+                "size": 8
+            },
+            "offset": {
+                "offset": 8,
+                "size": 4
+            },
+            "len": {
+                "offset": 12,
+                "size": 4
+            },
+            "ops": {
+                "offset": 16,
+                "size": 8
+            },
+            "flags": {
+                "offset": 24,
+                "size": 8
+            },
+            "private": {
+                "offset": 32,
+                "size": 8
+            }
+        }
+    },
+    "pipe_buf_operations": {
+        "size": 32,
+        "fields": {
+            "confirm": {
+                "offset": 0,
+                "size": 8
+            },
+            "release": {
+                "offset": 8,
+                "size": 8
+            },
+            "try_steal": {
+                "offset": 16,
+                "size": 8
+            },
+            "get": {
+                "offset": 24,
+                "size": 8
+            }
+        }
+    },
+    "msg_msg": {
+        "size": 48,
+        "fields": {
+            "m_list.next": {
+                "offset": 0,
+                "size": 8
+            },
+            "m_list.prev": {
+                "offset": 8,
+                "size": 8
+            },
+            "m_type": {
+                "offset": 16,
+                "size": 8
+            },
+            "m_ts": {
+                "offset": 24,
+                "size": 8
+            },
+            "next": {
+                "offset": 32,
+                "size": 8
+            },
+            "security": {
+                "offset": 40,
+                "size": 8
+            }
+        }
+    }
+}

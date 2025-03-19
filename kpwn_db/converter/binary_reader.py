@@ -1,6 +1,6 @@
 """Module containing classes related to reading binary data."""
 import struct
-
+import contextlib
 
 class BinaryReader:
   """Utility class to read binary data from a file or a bytearray more easily."""
@@ -17,6 +17,13 @@ class BinaryReader:
   def zstr_u2(self):
     """Reads a zero-terminated string prefixed with its length as a uint16 field."""
     len_ = self.u2()
+    result = self.read(len_)
+    self.offset += 1
+    return result
+
+  def zstr(self):
+    """Reads a zero-terminated string prefixed with its length as a varuint field."""
+    len_ = self.varuint()
     result = self.read(len_)
     self.offset += 1
     return result
@@ -57,3 +64,18 @@ class BinaryReader:
   def struct(self, struct_size_len=2):
     data_len = self.uint(struct_size_len)    # struct_size
     return BinaryReader(self.read(data_len)) if data_len > 0 else None
+
+  @contextlib.contextmanager
+  def seek(self, offs):
+    saved_offset = self.offset
+    self.offset = offs
+    yield
+    self.offset = saved_offset
+
+  def seekable_list(self):
+    hdr = self.varuint()
+    offset_size = (hdr & 0x3) + 1
+    item_count = hdr >> 2
+    # skip the seek list
+    self.offset += offset_size * item_count
+    return item_count

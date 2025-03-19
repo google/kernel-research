@@ -7,17 +7,16 @@ from converter.image_db_utils import collect_image_db_targets, get_targets_from_
 from converter.kpwn_writer import KpwnWriter
 from data_model.db import Db
 from data_model.meta import MetaConfig
-from test.utils import MOCK_DB_DIR, RELEASES_DIR, expect_file
+from test.utils import MOCK_DB_DIR, RELEASES_DIR, expect_file, ExceptionRaisingLogger
 
 class ImageDbUtilsTests(unittest.TestCase):
   """Tests for the image_db_utils.py file."""
 
-  def expect_db(self, db_path, release_filter, expected_fn):
+  def expect_db(self, db_path, release_filter, expected_fn, expected_target_count=1):
     with expect_file(expected_fn) as f:
-      logger = logging.getLogger(__name__)
-      logger.addHandler(logging.NullHandler())
-      meta_config = MetaConfig.from_desc(config.symbols, config.rop_actions)
-      targets = get_targets_from_image_db(meta_config, db_path, release_filter, logger)
+      meta_config = MetaConfig.from_desc(config.symbols, config.rop_actions, config.structs)
+      targets = get_targets_from_image_db(meta_config, db_path, release_filter, ExceptionRaisingLogger(__name__))
+      self.assertEqual(expected_target_count, len(targets))
       db = Db(meta_config, targets)
       KpwnWriter(db).write_to_file(f.name)
 
@@ -31,5 +30,5 @@ class ImageDbUtilsTests(unittest.TestCase):
     targets = collect_image_db_targets(RELEASES_DIR, "bad/missing_files")
     self.assertEqual(1, len(targets))
     self.assertEqual("missing_files", targets[0].release_name)
-    self.assertListEqual(["version.txt", "symbols.txt", "rop_actions.json", "stack_pivots.json"],
-                         targets[0].missing_files)
+    self.assertListEqual(["version.txt", "symbols.txt", "rop_actions.json",
+      "stack_pivots.json", "structs.json"], targets[0].missing_files)
