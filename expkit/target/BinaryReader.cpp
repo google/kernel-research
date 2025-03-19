@@ -10,7 +10,7 @@
 class BinaryReader {
 protected:
     std::vector<uint8_t> data_;
-    uint64_t offset_ = 0, offset_targets_ = 0;
+    uint64_t offset_ = 0;
     std::vector<uint64_t> struct_ends_;
     ILog* log_ = nullptr;
     uint log_padding = 0;
@@ -74,6 +74,15 @@ public:
         return ReadInt(false);
     }
 
+    uint64_t SeekableListCount() {
+        auto value = ReadUInt();
+        auto offset_size = (value & 0x3) + 1;
+        auto item_count = value >> 2;
+        // skip the seek list
+        offset_ += offset_size * item_count;
+        return item_count;
+    }
+
     template <typename... Args>
     inline void DebugLog(const char* format, const Args&... args) {
         static const char spaces[] = "                                                                     ";
@@ -109,6 +118,10 @@ public:
 
     const char* ZStr(uint16_t len) {
         return (char*) Read(len + 1);
+    }
+
+    const char* ZStr() {
+        return (char*) Read(ReadUInt() + 1);
     }
 
     BinaryReader(const uint8_t* buffer, size_t size): data_(buffer, buffer + size) {

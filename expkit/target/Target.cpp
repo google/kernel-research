@@ -54,14 +54,12 @@ enum struct RopItemType: uint8_t {
     SYMBOL = 1,
     ARGUMENT = 2
 };
-
 struct RopItem {
     RopItemType type;
     uint64_t value;
 
     RopItem(RopItemType type, uint64_t value): type(type), value(value) { }
 };
-
 struct RopActionArgMeta {
     std::string name;
     bool required;
@@ -70,7 +68,6 @@ struct RopActionArgMeta {
     RopActionArgMeta(std::string name, bool required, uint64_t default_value)
         : name(name), required(required), default_value(default_value) { }
 };
-
 struct RopActionMeta {
     RopActionId type_id;
     std::string desc;
@@ -78,6 +75,18 @@ struct RopActionMeta {
 
     RopActionMeta() {}
     RopActionMeta(RopActionId type_id, std::string desc): type_id(type_id), desc(desc) { }
+};
+
+struct StructField {
+    std::string name;
+    uint64_t offset;
+    uint64_t size;
+};
+
+struct Struct {
+    std::string name;
+    uint64_t size;
+    std::map<std::string, StructField> fields;
 };
 
 struct Target {
@@ -88,6 +97,7 @@ struct Target {
     std::string version;
     std::map<SymbolId, uint32_t> symbols;
     std::map<RopActionId, std::vector<RopItem>> rop_actions;
+    std::map<std::string, Struct> structs;
     Pivots pivots;
 
     Target() { }
