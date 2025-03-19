@@ -29,20 +29,37 @@ class RopActionMeta():
     return cls(type_id=type_id, desc=desc, args=args)
 
 @dataclass
+class StructFieldMeta():
+  field_name: str
+
+@dataclass
+class StructMeta():
+  struct_name: str
+  fields: List[StructFieldMeta]
+
+@dataclass
 class MetaConfig():
   symbols: List[SymbolMeta]
   rop_actions: List[RopActionMeta]
+  structs: List[StructMeta]
 
   @classmethod
   def from_desc(cls,
                 symbols: Dict[int, str] = {},
-                rop_actions: Dict[int, str] = {}):
-    symbols_meta = [
+                rop_actions: Dict[int, str] = {},
+                structs: Dict[str, List[str]] = {}):
+    symbols = [
         SymbolMeta(type_id=type_id, name=name)
         for type_id, name in symbols.items()
     ]
-    rop_actions_meta = [
+    rop_actions = [
         RopActionMeta.from_config(type_id, desc)
         for type_id, desc in rop_actions.items()
     ]
-    return cls(symbols=symbols_meta, rop_actions=rop_actions_meta)
+    structs = [
+        StructMeta(struct_name=struct_name, fields=[
+            StructFieldMeta(field_name=field_name)
+            for field_name in fields])
+        for struct_name, fields in structs.items()
+    ]
+    return cls(symbols=symbols, rop_actions=rop_actions, structs=structs)

@@ -5,10 +5,11 @@ from converter.binary_reader import BinaryReader
 from converter.symbols import SymbolReader
 from converter.rop_actions import RopActionReader
 from converter.stack_pivots import StackPivotReader
+from converter.structs import StructReader
 
 MAGIC = "KPWN"
 VERSION_MAJOR = 1
-VERSION_MINOR = 0
+VERSION_MINOR = 1
 
 class KpwnReaderException(Exception):
   pass
@@ -20,6 +21,7 @@ class KpwnReader:
     self.symbol_reader = SymbolReader()
     self.rop_action_reader = RopActionReader()
     self.stack_pivot_reader = StackPivotReader()
+    self.struct_reader = StructReader()
 
   def read(self, f):
     r_root = BinaryReader(f.read())
@@ -37,7 +39,10 @@ class KpwnReader:
     r_meta = r_root.struct(4)
     symbols_meta = self.symbol_reader.read_meta(r_meta)
     rop_actions_meta = self.rop_action_reader.read_meta(r_meta)
-    meta = MetaConfig(symbols_meta, rop_actions_meta)
+    structs_meta = self.struct_reader.read_meta(r_meta)
+    meta = MetaConfig(symbols_meta, rop_actions_meta, structs_meta)
+
+    self.struct_reader.read_struct_layouts(r_root)
 
     # targets
     targets = []
@@ -50,9 +55,10 @@ class KpwnReader:
       symbols = self.symbol_reader.read_target(r_target)
       rop_actions = self.rop_action_reader.read_target(r_target)
       stack_pivots = self.stack_pivot_reader.read_target(r_target)
+      structs = self.struct_reader.read_target(r_target)
 
       target = Target(distro, release_name, version,
-                      symbols, rop_actions, stack_pivots)
+                      symbols, rop_actions, stack_pivots, structs)
 
       targets.append(target)
 

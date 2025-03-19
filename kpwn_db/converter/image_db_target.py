@@ -3,6 +3,7 @@ import os
 from data_model.db import Target
 from data_model.pivots import Pivots
 from data_model.rop_chain import RopActions
+from data_model.structs import Structs
 from data_model.serialization import from_json
 
 class ImageDbTarget:
@@ -13,7 +14,8 @@ class ImageDbTarget:
   SYMBOLS_TXT = "symbols.txt"
   ROP_ACTIONS_JSON = "rop_actions.json"
   STACK_PIVOTS_JSON = "stack_pivots.json"
-  ALL_FILES = [VERSION_TXT, SYMBOLS_TXT, ROP_ACTIONS_JSON, STACK_PIVOTS_JSON]
+  STRUCTS_JSON = "structs.json"
+  ALL_FILES = [VERSION_TXT, SYMBOLS_TXT, ROP_ACTIONS_JSON, STACK_PIVOTS_JSON, STRUCTS_JSON]
 
   def __init__(self, distro, release_name, dir_):
     self.distro = distro
@@ -62,6 +64,10 @@ class ImageDbTarget:
     with self.open_file(self.STACK_PIVOTS_JSON) as f:
       return from_json(Pivots, f.read())
 
+  def get_structs(self):
+    with self.open_file(self.STRUCTS_JSON) as f:
+      return from_json(Structs, f.read())
+
   def process(self, config=None):
     version = self.get_version()
 
@@ -74,5 +80,7 @@ class ImageDbTarget:
       rop_actions = [ra for ra in rop_actions if ra.type_id in type_ids]
 
     stack_pivots = self.get_stack_pivots()
+    structs = self.get_structs()
     return Target(distro=self.distro, release_name=self.release_name, version=version,
-                  symbols=symbols, rop_actions=rop_actions, stack_pivots=stack_pivots)
+                  symbols=symbols, rop_actions=rop_actions, stack_pivots=stack_pivots,
+                  structs=structs)
