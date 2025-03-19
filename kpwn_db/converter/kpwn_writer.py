@@ -5,10 +5,11 @@ from converter.binary_writer import BinaryWriter
 from converter.symbols import SymbolWriter
 from converter.rop_actions import RopActionWriter
 from converter.stack_pivots import StackPivotWriter
+from converter.structs import StructWriter
 
 MAGIC = "KPWN"
 VERSION_MAJOR = 1
-VERSION_MINOR = 0
+VERSION_MINOR = 1
 
 
 class KpwnWriter:
@@ -18,6 +19,7 @@ class KpwnWriter:
     self.symbol_writer = SymbolWriter(db.meta.symbols)
     self.rop_action_writer = RopActionWriter(db.meta.rop_actions)
     self.stack_pivot_writer = StackPivotWriter()
+    self.struct_writer = StructWriter(db.meta.structs)
     self.db = db
 
   def write(self, f, minimal=False):
@@ -28,11 +30,9 @@ class KpwnWriter:
 
     # meta header
     with wr_root.struct(4) as wr_hdr:
-      # symbols
       self.symbol_writer.write_meta(wr_hdr, minimal)
-
-      # ROP Actions
       self.rop_action_writer.write_meta(wr_hdr, minimal)
+      self.struct_writer.write_meta(wr_hdr)
 
     # targets
     wr_root.u4(len(self.db.targets))
@@ -42,14 +42,13 @@ class KpwnWriter:
         wr_target.zstr_u2(target.release_name)
         wr_target.zstr_u2(target.version)
 
-        # symbols
         self.symbol_writer.write_target(wr_target, target)
-
-        # ROP Actions
         self.rop_action_writer.write_target(wr_target, target)
-
-        # Stack Pivots
         self.stack_pivot_writer.write_target(wr_target, target)
+        self.struct_writer.write_target(wr_target, target)
+
+    # struct layouts
+    self.struct_writer.write_struct_layouts(wr_root)
 
   def write_to_file(self, fn, minimal=False):
     os.makedirs(os.path.abspath(os.path.dirname(fn)), exist_ok=True)

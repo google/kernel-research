@@ -28,3 +28,12 @@ rop_actions = {
     0x06: "telefork(ARG_sleep_msec=0xffffffff)",
     0x07: "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
 }
+
+structs = {
+    "pipe_buffer": ["ops"],
+    "pipe_buf_operations": ["release", "get"],
+    "msg_msg": ["m_list.next", "m_list.prev", "m_type", "m_ts", "next", "security"],
+    "msg_msgseg": ["next"],
+    "hfsc_class": ["level", "cl_parent", "vt_node.__rb_parent_color",
+                   "cf_node.__rb_parent_color", "cl_vt", "cl_cvtmin"],
+}

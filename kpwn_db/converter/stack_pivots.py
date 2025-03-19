@@ -10,12 +10,8 @@ KERNEL_BASE_ADDRESS = 0xffffffff81000000
 class StackPivotWriter:
   def write_target(self, wr_target, target):
     with wr_target.struct() as wr:
-      def wr_list(list_):
-        wr.varuint(len(list_))
-        return list_
-
       def write_int_list(list_):
-        for value in wr_list(list_):
+        for value in wr.list(list_):
           wr.varsint(value)
 
       def write_address(g):
@@ -23,13 +19,13 @@ class StackPivotWriter:
 
       pivots = target.stack_pivots
 
-      for g in wr_list(pivots.one_gadgets):
+      for g in wr.list(pivots.one_gadgets):
         write_address(g)
         wr.varuint(REGISTERS.index(g.pivot_reg))
         write_int_list(g.used_offsets)
         wr.varsint(g.next_rip_offset)
 
-      for g in wr_list(pivots.push_indirects):
+      for g in wr.list(pivots.push_indirects):
         write_address(g)
         wr.varuint(INDIRECT_TYPES.index(g.indirect_type))
         wr.varuint(REGISTERS.index(g.push_register))
@@ -38,12 +34,12 @@ class StackPivotWriter:
         write_int_list(g.used_offsets_in_indirect_reg)
         wr.varsint(g.next_rip_offset)
 
-      for g in wr_list(pivots.pop_rsps):
+      for g in wr.list(pivots.pop_rsps):
         write_address(g)
         wr.varuint(g.stack_change_before_rsp)
         wr.varsint(g.next_rip_offset)
 
-      for g in wr_list(pivots.stack_shifts):
+      for g in wr.list(pivots.stack_shifts):
         write_address(g)
         wr.varuint(g.ret_offset)
         wr.varuint(g.shift_amount)

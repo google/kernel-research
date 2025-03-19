@@ -3,7 +3,7 @@
 magic = KPWN (u4)
 version_major = 0x1 (u2) - file with newer version_major
                            is not compatible with older readers
-version_minor = 0x0 (u2) - file with newer version_minor
+version_minor = 0x1 (u2) - file with newer version_minor
                            is compatible with older readers
 meta_size (u4) - useful for older readers to skip newer metadata
 meta:
@@ -26,6 +26,11 @@ meta:
       flags (u1)
         required - 0x1
       default_value (u8) - only if required == 0
+  structs[varsize]
+    struct_name[varsize] (zstr)
+    fields[varsize]
+      field_name [varsize] (zstr)
+  struct_layouts_db_offset (u4)
 num_targets (u4)
 targets[num_targets]
   struct_size (u4) - so we can jump over easily and
@@ -63,8 +68,28 @@ targets[num_targets]
       address (uint)
       stack_change_before_rsp (uint)
       next_rip_offset (sint)
+  struct_layout_indices[len(structs)] (uint) # 1-based, 0 means missing
+struct_layouts[seekable_varsize]
+  struct_meta_idx (uint)
+  sizeof_structure (uint)
+  fields[num_fields]
+    offset (uint)
+    field_size (uint)
 
 u[N] = N-byte unsigned integer (u1 = uint8_t, u4 = uint32_t)
 b[N] = N-bit unsigned integer (b4 = integer stored on 4 bits)
 uint = generic, variable-sized unsigned integer
 sint = generic, variable-sized signed integer
+zstr = string with a terminating \0 character
+varsize = array-size stored as uint before the array
+seekable_varsize =
+    array item end* offsets are stored as a varsize array before the array
+    *end offsets to support skipping <n> elements (even all elements)
+    so it expands to:
+        hdr (uint) - "(item_count << 2) | offset_size"
+            the 2 LSB bits: item size is also stored as int: 1 or 2 or 4
+            other bits: value
+        offset_size (uint)
+        item_count (uint)
+        end_offsets[item_count] (u1, u2 or u4 depending on offset_size)
+        array_items[item_count]

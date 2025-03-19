@@ -53,7 +53,7 @@ def main():
       meta = db.meta
       targets += db.targets
   elif args.kernel_image_db_path:
-    meta = MetaConfig.from_desc(config.symbols, config.rop_actions)
+    meta = MetaConfig.from_desc(config.symbols, config.rop_actions, config.structs)
     targets = []
   else:
     return parser.error("at least one of --input-file or --kernel_image_db_path required")
