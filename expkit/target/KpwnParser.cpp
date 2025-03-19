@@ -13,9 +13,13 @@
 
 class KpwnParser: protected BinaryReader {
 protected:
+    uint64_t offset_targets_ = 0, offset_struct_layouts_ = 0;
+    bool struct_layouts_parsed_ = false, has_structs_data_ = false;
     uint32_t num_targets_;
     std::vector<SymbolId> symbol_ids_;
     std::vector<RopActionId> rop_action_ids_;
+    std::vector<std::tuple<std::string, std::vector<std::string>>> structs_meta_;
+    std::vector<Struct> struct_layouts_;
 
     void ParseSymbolsHeader() {
         auto num_symbols = ReadU32();
@@ -141,12 +145,75 @@ protected:
         EndStruct();
     }
 
-    std::vector<Target> ParseTargets(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version) {
-        std::vector<Target> result;
+    void ParseStructsHeader() {
+        if (!has_structs_data_) return;
+        DebugLog("ParseStructsHeader()");
 
+        auto num_structs = ReadUInt();
+        DebugLog("ParseStructsHeader(): num_structs=%u", num_structs);
+
+        for (int i = 0; i < num_structs; i++) {
+            auto struct_name = ZStr();
+            auto num_fields = ReadUInt();
+            DebugLog("  struct[%u]: name:%s field_count:%u", i, struct_name, num_fields);
+
+            std::vector<std::string> fields;
+            for (int j = 0; j < num_fields; j++)
+                fields.push_back(ZStr());
+
+            structs_meta_.push_back(std::tuple(struct_name, fields));
+        }
+        offset_struct_layouts_ = ReadU32();
+    }
+
+    void ParseStructLayouts() {
+        if (!has_structs_data_) return;
+        DebugLog("ParseStructLayouts()");
+
+        offset_ = offset_struct_layouts_;
+        auto num_structs = SeekableListCount();
+        DebugLog("ParseStructLayouts(): num_structs=%u", num_structs);
+
+        for (int i = 0; i < num_structs; i++) {
+            auto meta_idx = ReadUInt();
+            auto [struct_name, fields] = structs_meta_.at(meta_idx);
+
+            Struct str;
+            str.size = ReadUInt();
+            str.name = struct_name;
+            for (auto& field_name : fields) {
+                StructField field;
+                field.name = field_name;
+                field.offset = ReadUInt();
+                field.size = ReadUInt();
+                str.fields[field_name] = field;
+            }
+            struct_layouts_.push_back(str);
+        }
+        struct_layouts_parsed_ = true;
+    }
+
+    void ParseStructs(Target& target) {
+        if (!has_structs_data_) return;
+        DebugLog("ParseStructs()");
+
+        for (int i = 0; i < structs_meta_.size(); i++) {
+            auto layout_idx = ReadUInt();
+            if (layout_idx == 0)
+                continue;
+            auto& str = struct_layouts_.at(layout_idx - 1);
+            target.structs[str.name] = str;
+        }
+    }
+
+    std::vector<Target> ParseTargets(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version) {
         if (offset_targets_ == 0)
             ParseHeader();
 
+        if (!struct_layouts_parsed_)
+            ParseStructLayouts();
+
+        std::vector<Target> result;
         offset_ = offset_targets_;
         DebugLog("ParseTarget(): offset = 0x%x", offset_targets_);
         for (uint32_t i_target = 0; i_target < num_targets_; i_target++, EndStruct()) {
@@ -181,6 +248,7 @@ protected:
             ParseSymbols(target);
             ParseRopActions(target);
             ParsePivots(target);
+            ParseStructs(target);
             result.push_back(target);
         }
 
@@ -230,9 +298,12 @@ public:
         if (version_major > 1)
             throw ExpKitError("version v%d.%d is not supported (only v1.x)", version_major, version_minor);
 
+        has_structs_data_ = version_minor >= 1;
+
         BeginStruct(4); // meta header
         ParseSymbolsHeader();
         ParseRopActionsHeader(parse_known_metadata);
+        ParseStructsHeader();
         EndStruct();
 
         num_targets_ = ReadU32();
