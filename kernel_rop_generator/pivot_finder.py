@@ -1,11 +1,12 @@
 #!/usr/bin/env -S python3 -u
 import argparse
+from collections import defaultdict
+import itertools
 import logging
+import os
+import pathlib
 import re
 import sys
-import os
-from collections import defaultdict
-import pathlib
 
 import archinfo
 import gadget_finder
@@ -92,10 +93,11 @@ class PivotFinder:
                 logger.debug(
                     'Gadget: %s was a bad pivot with reason: %s', gadget, e)
 
+        self._filter_pivots()
+
         return self.pivots
 
     # functions for preparing register info
-
     def _setup_reg_info(self):
         """
         Creates a mapping of sub registers to main register. 
@@ -606,6 +608,82 @@ class PivotFinder:
 
         raise BadPivot("No match")
 
+    @staticmethod
+    def _is_identical_or_worse(first, second):
+        """
+        Returns True if first is the same or worse than second
+        A gadget is the same if it uses the same registers and has the same offsets
+        A gadget is worse if it has the same properties, but uses more offsets
+        """
+        if isinstance(first, OneGadgetPivot) and isinstance(second, OneGadgetPivot):
+            # compare one gadget
+            if (first.next_rip_offset == second.next_rip_offset and
+                    first.pivot_reg == second.pivot_reg):
+                if set(second.used_offsets).issubset(set(first.used_offsets)):
+                    return True
+            return False
+
+        if isinstance(first, PushIndirectPivot) and isinstance(second, PushIndirectPivot):
+            # compare push indirect
+            if (first.next_rip_offset == second.next_rip_offset and
+                    first.indirect_register == second.indirect_register and
+                    first.indirect_type == second.indirect_type and
+                    first.push_register == second.push_register):
+                if (set(second.used_offsets_in_indirect_reg).issubset(set(first.used_offsets_in_indirect_reg)) and
+                        set(second.used_offsets_in_push).issubset(set(first.used_offsets_in_push))):
+                    return True
+            return False
+
+        if isinstance(first, StackShift) and isinstance(second, StackShift):
+            # compare stack pivot
+            if (first.ret_offset == second.ret_offset and
+                    first.shift_amount == second.shift_amount):
+                return True
+            return False
+
+        if isinstance(first, PopRspPivot) and isinstance(second, PopRspPivot):
+            # compare pop rsp
+            if (first.stack_change_before_rsp == second.stack_change_before_rsp and
+                    first.next_rip_offset == second.next_rip_offset):
+                return True
+            return False
+
+        # different types
+        return False
+
+
+    def _filter_pivots(self):
+        """
+        filters duplicate pivots
+        compares each pivot against each other pivot to see if it's identical or worse
+        """
+
+        filtered = []
+        unfiltered = self.pivots.combined_list()
+
+        while len(unfiltered) > 0:
+            # check each pivot against all other remaining pivots
+            gadget = unfiltered.pop()
+
+            is_useful = True
+            for other in itertools.chain(filtered, unfiltered):
+                if self._is_identical_or_worse(gadget, other):
+                    print("gadget is not useful:")
+                    print(gadget.debug_print())
+                    print("better:")
+                    print(other.debug_print())
+                    print("")
+                    is_useful = False
+                    break
+
+            if is_useful:
+                filtered.append(gadget)
+
+        filtered_pivots = Pivots()
+        for gadget in filtered:
+            filtered_pivots.append(gadget)
+
+        self.pivots = filtered_pivots
 
 def main():
     parser = argparse.ArgumentParser(description="ROP stack pivot finder")
