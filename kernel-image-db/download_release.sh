@@ -120,14 +120,15 @@ save() {
 process_vmlinux() {
     save symbols.txt              "nm vmlinux"
 
-    if [ "$ONLY_DB" == "" ]; then
-        if [ ! -f "btf" ]; then
-            echo "Extracting pahole BTF information..."
-            pahole --btf_encode_detached btf vmlinux;
-        fi
+    if [ ! -f "btf" ]; then
+        echo "Extracting pahole BTF information..."
+        pahole --btf_encode_detached btf vmlinux;
+    fi
 
-        save btf.json                 "bpftool btf dump -j file btf"
-        save structs.json             "$SCRIPT_DIR/extract_structures.py"
+    save btf.json                 "bpftool btf dump -j file btf"
+    save structs.json             "$SCRIPT_DIR/extract_structures.py"
+
+    if [ "$ONLY_DB" == "" ]; then
         save btf_formatted.json       "jq . btf.json"
         save pahole.txt               "pahole vmlinux"
         save .config                  "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
