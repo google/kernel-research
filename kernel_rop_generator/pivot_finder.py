@@ -668,11 +668,11 @@ class PivotFinder:
             is_useful = True
             for other in itertools.chain(filtered, unfiltered):
                 if self._is_identical_or_worse(gadget, other):
-                    print("gadget is not useful:")
-                    print(gadget.debug_print())
-                    print("better:")
-                    print(other.debug_print())
-                    print("")
+                    logger.debug("gadget is not useful:")
+                    logger.debug(gadget.debug_info())
+                    logger.debug("better:")
+                    logger.debug(other.debug_info())
+                    logger.debug("")
                     is_useful = False
                     break
 
@@ -730,7 +730,7 @@ def main():
                 pivot_desc = ", ".join([f"{repr(value)}" for (key,value) in pivot.__dict__.items() if key not in ["address", "instructions"]])
                 print(f"{'; '.join(pivot.instructions):<50}// {pivot.__class__.__name__}({pivot_desc})")
             else:
-                pivot.debug_print()
+                print(pivot.debug_info())
                 print()
 
 if __name__ == "__main__":
