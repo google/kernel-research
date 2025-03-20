@@ -13,6 +13,7 @@ protected:
     uint64_t offset_ = 0;
     std::vector<uint64_t> struct_ends_;
     ILog* log_ = nullptr;
+    int64_t seek_origin_offset_ = -1;
     uint log_padding = 0;
 
 public:
@@ -25,13 +26,17 @@ public:
             throw ExpKitError("unsupported uint size (%d)", size);
     }
 
+    uint64_t EndOffset() {
+        return IsSeekingInProgress() ? data_.size() : struct_ends_.back();
+    }
+
     uint64_t RemainingBytes() {
-        return struct_ends_.back() - offset_;
+        return EndOffset() - offset_;
     }
 
     void SizeCheck(uint64_t len) {
         if (RemainingBytes() < len)
-            throw ExpKitError("tried to read outside of buffer: offset=%u, len=%u, struct_end=%u", offset_, len, struct_ends_.back());
+            throw ExpKitError("tried to read outside of buffer: offset=%u, len=%u, struct_end=%u", offset_, len, EndOffset());
     }
 
     uint8_t* Read(uint16_t len) {
@@ -81,6 +86,40 @@ public:
         // skip the seek list
         offset_ += offset_size * item_count;
         return item_count;
+    }
+
+    bool IsSeekingInProgress() { return seek_origin_offset_ != -1; }
+
+    void SeekToItem(uint64_t seeklist_offset, uint64_t item_idx) {
+        if (IsSeekingInProgress())
+            throw ExpKitError("Seeking is already in progress. Call EndSeek() first.");
+
+        seek_origin_offset_ = offset_;
+        offset_ = seeklist_offset;
+        auto value = ReadUInt();
+        auto offset_size = (value & 0x3) + 1;
+        auto item_count = value >> 2;
+        if (item_idx >= item_count)
+            throw ExpKitError("tried to seek to item index %u, but list contains only %u items", item_idx, item_count);
+
+        auto hdr_offset = offset_;
+        uint64_t item_offset = 0;
+        if (item_idx != 0) {
+            offset_ += offset_size * (item_idx - 1);
+            item_offset = Uint(offset_size);
+        }
+
+        // skip the seek list
+        offset_ = hdr_offset + offset_size * item_count + item_offset;
+        DebugLog("SeekToItem(): seeklist_offset=%u, item_idx=%u, offset_size=%u, item_count=%u, item_offset=%u, new offset=%u", 
+            seeklist_offset, item_idx, offset_size, item_count, item_offset, offset_);
+    }
+
+    void EndSeek() {
+        if (!IsSeekingInProgress())
+            throw ExpKitError("There is no seeking in progress. Call SeekToItem() first.");
+        offset_ = seek_origin_offset_;
+        seek_origin_offset_ = -1;
     }
 
     template <typename... Args>
