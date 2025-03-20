@@ -4,6 +4,10 @@ import sys
 
 PTR_SIZE = 8
 
+def debug(msg):
+  if "--debug" in sys.argv:
+    sys.stderr.write(f"{msg}\n")
+
 with open("btf.json", "rt") as f:
   btf = json.loads(f.read())
 
@@ -17,7 +21,7 @@ def find_size(o):
 
 def add_fields(fields_obj, prefix, start_offs, members_arr):
   for m in members_arr:
-    sys.stderr.write(f"  processing field '{m['name']}'\n")
+    debug(f"  processing field '{m['name']}'")
     field_name = f"{prefix}{m['name']}"
     t = types_by_id[m["type_id"]]
     offset = start_offs + (m["bits_offset"] // 8)
@@ -31,7 +35,7 @@ def add_fields(fields_obj, prefix, start_offs, members_arr):
 
 structs = {}
 for s in filter(lambda s: s["kind"] == "STRUCT" and s["name"] != "(anon)", btf["types"]):
-  sys.stderr.write(f"processing struct '{s['name']}' ({s['id']})\n")
+  debug(f"processing struct '{s['name']}' ({s['id']})")
   structs[s["name"]] = obj = {"size": s["size"], "fields": {}}
   add_fields(obj["fields"], "", 0, s["members"])
 
