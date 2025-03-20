@@ -4,6 +4,7 @@ exp: $(SRCS) target_db.kpwn
 	g++ -static -I. -o exp exp.cpp
 
 test: bin/test
+	bin/test --test-suites StaticTests --tests ^TODO
 
 bin/test: $(SRCS) test/artifacts/target_db_lts-6.1.81.kpwn test/artifacts/kernelctf.kpwn
 	mkdir -p bin
