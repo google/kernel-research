@@ -9,7 +9,7 @@ class Pivot:
   address: int
   instructions: List[str]
 
-  def debug_print(self):
+  def debug_info(self):
     raise NotImplementedError
 
 @dataclass
@@ -23,9 +23,8 @@ class StackShift(Pivot):
     ret_offset: int  # Offset of the return address
     shift_amount: int # The amount by which the stack pointer is shifted]
 
-    def debug_print(self):
-        print("StackShift: ", self.ret_offset, self.shift_amount)
-        print(self.instructions)
+    def debug_info(self):
+        return f"StackShift: {self.ret_offset} {self.shift_amount}\n{self.instructions}"
 
 @dataclass
 class OneGadgetPivot(Pivot):
@@ -40,9 +39,8 @@ class OneGadgetPivot(Pivot):
   used_offsets: List[int]
   next_rip_offset: int
 
-  def debug_print(self):
-    print("OneGadgetPivot: ", self.pivot_reg, self.next_rip_offset)
-    print(self.instructions)
+  def debug_info(self):
+    return f"OneGadgetPivot: {self.pivot_reg} {self.next_rip_offset}\n{self.instructions}"
 
 @dataclass
 class PushIndirectPivot(Pivot):
@@ -57,10 +55,9 @@ class PushIndirectPivot(Pivot):
   used_offsets_in_indirect_reg: List[int]
   next_rip_offset: int
 
-  def debug_print(self):
-    print("PushIndirectPivot: ", self.indirect_type, self.push_register,
-          self.indirect_register, self.next_rip_offset)
-    print(self.instructions)
+  def debug_info(self):
+    return f"PushIndirectPivot: {self.indirect_type} {self.push_register}" + \
+           f"{self.indirect_register} {self.next_rip_offset}\n{self.instructions}"
 
 @dataclass
 class PopRspPivot(Pivot):
@@ -70,9 +67,8 @@ class PopRspPivot(Pivot):
   stack_change_before_rsp: int
   next_rip_offset: int
 
-  def debug_print(self):
-    print("PopRspPivot: ", self.stack_change_before_rsp, self.next_rip_offset)
-    print(self.instructions)
+  def debug_info(self):
+    return f"PopRspPivot: {self.stack_change_before_rsp} {self.next_rip_offset}\n{self.instructions}"
 
 @dataclass
 class Pivots:
