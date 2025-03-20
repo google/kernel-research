@@ -21,6 +21,9 @@ KPWN_DB_DIR="$SCRIPT_DIR/../kpwn_db"
 mkdir -p db
 gcloud storage cp "gs://kernel-research/pwnkit/db/kernelctf/*.kpwn" ./db
 "$KPWN_DB_DIR/kpwn_db.py" -i "db/*.kpwn" -o kernelctf.kpwn
+"$KPWN_DB_DIR/kpwn_db.py" -i kernelctf.kpwn -o kernelctf.json
 
 echo "Uploading new db"
-gcloud storage cp -Z -a publicRead kernelctf.kpwn gs://kernel-research/pwnkit/db/kernelctf.kpwn
+for EXT in kpwn json; do
+    gcloud storage cp -Z -a publicRead kernelctf.$EXT gs://kernel-research/pwnkit/db/kernelctf.$EXT
+done
