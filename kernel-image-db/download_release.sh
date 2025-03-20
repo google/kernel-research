@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+set -eo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 UBUNTU_BASE_URL="https://mirrors.edge.kernel.org/ubuntu/pool/main/l"

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-set -ex
+set -eo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
@@ -37,3 +37,6 @@ echo "Uploading dbs"
 for EXT in kpwn json; do
     gcloud storage cp -Z -a publicRead db.$EXT gs://kernel-research/pwnkit/db/$DISTRO/$RELEASE.$EXT
 done
+
+echo "Uploading missing kernel-image-db information"
+gcloud storage rsync "$IMAGE_DB_DIR/releases/$DISTRO/$RELEASE" "gs://kernel-research/kernel-image-db/releases/$DISTRO/$RELEASE" -a publicRead -x "^(?!(btf|btf.json|rop_actions.json|slabinfo.txt|stack_pivots.json|structs.json|symbols.txt|version.txt)$).*"
