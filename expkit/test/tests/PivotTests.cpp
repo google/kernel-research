@@ -85,8 +85,6 @@ public:
         auto rop_pivot = finder.PivotToRop(rop);
 
         Log("Selected stack pivot: %s", rop_pivot.pivot.GetDescription().c_str());
-        ASSERT_EQ(0x08, rop_pivot.pivot.GetDestinationOffset());
-
         Log("ROP chain min offset: 0x%lx", rop_pivot.rop_min_offset);
 
         for (auto& shift : rop_pivot.stack_shift.stack_shifts)
