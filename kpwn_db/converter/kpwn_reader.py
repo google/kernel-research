@@ -35,14 +35,17 @@ class KpwnReader:
     if major_ver > VERSION_MAJOR:
       raise KpwnReaderException(f"reading {major_ver} is not supported (only {VERSION_MAJOR} or earlier)")
 
+    structs_supported = minor_ver >= 1
+
     # meta header
     r_meta = r_root.struct(4)
     symbols_meta = self.symbol_reader.read_meta(r_meta)
     rop_actions_meta = self.rop_action_reader.read_meta(r_meta)
-    structs_meta = self.struct_reader.read_meta(r_meta)
+    structs_meta = self.struct_reader.read_meta(r_meta) if structs_supported else []
     meta = MetaConfig(symbols_meta, rop_actions_meta, structs_meta)
 
-    self.struct_reader.read_struct_layouts(r_root)
+    if structs_supported:
+      self.struct_reader.read_struct_layouts(r_root)
 
     # targets
     targets = []
@@ -55,7 +58,7 @@ class KpwnReader:
       symbols = self.symbol_reader.read_target(r_target)
       rop_actions = self.rop_action_reader.read_target(r_target)
       stack_pivots = self.stack_pivot_reader.read_target(r_target)
-      structs = self.struct_reader.read_target(r_target)
+      structs = self.struct_reader.read_target(r_target) if structs_supported else {}
 
       target = Target(distro, release_name, version,
                       symbols, rop_actions, stack_pivots, structs)
