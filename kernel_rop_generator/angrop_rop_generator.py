@@ -290,18 +290,25 @@ class RopGeneratorAngrop:
         Returns:
           The address of the kPTI trampoline.
         """
-        init_block = self._project.factory.block(
-            self._find_symbol_addr(KPTI_TRAMPOLINE)
-        )
-        next_block = self._project.factory.block(
-            list(init_block.vex.constant_jump_targets)[0]
-        )
-        for ins in next_block.disassembly.insns:
-            if ins.mnemonic == "mov" and "rdi, rsp" in ins.op_str:
-                # add to symbol map
-                self._symbol_map["kpti_trampoline"] = ins.address
-                self._addr_to_symbol[ins.address] = "kpti_trampoline"
-                return ins.address
+
+        target_addr = self._find_symbol_addr(KPTI_TRAMPOLINE)
+
+        # step at most 4 times
+        for _ in range(4):
+            target_block = self._project.factory.block(target_addr)
+            for ins in target_block.disassembly.insns:
+                if ins.mnemonic == "mov" and "rdi, rsp" in ins.op_str:
+                    # add to symbol map
+                    self._symbol_map["kpti_trampoline"] = ins.address
+                    self._addr_to_symbol[ins.address] = "kpti_trampoline"
+                    return ins.address
+            if target_block.size == 0:
+                target_addr += 1
+            else:
+                target_addr = target_addr+target_block.size
+
+
+        raise RuntimeError("didn't find kpti_trampoline")
 
     def payload_c_code(self, rop_chain, print_instructions=True):
         """Prints the C code for the ROP chain.
