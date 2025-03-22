@@ -24,7 +24,7 @@ class StackShift(Pivot):
     shift_amount: int # The amount by which the stack pointer is shifted]
 
     def debug_info(self):
-        return f"StackShift: {self.ret_offset} {self.shift_amount}\n{self.instructions}"
+        return f"StackShift {hex(self.address)}: {self.ret_offset} {self.shift_amount}\n{self.instructions}"
 
 @dataclass
 class OneGadgetPivot(Pivot):
@@ -40,7 +40,7 @@ class OneGadgetPivot(Pivot):
   next_rip_offset: int
 
   def debug_info(self):
-    return f"OneGadgetPivot: {self.pivot_reg} {self.next_rip_offset}\n{self.instructions}"
+    return f"OneGadgetPivot {hex(self.address)}: {self.pivot_reg} {self.next_rip_offset}\n{self.instructions}"
 
 @dataclass
 class PushIndirectPivot(Pivot):
@@ -56,7 +56,7 @@ class PushIndirectPivot(Pivot):
   next_rip_offset: int
 
   def debug_info(self):
-    return f"PushIndirectPivot: {self.indirect_type} {self.push_register}" + \
+    return f"PushIndirectPivot {hex(self.address)}: {self.indirect_type} {self.push_register}" + \
            f"{self.indirect_register} {self.next_rip_offset}\n{self.instructions}"
 
 @dataclass
@@ -68,7 +68,7 @@ class PopRspPivot(Pivot):
   next_rip_offset: int
 
   def debug_info(self):
-    return f"PopRspPivot: {self.stack_change_before_rsp} {self.next_rip_offset}\n{self.instructions}"
+    return f"PopRspPivot {hex(self.address)}: {self.stack_change_before_rsp} {self.next_rip_offset}\n{self.instructions}"
 
 @dataclass
 class Pivots:
