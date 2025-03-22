@@ -14,6 +14,7 @@ from rop_util import get_offset, setup_logger, load_symbols, get_segment_by_addr
 RETURN_THUNK_BYTES_REPLACE = b"\xc3\xcc\xcc\xcc\xcc"
 FENTRY_BYTES_REPLACE = b"\x0f\x1f\x44\x00\x00"
 RUNTIME_RELOCATED_BYTES_REPLACE = b"\xcc\xcc\xcc\xcc"
+STATIC_CALL_REPLACE = b"\xcc\xcc\xcc\xcc"
 OUTPUT_FILE_EXTENTION = ".thunk_replaced"
 
 logger = setup_logger("rop_instruction_patcher")
@@ -38,6 +39,8 @@ gs:0x20c80:
 class RopInstructionPatcher:
     def __init__(self, vmlinux_path) -> None:
         self.vmlinux_path = vmlinux_path
+        self.alternatives = []
+        self.static_call_sites = []
         self.fentry_calls = []
         self.return_thunks = []
         self.indirect_thunk_calls = defaultdict(list)
@@ -107,7 +110,131 @@ class RopInstructionPatcher:
                 offset = relocation.entry['r_offset']
                 self.other_relocations.append(offset)
 
+    def get_alt_instr_struct(self, altinstr_data):
+        """
+        Hueristically determine the struct layout of the alt_instr struct
+        Could get this from the parsed structs.json
+        However, that would limit applicability of this tool as a standalone
+
+        We need the following fields
+          s32 instr_offset;	/* original instruction */
+	      s32 repl_offset;	/* offset to replacement instruction */
+          ...
+	      u8  instrlen;		/* length of original instruction */
+	      u8  replacementlen;	/* length of new instruction */
+        """
+
+        # struct size must be at least 10, likely to be under 0x20
+        # instr_offset is always at the beginning
+        # instrlen and replacementlen are near the end
+        # guess size and instrlen offset
+
+        # find a guess where the lengths of instrlen, replacementlen all make sense
+        for size in range(10, 0x20):
+            if len(altinstr_data) % size != 0:
+                continue
+
+            # iterate reversed as instrlen is near the end, flags are before it
+            for instrlen_offset in reversed(range(8, size-1)):
+                match = True
+                has_nonzero_repl = False
+                for test_offset in range(0, len(altinstr_data), size):
+                    instrlen = altinstr_data[test_offset+instrlen_offset]
+                    replacementlen = altinstr_data[test_offset+instrlen_offset+1]
+                    # check that instrlen >= replacementlen
+                    if instrlen < replacementlen:
+                        match = False
+                        break
+                    if replacementlen > 0:
+                        has_nonzero_repl = True
+                # we should have seen some non-zero replacements
+                if match and has_nonzero_repl:
+                    logger.debug("got alt_instr size and instrlen_offset %d %d", size, instrlen_offset)
+                    return size, instrlen_offset
+
+        raise RuntimeError("Could not determine alt_instr struct layout")
+
+    def process_alternatives(self, elffile):
+        """
+        For alternatives see apply_alternatives() in arch/x86/kernel/alternative.c
+        """
+        altinstr_section = elffile.get_section_by_name('.altinstructions')
+
+        if altinstr_section is None:
+            logger.warning("'.altinstructions' section not found.")
+            return
+
+        data = altinstr_section.data()  # Get the raw bytes of the section
+        data_size = len(data)
+        base = altinstr_section['sh_addr']
+
+        text_section = elffile.get_section_by_name('.text')
+        text_section_base = text_section['sh_addr']
+        text_section_data = text_section.data()
+        text_section_end = text_section_base+len(text_section_data)
+
+        # first determine size of the struct `alt_instr` and offset of instrlen
+        struct_size, instrlen_off = self.get_alt_instr_struct(data)
+
+        # Iterate through the data
+        offset = 0
+        for offset in range(0, data_size, struct_size):
+            address = base + offset + struct.unpack_from("<i", data, offset)[0]
+            if address >= text_section_end:
+                continue
+
+            length = data[offset+instrlen_off]
+            self.alternatives.append((address, length))
+
+    def get_buf_from_elf(self, elffile, start, end):
+        size = end-start
+
+        for segment in elffile.iter_segments():
+            if segment['p_type'] == 'PT_LOAD':  # Look for loadable segments
+                seg_start_va = segment['p_vaddr']
+                seg_end_va = seg_start_va + segment['p_memsz']
+                if seg_start_va <= start < seg_end_va:  # Check if VA is within segment range
+                    offset_in_segment = start - seg_start_va
+                    return segment.data()[offset_in_segment:offset_in_segment+size]
+        raise RuntimeError("Couldn't find segment with address")
+
+    def process_static_call_sites(self, elffile):
+        """
+        For static call sites see in kernel/static_call_inline.c
+
+        struct static_call_site {
+            s32 addr;
+            s32 key;
+        };
+        """
+        start = self._symbols["__start_static_call_sites"]
+        end = self._symbols["__stop_static_call_sites"]
+
+        data = self.get_buf_from_elf(elffile, start, end)
+        data_size = len(data)
+        base = start
+
+        text_section = elffile.get_section_by_name('.text')
+        text_section_base = text_section['sh_addr']
+        text_section_data = text_section.data()
+        text_section_end = text_section_base+len(text_section_data)
+
+        # Iterate through the data
+
+        for offset in range(0, data_size, 8):
+            address = base + offset + struct.unpack_from("<i", data, offset)[0]
+            if address >= text_section_end:
+                continue
+
+            instr = text_section_data[address-text_section_base:address-text_section_base+5]
+            assert instr[0] == 0xe8 or instr[0] == 0xe9
+
+            self.static_call_sites.append(address)
+
     def process_retpoline_sites_section(self, elffile):
+        """
+        For retpolines see apply_retpolines() in arch/x86/kernel/alternative.c
+        """
         retpoline_section = elffile.get_section_by_name('.retpoline_sites')
 
         if retpoline_section is None:
@@ -142,9 +269,11 @@ class RopInstructionPatcher:
                 self.indirect_thunk_jumps[reg].append(address)
             else:
                 assert False, "expected jmp or call"
-            offset += 4
 
     def process_return_sites_section(self, elffile):
+        """
+        For returns see apply_returns() in arch/x86/kernel/alternative.c
+        """
         return_section = elffile.get_section_by_name('.return_sites')
 
         if return_section is None:
@@ -167,6 +296,9 @@ class RopInstructionPatcher:
             self.return_thunks.append(address)
 
     def process_fentry_table(self, elffile):
+        """
+        For fentry patches see callthunks_patch_builtin_calls() in arch/x86/kernel/callthunks.c
+        """
         if "__start_mcount_loc" not in self._symbols:
             logger.warning("no __start_mcount_loc, cannot process fentry calls")
             return
@@ -197,6 +329,10 @@ class RopInstructionPatcher:
         """
         with open(self.vmlinux_path, 'rb') as f:
             elffile = ELFFile(f)
+
+            # always process alternatives
+            self.process_alternatives(elffile)
+            self.process_static_call_sites(elffile)
 
             # Check for relocations and process relocation sections referring to .text
             has_relocs = False
@@ -238,6 +374,13 @@ class RopInstructionPatcher:
 
         with open(self.vmlinux_path, "rb") as vmlinux_file:
             elffile = ELFFile(vmlinux_file)
+
+            for addr, length in self.alternatives:
+                self.replace_bytes(vmlinux_bytes, elffile, addr, b"\x90"*length)
+
+            for addr in self.static_call_sites:
+                # replace the call/jump target with cc so no mid-instruction gadgets
+                self.replace_bytes(vmlinux_bytes, elffile, addr+1, STATIC_CALL_REPLACE)
 
             for addr in self.fentry_calls:
                 self.replace_bytes(vmlinux_bytes, elffile,
