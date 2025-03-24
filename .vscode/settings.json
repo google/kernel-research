@@ -1,4 +1,5 @@
 {
+    "python.analysis.exclude": ["**/node_modules", "**/__pycache__", ".git", "kernel-image-db/releases"],
     "python.analysis.extraPaths": ["kernel_rop_generator"],
     "editor.tabSize": 4,
     "[python]": {
