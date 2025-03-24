@@ -16,3 +16,7 @@
 echo "=== COMMAND-BEGIN: $@ ==="
 eval $@ > /output 2>/output
 echo "=== COMMAND-END ==="
+
+# make sure this is written out fully and not to be mixed with dmesg messages
+# TODO: make this better, e.g. separate the streams altogether
+sleep 0.1
