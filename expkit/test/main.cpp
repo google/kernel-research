@@ -31,7 +31,7 @@ public:
         runner_.Add(new PivotKpwnTests());
 
         runner_.SetSuiteFilter(args_.getOption("test-suites"));
-        runner_.SetTestFilter(args_.getOption("tests"));
+        runner_.SetTestFilter(args_.getOption("tests").value_or("^TODO"));
         runner_.SetTargetDbPath(args_.getOption("target-db").value_or("test/artifacts/targets.kpwn"));
 
         if (args_.getOption("tap"))

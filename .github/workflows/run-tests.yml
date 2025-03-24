@@ -72,7 +72,7 @@ jobs:
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --tap --tests ^TODO
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --tap
 
       - name: Test expkit samples
         if: ${{ success() || failure() }}
