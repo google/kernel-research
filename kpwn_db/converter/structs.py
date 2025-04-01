@@ -15,6 +15,7 @@ class StructWriter:
       wr.zstr(s.struct_name)
       for f in wr.list(s.fields):
         wr.zstr(f.field_name)
+        wr.u1(f.optional)
     self.struct_layouts_db_offset_field = wr.reserve(4)
 
   def write_target(self, wr_target, target):
@@ -37,9 +38,14 @@ class StructWriter:
       wr.varuint(struct.meta_idx)
       wr.varuint(struct.size)
       for field_meta in self.structs_meta[struct.meta_idx].fields:
-        field = struct.fields[field_meta.field_name]
-        wr.varuint(field.offset)
-        wr.varuint(field.size)
+        field = struct.fields.get(field_meta.field_name)
+        if field is None:
+          if not field_meta.optional:
+            raise RuntimeError(f"Non-optional field is missing: {field_meta.field_name}")
+          wr.varuint(0)
+        else:
+          wr.varuint(field.offset + 1)
+          wr.varuint(field.size)
 
 
 class StructReader:
@@ -51,7 +57,9 @@ class StructReader:
       struct_name = r_hdr.zstr()
       fields = []
       for _ in range(r_hdr.varuint()):
-        fields.append(StructFieldMeta(r_hdr.zstr()))
+        field_name = r_hdr.zstr()
+        optional = r_hdr.u1()
+        fields.append(StructFieldMeta(field_name, optional == 1))
       self.meta.append(StructMeta(struct_name, fields))
     self.struct_layouts_db_offset = r_hdr.u4()
     return self.meta
@@ -64,7 +72,11 @@ class StructReader:
         sizeof = r_root.varuint()
         fields = {}
         for field_meta in self.meta[meta_idx].fields:
-          offset = r_root.varuint()
+          offset = r_root.varuint() - 1
+          if offset == -1:  # missing field
+            if not field_meta.optional:
+              raise RuntimeError(f"Non-optional field is missing: {field_meta.field_name}")
+            continue
           size = r_root.varuint()
           fields[field_meta.field_name] = StructField(offset=offset, size=size)
         self.struct_layouts.append(Struct(meta_idx=meta_idx, size=sizeof, fields=fields))
