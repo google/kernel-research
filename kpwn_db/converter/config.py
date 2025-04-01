@@ -16,7 +16,8 @@ symbols = {
     SYM_STRUCT | 0x01: "init_nsproxy",
 
     # nm: d - initialized data section, local
-    SYM_OPS | 0x01: "anon_pipe_buf_ops"
+    SYM_OPS | 0x01: "anon_pipe_buf_ops",
+    SYM_OPS | 0x02: "qfq_qdisc_ops"
 }
 
 rop_actions = {
@@ -36,4 +37,6 @@ structs = {
     "msg_msgseg": ["next"],
     "hfsc_class": ["level", "cl_parent", "vt_node.__rb_parent_color",
                    "cf_node.__rb_parent_color", "cl_vt", "cl_cvtmin"],
+    "simple_xattr": ["list.next", "list.prev", "name", "size", "value"],
+    "Qdisc_ops": ["change"]
 }
