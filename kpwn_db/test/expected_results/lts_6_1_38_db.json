@@ -123,7 +123,8 @@
                 "struct_name": "pipe_buffer",
                 "fields": [
                     {
-                        "field_name": "ops"
+                        "field_name": "ops",
+                        "optional": false
                     }
                 ]
             },
@@ -131,10 +132,12 @@
                 "struct_name": "pipe_buf_operations",
                 "fields": [
                     {
-                        "field_name": "release"
+                        "field_name": "release",
+                        "optional": false
                     },
                     {
-                        "field_name": "get"
+                        "field_name": "get",
+                        "optional": false
                     }
                 ]
             },
@@ -142,22 +145,28 @@
                 "struct_name": "msg_msg",
                 "fields": [
                     {
-                        "field_name": "m_list.next"
+                        "field_name": "m_list.next",
+                        "optional": false
                     },
                     {
-                        "field_name": "m_list.prev"
+                        "field_name": "m_list.prev",
+                        "optional": false
                     },
                     {
-                        "field_name": "m_type"
+                        "field_name": "m_type",
+                        "optional": false
                     },
                     {
-                        "field_name": "m_ts"
+                        "field_name": "m_ts",
+                        "optional": false
                     },
                     {
-                        "field_name": "next"
+                        "field_name": "next",
+                        "optional": false
                     },
                     {
-                        "field_name": "security"
+                        "field_name": "security",
+                        "optional": false
                     }
                 ]
             },
@@ -165,7 +174,8 @@
                 "struct_name": "msg_msgseg",
                 "fields": [
                     {
-                        "field_name": "next"
+                        "field_name": "next",
+                        "optional": false
                     }
                 ]
             },
@@ -173,22 +183,28 @@
                 "struct_name": "hfsc_class",
                 "fields": [
                     {
-                        "field_name": "level"
+                        "field_name": "level",
+                        "optional": false
                     },
                     {
-                        "field_name": "cl_parent"
+                        "field_name": "cl_parent",
+                        "optional": false
                     },
                     {
-                        "field_name": "vt_node.__rb_parent_color"
+                        "field_name": "vt_node.__rb_parent_color",
+                        "optional": true
                     },
                     {
-                        "field_name": "cf_node.__rb_parent_color"
+                        "field_name": "cf_node.__rb_parent_color",
+                        "optional": true
                     },
                     {
-                        "field_name": "cl_vt"
+                        "field_name": "cl_vt",
+                        "optional": false
                     },
                     {
-                        "field_name": "cl_cvtmin"
+                        "field_name": "cl_cvtmin",
+                        "optional": false
                     }
                 ]
             }
