@@ -2,7 +2,7 @@
 
 import logging
 import unittest
-import converter.config as config
+import test.config as config
 from converter.image_db_utils import collect_image_db_targets, get_targets_from_image_db
 from converter.kpwn_writer import KpwnWriter
 from data_model.db import Db
