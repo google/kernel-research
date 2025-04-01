@@ -34,6 +34,6 @@ structs = {
     "pipe_buf_operations": ["release", "get"],
     "msg_msg": ["m_list.next", "m_list.prev", "m_type", "m_ts", "next", "security"],
     "msg_msgseg": ["next"],
-    "hfsc_class": ["level", "cl_parent", "vt_node.__rb_parent_color",
-                   "cf_node.__rb_parent_color", "cl_vt", "cl_cvtmin"],
+    "hfsc_class": ["level", "cl_parent", "vt_node.__rb_parent_color?",
+                   "cf_node.__rb_parent_color?", "cl_vt", "cl_cvtmin"],
 }

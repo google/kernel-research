@@ -31,6 +31,7 @@ class RopActionMeta():
 @dataclass
 class StructFieldMeta():
   field_name: str
+  optional: bool
 
 @dataclass
 class StructMeta():
@@ -56,10 +57,15 @@ class MetaConfig():
         RopActionMeta.from_config(type_id, desc)
         for type_id, desc in rop_actions.items()
     ]
-    structs = [
-        StructMeta(struct_name=struct_name, fields=[
-            StructFieldMeta(field_name=field_name)
-            for field_name in fields])
-        for struct_name, fields in structs.items()
-    ]
-    return cls(symbols=symbols, rop_actions=rop_actions, structs=structs)
+
+    structs_ = []
+    for struct_name, fields in structs.items():
+      fields_ = []
+      for field_name in fields:
+        optional = field_name.endswith("?")
+        if optional:
+          field_name = field_name[:-1]
+        fields_.append(StructFieldMeta(field_name=field_name, optional=optional))
+      structs_.append(StructMeta(struct_name=struct_name, fields=fields_))
+
+    return cls(symbols=symbols, rop_actions=rop_actions, structs=structs_)

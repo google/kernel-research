@@ -37,6 +37,7 @@ structs = {
     "msg_msgseg": ["next"],
     "hfsc_class": ["level", "cl_parent", "vt_node.__rb_parent_color",
                    "cf_node.__rb_parent_color", "cl_vt", "cl_cvtmin"],
-    "simple_xattr": ["list.next", "list.prev", "name", "size", "value"],
+    "simple_xattr": ["list.next?", "list.prev?", "rb_node.__rb_parent_color?",
+                     "rb_node.rb_right?", "rb_node.rb_left?", "name", "size", "value"],
     "Qdisc_ops": ["change"]
 }

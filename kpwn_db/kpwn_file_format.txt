@@ -30,6 +30,7 @@ meta:
     struct_name[varsize] (zstr)
     fields[varsize]
       field_name [varsize] (zstr)
+      optional (u1)
   struct_layouts_db_offset (u4)
 num_targets (u4)
 targets[num_targets]
@@ -73,7 +74,7 @@ struct_layouts[seekable_varsize]
   struct_meta_idx (uint)
   sizeof_structure (uint)
   fields[num_fields]
-    offset (uint)
+    offset (uint) # 1-based, 0 means missing
     field_size (uint)
 
 u[N] = N-byte unsigned integer (u1 = uint8_t, u4 = uint32_t)
