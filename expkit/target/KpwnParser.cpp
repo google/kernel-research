@@ -11,6 +11,16 @@
 #include "util/error.cpp"
 #include "util/file.cpp"
 
+struct FieldMeta {
+    std::string field_name;
+    bool optional;
+};
+
+struct StructMeta {
+    std::string struct_name;
+    std::vector<FieldMeta> fields;
+};
+
 class KpwnParser: protected BinaryReader {
 protected:
     uint64_t offset_targets_ = 0, offset_struct_layouts_ = 0;
@@ -18,7 +28,7 @@ protected:
     uint32_t num_targets_;
     std::vector<SymbolId> symbol_ids_;
     std::vector<RopActionId> rop_action_ids_;
-    std::vector<std::tuple<std::string, std::vector<std::string>>> structs_meta_;
+    std::vector<StructMeta> structs_meta_;
     std::map<uint64_t, Struct> struct_layouts_;
 
     void ParseSymbolsHeader() {
@@ -157,11 +167,14 @@ protected:
             auto num_fields = ReadUInt();
             DebugLog("  struct[%u]: name:%s field_count:%u", i, struct_name, num_fields);
 
-            std::vector<std::string> fields;
-            for (int j = 0; j < num_fields; j++)
-                fields.push_back(ZStr());
+            std::vector<FieldMeta> fields;
+            for (int j = 0; j < num_fields; j++) {
+                auto field_name = ZStr();
+                auto optional = ReadU8() == 1;
+                fields.push_back({ field_name, optional });
+            }
 
-            structs_meta_.push_back(std::tuple(struct_name, fields));
+            structs_meta_.push_back({ struct_name, fields });
         }
         offset_struct_layouts_ = ReadU32();
     }
@@ -176,12 +189,19 @@ protected:
         Struct str;
         str.size = ReadUInt();
         str.name = struct_name;
-        for (auto& field_name : fields) {
+        for (auto& field_meta : fields) {
+            auto offset = ReadUInt();
+            if (offset == 0) {
+                if (!field_meta.optional)
+                    throw ExpKitError("Non-optional field is missing: %s", field_meta.field_name.c_str());
+                continue;
+            }
+
             StructField field;
-            field.name = field_name;
-            field.offset = ReadUInt();
+            field.name = field_meta.field_name;
+            field.offset = offset - 1;
             field.size = ReadUInt();
-            str.fields[field_name] = field;
+            str.fields[field_meta.field_name] = field;
         }
         EndSeek();
 
