@@ -24,6 +24,7 @@ enum SymbolId: uint32_t {
     INIT_NSPROXY =           SYM_STRUCT | 0x01,
 
     ANON_PIPE_BUF_OPS =      SYM_OPS | 0x01,
+    QFQ_QDISC_OPS =          SYM_OPS | 0x02, 
 };
 
 std::map<SymbolId, const char*> symbol_names {
@@ -37,6 +38,7 @@ std::map<SymbolId, const char*> symbol_names {
     { INIT_NSPROXY, "INIT_NSPROXY" },
 
     { ANON_PIPE_BUF_OPS, "ANON_PIPE_BUF_OPS" },
+    { QFQ_QDISC_OPS, "QFQ_QDISC_OPS" },
 };
 
 enum struct RopActionId: uint32_t {
