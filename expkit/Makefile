@@ -14,4 +14,4 @@ test/artifacts/kernelctf.kpwn:
 	wget -O test/artifacts/kernelctf.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
 
 test/artifacts/target_db_lts-6.1.81.kpwn:
-	../kpwn_db/kpwn_db.py --kernel-image-db-path=../kernel-image-db --release-filter-add lts-6.1.81 -o ../expkit/test/artifacts/target_db_lts-6.1.81.kpwn
+	../kpwn_db/kpwn_db.py --kernel-image-db-path=../kernel-image-db --release-filter-add lts-6.1.81 -o test/artifacts/target_db_lts-6.1.81.kpwn
