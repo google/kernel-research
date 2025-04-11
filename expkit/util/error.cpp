@@ -7,6 +7,9 @@
 
 struct ExpKitError : public std::runtime_error {
     template <typename... Args>
+    ExpKitError(const char* error_msg) : std::runtime_error(error_msg) { }
+
+    template <typename... Args>
     ExpKitError(const char* format, const Args&... args) : std::runtime_error(format_str(format, args...)) { }
 };
 
