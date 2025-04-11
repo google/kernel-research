@@ -1,5 +1,6 @@
 TARGET ?= kernelctf lts-6.1.36
-#TARGET ?= kernelctf cos-101-17162.127.42
+#TARGET ?= kernelctf cos-101-17162.210.48
+#TARGET ?= kernelctf mitigation-6.1-v2
 
 INCLUDES = -I/usr/include/libnl3 -I../..
 LIBS = -pthread -lnl-cli-3 -lnl-route-3 -lnl-3 -ldl
