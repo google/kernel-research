@@ -32,6 +32,10 @@ if [[ $# -lt 3 ]]; then usage; fi
 if [ -z "$CUSTOM_MODULES" ]; then exit; fi
 
 ../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" headers
+VERSION_FN="$RELEASE_DIR/version.txt"
+if [ ! -f "$VERSION_FN" ]; then
+    ./run.sh --only-command-output $DISTRO $RELEASE_NAME -- cat /proc/version > $VERSION_FN
+fi
 
 mkdir -p "$CUSTOM_MODULES_BUILD_DIR"
 
@@ -49,7 +53,7 @@ for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
         # "LOCALVERSION=" is needed because otherwise if the repo is not clean, it will add a + into
         #   the version (e.g. 6.1.81 -> 6.1.81+) which makes the module incompatible
         LOCALVERSION=""
-        if grep '[+]' $RELEASE_DIR/version.txt; then LOCALVERSION="+"; fi
+        if grep '[+]' $VERSION_FN; then LOCALVERSION="+"; fi
         make LOCALVERSION=$LOCALVERSION -C $HDR_DIR modules_prepare && touch "$HDR_DIR/.modules_prepared"
     fi
 
