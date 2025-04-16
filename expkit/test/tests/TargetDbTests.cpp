@@ -39,10 +39,10 @@ struct TargetDbTests: TestSuite {
 
     TEST_METHOD(symbolsLts6181, "symbols are correct in target db (lts-6.1.81)") {
         auto target = getLts6181();
-        ASSERT_EQ(0x1be800, target.GetSymbolOffset(PREPARE_KERNEL_CRED));
-        ASSERT_EQ(0x2876880, target.GetSymbolOffset(INIT_NSPROXY));
-        ASSERT_EQ(0x1a200c0, target.GetSymbolOffset(ANON_PIPE_BUF_OPS));
-        ASSERT_EQ(0x227a50, target.GetSymbolOffset(MSLEEP));
+        ASSERT_EQ(0x1be800, target.GetSymbolOffset("prepare_kernel_cred"));
+        ASSERT_EQ(0x2876880, target.GetSymbolOffset("init_nsproxy"));
+        ASSERT_EQ(0x1a200c0, target.GetSymbolOffset("anon_pipe_buf_ops"));
+        ASSERT_EQ(0x227a50, target.GetSymbolOffset("msleep"));
     }
 
     TEST_METHOD(metaDataIsNotParsedByDefault, "metadata is not parsed by default") {

