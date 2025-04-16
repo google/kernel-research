@@ -5,12 +5,15 @@
 #include "test/TestSuite.cpp"
 #include "target/KpwnParser.cpp"
 #include "target/Target.cpp"
+#include "target/TargetDb.cpp"
 #include "util/file.cpp"
 
 struct TargetDbTests: TestSuite {
     std::vector<uint8_t> kpwn_db_lts6181;
 
     TargetDbTests(): TestSuite("TargetDbStaticTests", "target.kpwn database tests") { }
+
+    const char* lts_6181_version = "Linux version 6.1.81 (runner@fv-az736-920) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #1 SMP PREEMPT_DYNAMIC Thu Mar  7 12:17:31 UTC 2024";
 
     void init() {
         kpwn_db_lts6181 = read_file("test/artifacts/target_db_lts-6.1.81.kpwn");
@@ -23,16 +26,15 @@ struct TargetDbTests: TestSuite {
     }
 
     Target getLts6181() {
-        return getParser().GetTarget("kernelctf", "lts-6.1.81");
+        return getParser().GetTarget("kernelctf", "lts-6.1.81", true).value();
     }
 
     TEST_METHOD(versionLts6181, "version, distro and release_name fields are correct in target db (lts-6.1.81)") {
-        const char* expected_version = "Linux version 6.1.81 (runner@fv-az736-920) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #1 SMP PREEMPT_DYNAMIC Thu Mar  7 12:17:31 UTC 2024";
         auto parser = getParser();
         auto target = getLts6181();
-        ASSERT_EQ(expected_version, target.version.c_str());
+        ASSERT_EQ(lts_6181_version, target.version.c_str());
 
-        auto target2 = parser.GetTarget(expected_version);
+        auto target2 = parser.GetTarget(lts_6181_version, true).value();
         ASSERT_EQ("kernelctf", target2.distro.c_str());
         ASSERT_EQ("lts-6.1.81", target2.release_name.c_str());
     }
@@ -136,5 +138,33 @@ struct TargetDbTests: TestSuite {
 
         ASSERT_EQ(752, structs["hfsc_class"].size);
         ASSERT_EQ(312, structs["hfsc_class"].fields["cl_cvtmin"].offset);
+    }
+
+    TEST_METHOD(targetDbMergingWorks, "TargetDb can merge db with static targets") {
+        TargetDb db(getParser());
+
+        StaticTarget st("kernelctf", "lts-6.1.81");
+        st.AddSymbol("new_symbol", 0x1234);
+        st.AddStruct("new_struct", 80, { { "field1", 0x10, 8 }, { "field2", 0x20, 8 } });
+        db.AddStaticTarget(st);
+
+        auto target = db.GetTarget(lts_6181_version);
+        // symbols from the kpwn db found
+        ASSERT_EQ(0x1be800, target.GetSymbolOffset("prepare_kernel_cred"));
+        // symbols from the static target also found
+        ASSERT_EQ(0x1234, target.GetSymbolOffset("new_symbol"));
+        ASSERT_EQ(0x20, target.structs.at("new_struct").fields.at("field2").offset);
+    }
+
+    TEST_METHOD(staticDbWorks, "TargetDb can work with only static targets without a db") {
+        TargetDb db;
+
+        StaticTarget st("kernelctf", "lts-6.1.81", lts_6181_version);
+        st.AddSymbol("new_symbol", 0x1234);
+        db.AddStaticTarget(st);
+
+        auto target = db.GetTarget(lts_6181_version);
+        ASSERT_EQ("lts-6.1.81", target.release_name.c_str());
+        ASSERT_EQ(0x1234, target.GetSymbolOffset("new_symbol"));
     }
 };

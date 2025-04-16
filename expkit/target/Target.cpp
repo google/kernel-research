@@ -7,6 +7,7 @@
 #include "util/error.cpp"
 #include "util/RopChain.cpp"
 #include "pivot/Pivots.cpp"
+#include "util/stdutils.cpp"
 
 enum struct RopActionId: uint32_t {
     MSLEEP = 0x01,
@@ -59,8 +60,6 @@ struct Struct {
 };
 
 struct Target {
-    static Target current;
-
     std::string distro;
     std::string release_name;
     std::string version;
@@ -68,8 +67,6 @@ struct Target {
     std::map<RopActionId, std::vector<RopItem>> rop_actions;
     std::map<std::string, Struct> structs;
     Pivots pivots;
-
-    Target() { }
 
     uint32_t GetSymbolOffset(std::string symbol_name) const {
         auto it = symbols.find(symbol_name);
@@ -99,4 +96,21 @@ struct Target {
     }
 };
 
-Target Target::current;
+struct StaticTarget: Target {
+    StaticTarget(const std::string& distro, const std::string& release_name, const std::string& version = "") {
+        this->distro = distro;
+        this->release_name = release_name;
+        this->version = version;
+    }
+
+    void AddSymbol(const std::string& name, uint64_t value) {
+        symbols[name] = value;
+    }
+
+    void AddStruct(const std::string& name, uint64_t size, const std::vector<StructField>& fields) {
+        Struct str { name, size };
+        for (auto field : fields)
+            str.fields[field.name] = field;
+        structs[name] = str;
+    }
+};
