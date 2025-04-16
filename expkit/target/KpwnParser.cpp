@@ -26,7 +26,7 @@ protected:
     uint64_t offset_targets_ = 0, offset_struct_layouts_ = 0;
     bool has_structs_data_ = false;
     uint32_t num_targets_;
-    std::vector<SymbolId> symbol_ids_;
+    std::vector<std::string> symbol_names_;
     std::vector<RopActionId> rop_action_ids_;
     std::vector<StructMeta> structs_meta_;
     std::map<uint64_t, Struct> struct_layouts_;
@@ -37,16 +37,19 @@ protected:
         for (int i = 0; i < num_symbols; i++, EndStruct()) {
             BeginStruct(2);
             auto type_id = ReadU32();
-            DebugLog("symbol[%d] = %x", i, type_id);
-            symbol_ids_.push_back((SymbolId) type_id);
+            auto name_len = ReadU16();
+            auto name = ZStr(name_len);
+            DebugLog("symbol[%d] = %s", i, name);
+            symbol_names_.push_back(name);
         }
     }
 
     void ParseSymbols(Target& target) {
-        DebugLog("ParseSymbols (num=%u)", symbol_ids_.size());
-        for (auto type_id : symbol_ids_) {
-            target.symbols[type_id] = ReadU32();
-            DebugLog("symbol[0x%x] = 0x%x", type_id, target.symbols[type_id]);
+        DebugLog("ParseSymbols (num=%u)", symbol_names_.size());
+        for (auto& name : symbol_names_) {
+            auto value = ReadU32();
+            target.symbols[name] = value;
+            DebugLog("symbol[%s] = 0x%x", name.c_str(), value);
         }
     }
 
