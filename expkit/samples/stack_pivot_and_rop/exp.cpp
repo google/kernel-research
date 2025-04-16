@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include <cassert>
-#include <target/KpwnParser.cpp>
+#include <target/TargetDb.cpp>
 #include <test/kpwn/Kpwn.cpp>
 #include <util/incbin.cpp>
 #include <util/syscalls.cpp>
@@ -59,7 +59,7 @@ void trigger_vuln_arb_write(uint64_t addr, const std::vector<uint8_t>& data) {
 }
 
 int main(int argc, const char** argv) {
-    KpwnParser kpwn_db(target_db, target_db_size);
+    TargetDb kpwn_db(target_db, target_db_size);
     auto target = kpwn_db.AutoDetectTarget();
     printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
 

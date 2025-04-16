@@ -20,7 +20,7 @@ public:
 
     void init() {
         parser = KpwnParser::FromFile("test/artifacts/kernelctf.kpwn");
-        lts6181 = parser.GetTarget("kernelctf", "lts-6.1.81");
+        lts6181 = parser.GetTarget("kernelctf", "lts-6.1.81", true).value();
     }
 
     TEST_METHOD(findsPivotsForLts6181, "find all pivots for LTS 6.1.81") {

@@ -2,13 +2,14 @@
 
 #include <optional>
 #include "target/KpwnParser.cpp"
+#include "target/TargetDb.cpp"
 #include "test/kpwn/Kpwn.cpp"
 #include "util/file.cpp"
 
 class TestEnvironment {
     std::string target_db_path_;
     std::optional<Kpwn> kpwn_;
-    std::optional<KpwnParser> parser_;
+    std::optional<TargetDb> target_db_;
     std::optional<Target> target_;
 
 public:
@@ -26,18 +27,18 @@ public:
         return kpwn_.value();
     }
 
-    KpwnParser& GetKpwnParser() {
+    TargetDb& GetTargetDb() {
         if (target_db_path_.empty())
             throw ExpKitError("the target db path was not specified in the environment");
 
-        if (!parser_)
-            parser_ = KpwnParser(read_file(target_db_path_.c_str()));
-        return parser_.value();
+        if (!target_db_)
+        target_db_ = TargetDb(KpwnParser(read_file(target_db_path_.c_str())));
+        return target_db_.value();
     }
 
     const Target& GetTarget() {
         if (!target_)
-            target_ = GetKpwnParser().AutoDetectTarget();
+            target_ = GetTargetDb().AutoDetectTarget();
         return target_.value();
     }
 };

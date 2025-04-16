@@ -280,11 +280,14 @@ protected:
         return result;
     }
 
-    Target ParseTarget(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version) {
+    std::optional<Target> ParseTarget(std::optional<const std::string> distro, std::optional<const std::string> release_name, std::optional<const std::string> version, bool throw_on_missing) {
         auto targets = ParseTargets(distro, release_name, version);
 
         if (targets.size() == 1)
             return targets[0];
+
+        if (targets.size() == 0 && !throw_on_missing)
+            return std::nullopt;
 
         auto error = targets.size() > 1 ? "multiple targets were found" : "target was not found";
         if (version.has_value())
@@ -335,18 +338,12 @@ public:
         offset_targets_ = offset_;
     }
 
-    Target GetTarget(const std::string& distro, const std::string& release_name) {
-        return ParseTarget(distro, release_name, std::nullopt);
+    std::optional<Target> GetTarget(const std::string& distro, const std::string& release_name, bool throw_on_missing = false) {
+        return ParseTarget(distro, release_name, std::nullopt, throw_on_missing);
     }
 
-    Target GetTarget(const std::string& version) {
-        return ParseTarget(std::nullopt, std::nullopt, version);
-    }
-
-    Target AutoDetectTarget() {
-        auto version_bytes = read_file("/proc/version");
-        std::string version(version_bytes.begin(), version_bytes.end() - 1);
-        return GetTarget(version);
+    std::optional<Target> GetTarget(const std::string& version, bool throw_on_missing = false) {
+        return ParseTarget(std::nullopt, std::nullopt, version, throw_on_missing);
     }
 
     std::vector<Target> GetAllTargets() {
