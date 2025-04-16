@@ -77,7 +77,7 @@ jobs:
       - name: Build expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: make samples
+        run: make PREREQ=1 samples
 
       - name: Test expkit samples
         if: ${{ success() || failure() }}

@@ -18,7 +18,9 @@ test/artifacts/target_db_lts-6.1.81.kpwn:
 	../kpwn_db/kpwn_db.py --kernel-image-db-path=../kernel-image-db --release-filter-add lts-6.1.81 -o test/artifacts/target_db_lts-6.1.81.kpwn
 
 $(SAMPLES):
+ifdef PREREQ
+	if make -C samples/$@ -n prerequisites; then make -C samples/$@ prerequisites; fi
+endif
 	make -C samples/$@ build
 
 samples: $(SAMPLES)
-
