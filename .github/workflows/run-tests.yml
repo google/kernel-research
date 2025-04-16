@@ -74,6 +74,11 @@ jobs:
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --tap
 
+      - name: Build expkit samples
+        if: ${{ success() || failure() }}
+        working-directory: ./expkit
+        run: make samples
+
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
