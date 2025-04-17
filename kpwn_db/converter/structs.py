@@ -37,11 +37,12 @@ class StructWriter:
     for (wr, struct) in root_wr.seekable_list(self.struct_layouts):
       wr.varuint(struct.meta_idx)
       wr.varuint(struct.size)
-      for field_meta in self.structs_meta[struct.meta_idx].fields:
+      struct_meta = self.structs_meta[struct.meta_idx]
+      for field_meta in struct_meta.fields:
         field = struct.fields.get(field_meta.field_name)
         if field is None:
           if not field_meta.optional:
-            raise RuntimeError(f"Non-optional field is missing: {field_meta.field_name}")
+            raise RuntimeError(f"Non-optional field is missing: {struct_meta.struct_name}.{field_meta.field_name}")
           wr.varuint(0)
         else:
           wr.varuint(field.offset + 1)

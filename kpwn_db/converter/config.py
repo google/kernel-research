@@ -11,6 +11,7 @@ symbols = {
     SYM_FUNC | 0x04: "switch_task_namespaces",
     SYM_FUNC | 0x05: "__x64_sys_fork",
     SYM_FUNC | 0x06: "msleep",
+    SYM_FUNC | 0x07: "sock_def_write_space",
 
     # nm: D - initialized data section, global
     SYM_STRUCT | 0x01: "init_nsproxy",
@@ -39,5 +40,6 @@ structs = {
                    "cf_node.__rb_parent_color", "cl_vt", "cl_cvtmin"],
     "simple_xattr": ["list.next?", "list.prev?", "rb_node.__rb_parent_color?",
                      "rb_node.rb_right?", "rb_node.rb_left?", "name", "size", "value"],
-    "Qdisc_ops": ["change"]
+    "Qdisc_ops": ["change"],
+    "sock": ["sk_destruct", "sk_rcu.next"]
 }

@@ -17,27 +17,30 @@ def collect_image_db_targets(releases_dir, release_filter=None):
       targets.append(target)
   return targets
 
-def get_targets_from_image_db(meta_config, image_db_path, release_filter, logger):
+def get_targets_from_image_db(meta_config, image_db_path, release_filter, logger, allow_partial=False):
   logger.info("Collecting targets...\n")
   db_targets = collect_image_db_targets(f"{image_db_path}/releases", release_filter)
   db_targets.sort(key=lambda t: natural_sort_key(str(t)))
 
-  targets_with_missing_files = [t for t in db_targets if t.missing_files]
-  if targets_with_missing_files:
-    error_msg = "The following targets will be skipped as some of the " \
-                "required files are missing:\n"
-    for target in targets_with_missing_files:
-      error_msg += f" - {target.distro}/{target.release_name}: " \
-                   f"{', '.join(target.missing_files)}\n"
-    logger.error(error_msg)
+  if allow_partial:
+    valid_targets = db_targets
+  else:
+    targets_with_missing_files = [t for t in db_targets if t.missing_files]
+    if targets_with_missing_files:
+      error_msg = "The following targets will be skipped as some of the " \
+                  "required files are missing:\n"
+      for target in targets_with_missing_files:
+        error_msg += f" - {target.distro}/{target.release_name}: " \
+                    f"{', '.join(target.missing_files)}\n"
+      logger.error(error_msg)
 
-  valid_targets = [t for t in db_targets if not t.missing_files]
+    valid_targets = [t for t in db_targets if not t.missing_files]
 
   targets = []
   for db_target in valid_targets:
     logger.info(f"Processing target: {db_target}")
     try:
-      targets.append(db_target.process(meta_config))
+      targets.append(db_target.process(meta_config, allow_partial))
     except Exception:
       logger.error(f"Failed processing target: {traceback.format_exc()}")
 

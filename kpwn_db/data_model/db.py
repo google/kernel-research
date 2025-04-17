@@ -1,5 +1,5 @@
 """Module containing classes related to targets."""
-from typing import Dict, List
+from typing import Dict, List, Optional
 from pydantic.dataclasses import dataclass
 from .meta import MetaConfig
 from .pivots import Pivots
@@ -10,11 +10,11 @@ from .structs import Structs
 class Target():
   distro: str
   release_name: str
-  version: str
-  symbols: Dict[str, int]  # name -> offset
-  rop_actions: RopActions
-  stack_pivots: Pivots
-  structs: Structs
+  version: Optional[str]
+  symbols: Optional[Dict[str, int]]  # name -> offset
+  rop_actions: Optional[RopActions]
+  stack_pivots: Optional[Pivots]
+  structs: Optional[Structs]
 
   def __str__(self):
     return f"{self.distro}/{self.release_name}"
