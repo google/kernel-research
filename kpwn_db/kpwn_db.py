@@ -6,7 +6,6 @@ import os
 import sys
 import re
 
-
 KPWN_DB_DIR = os.path.abspath(f"{__file__}/..")
 sys.path.append(KPWN_DB_DIR)
 
@@ -16,7 +15,7 @@ from data_model.serialization import *
 import converter.config as config
 from converter.image_db_utils import get_targets_from_image_db
 from converter.kpwn_file import read_kpwn_db, write_kpwn_db
-
+from converter.partial_sync import PartialSync
 
 def main():
   parser = argparse.ArgumentParser(description=".kpwn database builder and converter")
@@ -32,10 +31,14 @@ def main():
                       help="Full file path to the destination target_db.{kpwn,json,yaml}")
   parser.add_argument("--indent", type=int, default=None,
                       help="How much intendation to use in JSON output file")
-  parser.add_argument('--minimal', action=argparse.BooleanOptionalAction,
+  parser.add_argument('--minimal', action='store_true',
                       help="Minimalize output kpwn size (skip well-known meta information)")
-  parser.add_argument('--list-targets', action=argparse.BooleanOptionalAction,
+  parser.add_argument('--list-targets', action='store_true',
                       help="List the targets in the database")
+  parser.add_argument('--partial-sync', action='store_true',
+                      help="Only add missing data to the database")
+  parser.add_argument('--partial-list-files', action='store_true',
+                      help="List missing files for partial sync")
   parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="INFO",
                       help="Set the logging level.")
   args = parser.parse_args()
@@ -44,42 +47,62 @@ def main():
   logger.setLevel(getattr(logging, args.log_level))
   logger.addHandler(logging.StreamHandler())
 
+  default_config = MetaConfig.from_desc(config.symbols, config.rop_actions, config.structs)
+
   targets = []
   if args.input_file:
+    db_config = None
     input_files = sorted(glob.glob(args.input_file, recursive=True))
     for input_file in input_files:
       logger.info("Processing input file: %s", input_file)
       db = read_kpwn_db(input_file)
-      meta = db.meta
+      if db_config and db_config != db.meta:
+        return parser.error("all input files must have the same config")
+      db_config = db.meta
       targets += db.targets
+    new_config = db_config
   elif args.kernel_image_db_path:
-    meta = MetaConfig.from_desc(config.symbols, config.rop_actions, config.structs)
-    targets = []
+    new_config = default_config
   else:
     return parser.error("at least one of --input-file or --kernel_image_db_path required")
 
+  if args.partial_sync:
+    new_config = default_config  # upgrade the db_config
+
+  partial_sync = PartialSync(db_config, default_config)
+
+  if args.partial_list_files:
+    missing_files = partial_sync.get_missing_files()
+    if missing_files:
+      print(' '.join(missing_files))
+    sys.exit(0 if missing_files else 1)
+
   if args.kernel_image_db_path:
-    new_targets = get_targets_from_image_db(meta, args.kernel_image_db_path, args.release_filter_add, logger)
+    new_targets = get_targets_from_image_db(new_config, args.kernel_image_db_path, args.release_filter_add, logger, args.partial_sync)
     if not new_targets:
       sys.stderr.write("No new targets to add. Exiting...\n")
-      os._exit(1)
-    targets += new_targets
+      sys.exit(1)
 
-  # make targets unique
-  targets = {str(t): t for t in targets}.values()
+    if args.partial_sync:
+      partial_sync.sync(targets, new_targets, logger)
+    else:
+      # add new targets, but make sure they are unique
+      targets = {str(t): t for t in new_targets + targets}.values()
 
   if args.release_filter:
     targets = [t for t in targets if re.search(args.release_filter, f"{t.distro}/{t.release_name}")]
 
-  db = Db(meta, targets)
-
   if args.list_targets:
     for t in targets:
       print(f"{t.distro}/{t.release_name}")
-  elif args.output_file:
+    sys.exit(0)
+
+  db = Db(new_config, targets)
+
+  if args.output_file:
     write_kpwn_db(args.output_file, db, indent=args.indent, minimal=args.minimal)
   else:
-    return parser.error("at least one of --output-file or --list-targets required")
+    return parser.error("at least one of --output-file or --list-targets or --partial-list-files required")
 
 if __name__ == "__main__":
   main()
