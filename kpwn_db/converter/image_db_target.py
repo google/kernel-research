@@ -22,6 +22,7 @@ class ImageDbTarget:
     self.release_name = release_name
     self.dir = dir_
     self.missing_files = self.get_missing_files()
+    self.allow_partial = False
 
   def __str__(self):
     return f"{self.distro}/{self.release_name}"
@@ -29,58 +30,86 @@ class ImageDbTarget:
   def file_exists(self, fn):
     return os.path.isfile(f"{self.dir}/{fn}")
 
-  def open_file(self, fn):
-    if not self.file_exists(fn):
-      raise FileNotFoundError(f"{fn} file was not found for "
-                              f"release: {self.release_name} (path={self.dir}/{fn})")
-    else:
-      return open(f"{self.dir}/{fn}", "rt")
+  def read_file(self, fn):
+    if self.file_exists(fn):
+      with open(f"{self.dir}/{fn}", "rt") as f:
+        return f.read()
+
+    if self.allow_partial:
+      return None
+
+    raise FileNotFoundError(f"{fn} file was not found for "
+                            f"release: {self.release_name} (path={self.dir}/{fn})")
 
   def get_full_name(self):
     return f"{self.distro}/{self.release_name}"
 
-  def get_version(self):
-    with self.open_file(self.VERSION_TXT) as f:
-      return f.read().strip()
-
-  def get_symbols(self, filter_list=None):
-    symbols = {}
-    with self.open_file(self.SYMBOLS_TXT) as f:
-      for line in f:
-        if line[0] == " ": continue
-        [addr, _, name] = line.rstrip().split(" ")
-        if not filter_list or name in filter_list:
-          symbols[name] = int(addr, 16) - self.KBASE_ADDR
-    return symbols
-
   def get_missing_files(self):
     return [f for f in self.ALL_FILES if not self.file_exists(f)]
 
+  def get_version(self):
+    version = self.read_file(self.VERSION_TXT)
+    return version.strip() if version else None
+
+  def get_symbols(self, filter_list):
+    content = self.read_file(self.SYMBOLS_TXT)
+    if not content: return None
+
+    symbols = {}
+    for line in content.split("\n"):
+      if not line or line.startswith(" "): continue
+      [addr, _, name] = line.rstrip().split(" ")
+      if not filter_list or name in filter_list:
+        symbols[name] = int(addr, 16) - self.KBASE_ADDR
+    return symbols
+
+  def from_json(self, fn, type_):
+    json_str = self.read_file(fn)
+    return from_json(type_, json_str) if json_str else None
+
   def get_rop_actions(self):
-    with self.open_file(self.ROP_ACTIONS_JSON) as f:
-      return from_json(RopActions, f.read())
+    return self.from_json(self.ROP_ACTIONS_JSON, RopActions)
 
   def get_stack_pivots(self):
-    with self.open_file(self.STACK_PIVOTS_JSON) as f:
-      return from_json(Pivots, f.read())
+    return self.from_json(self.STACK_PIVOTS_JSON, Pivots)
 
   def get_structs(self):
-    with self.open_file(self.STRUCTS_JSON) as f:
-      return from_json(Structs, f.read())
+    return self.from_json(self.STRUCTS_JSON, Structs)
 
-  def process(self, config=None):
-    version = self.get_version()
-
+  def process_symbols(self, config=None):
     symbol_filter = [s.name for s in config.symbols] if config and config.symbols else None
-    symbols = self.get_symbols(symbol_filter)
+    return self.get_symbols(symbol_filter)
 
+  def process_rop_actions(self, config=None):
     rop_actions = self.get_rop_actions()
-    if config and config.rop_actions:
+    if rop_actions and config and config.rop_actions:
       type_ids = [ra.type_id for ra in config.rop_actions]
       rop_actions = [ra for ra in rop_actions if ra.type_id in type_ids]
+    return rop_actions
 
+  def process_structs(self, config=None):
+    all_structs = self.get_structs()
+    if not all_structs or not config or not config.structs: return all_structs
+
+    structs = {}
+    for struct_meta in config.structs:
+      struct = all_structs.get(struct_meta.struct_name)
+      if not struct:
+        raise RuntimeError(f"Struct '{struct_meta.struct_name}' not found for target: {self.get_full_name()}")
+      structs[struct_meta.struct_name] = struct
+
+      missing_fields = [f.field_name for f in struct_meta.fields if not f.optional and not struct.fields.get(f.field_name)]
+      if missing_fields:
+        raise RuntimeError(f"Missing fields ('{', '.join(missing_fields)}') for struct '{struct_meta.struct_name}' for target: {self.get_full_name()}")
+    return structs
+
+  def process(self, config=None, allow_partial=False):
+    self.allow_partial = allow_partial
+    version = self.get_version()
+    symbols = self.process_symbols(config)
+    rop_actions = self.process_rop_actions(config)
     stack_pivots = self.get_stack_pivots()
-    structs = self.get_structs()
+    structs = self.process_structs(config)
     return Target(distro=self.distro, release_name=self.release_name, version=version,
                   symbols=symbols, rop_actions=rop_actions, stack_pivots=stack_pivots,
                   structs=structs)
