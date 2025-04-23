@@ -15,7 +15,7 @@ class ImageDbUtilsTests(unittest.TestCase):
   def expect_db(self, db_path, release_filter, expected_fn, expected_target_count=1):
     with expect_file(expected_fn) as f:
       meta_config = MetaConfig.from_desc(config.symbols, config.rop_actions, config.structs)
-      targets = get_targets_from_image_db(meta_config, db_path, release_filter, ExceptionRaisingLogger(__name__))
+      targets = get_targets_from_image_db(meta_config, db_path, release_filter, ExceptionRaisingLogger(__name__), False, True)
       self.assertEqual(expected_target_count, len(targets))
       db = Db(meta_config, targets)
       KpwnWriter(db).write_to_file(f.name)

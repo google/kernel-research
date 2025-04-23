@@ -51,9 +51,9 @@ class ImageDbTarget:
     version = self.read_file(self.VERSION_TXT)
     return version.strip() if version else None
 
-  def get_symbols(self, filter_list):
+  def get_symbols(self, filter_list=None):
     content = self.read_file(self.SYMBOLS_TXT)
-    if not content: return None
+    if content is None: return None
 
     symbols = {}
     for line in content.split("\n"):
@@ -87,29 +87,32 @@ class ImageDbTarget:
       rop_actions = [ra for ra in rop_actions if ra.type_id in type_ids]
     return rop_actions
 
-  def process_structs(self, config=None):
+  def process_structs(self, config=None, allow_missing=False):
     all_structs = self.get_structs()
-    if not all_structs or not config or not config.structs: return all_structs
+    if all_structs is None or not config or not config.structs: return all_structs
 
     structs = {}
     for struct_meta in config.structs:
       struct = all_structs.get(struct_meta.struct_name)
       if not struct:
-        raise RuntimeError(f"Struct '{struct_meta.struct_name}' not found for target: {self.get_full_name()}")
-      structs[struct_meta.struct_name] = struct
+        if not allow_missing:
+          raise RuntimeError(f"Struct '{struct_meta.struct_name}' not found for target: {self.get_full_name()}")
+        continue
 
+      structs[struct_meta.struct_name] = struct
       missing_fields = [f.field_name for f in struct_meta.fields if not f.optional and not struct.fields.get(f.field_name)]
-      if missing_fields:
+      if missing_fields and not allow_missing:
         raise RuntimeError(f"Missing fields ('{', '.join(missing_fields)}') for struct '{struct_meta.struct_name}' for target: {self.get_full_name()}")
+
     return structs
 
-  def process(self, config=None, allow_partial=False):
+  def process(self, config=None, allow_partial=False, allow_missing=False):
     self.allow_partial = allow_partial
     version = self.get_version()
     symbols = self.process_symbols(config)
     rop_actions = self.process_rop_actions(config)
     stack_pivots = self.get_stack_pivots()
-    structs = self.process_structs(config)
+    structs = self.process_structs(config, allow_missing)
     return Target(distro=self.distro, release_name=self.release_name, version=version,
                   symbols=symbols, rop_actions=rop_actions, stack_pivots=stack_pivots,
                   structs=structs)
