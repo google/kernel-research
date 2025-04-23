@@ -17,7 +17,7 @@ def collect_image_db_targets(releases_dir, release_filter=None):
       targets.append(target)
   return targets
 
-def get_targets_from_image_db(meta_config, image_db_path, release_filter, logger, allow_partial=False):
+def get_targets_from_image_db(meta_config, image_db_path, release_filter, logger, allow_partial=False, allow_missing=False):
   logger.info("Collecting targets...\n")
   db_targets = collect_image_db_targets(f"{image_db_path}/releases", release_filter)
   db_targets.sort(key=lambda t: natural_sort_key(str(t)))
@@ -40,7 +40,7 @@ def get_targets_from_image_db(meta_config, image_db_path, release_filter, logger
   for db_target in valid_targets:
     logger.info(f"Processing target: {db_target}")
     try:
-      targets.append(db_target.process(meta_config, allow_partial))
+      targets.append(db_target.process(meta_config, allow_partial, allow_missing))
     except Exception:
       logger.error(f"Failed processing target: {traceback.format_exc()}")
 
