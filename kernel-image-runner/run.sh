@@ -18,7 +18,7 @@ set -e
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld,kpwn] [--only-command-output [--dmesg=<path>]] [--gdb] [--snapshot] [--nokaslr] -- [<commands-to-run-in-vm>]";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--custom-modules=helloworld,kpwn] [--only-command-output [--dmesg=<path>]] [--gdb] [--snapshot] [--nokaslr] -- [<commands-to-run-in-vm>]" >&2;
     exit 1;
 }
 
