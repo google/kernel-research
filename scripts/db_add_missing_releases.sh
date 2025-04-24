@@ -18,19 +18,7 @@ SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
 KPWN_DB_DIR="$SCRIPT_DIR/../kpwn_db"
 
-gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kpwn db.kpwn
-"$KPWN_DB_DIR/kpwn_db.py" -i db.kpwn --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
-
-# gcloud storage ls gs://kernelctf-build/releases | sed "s/.*releases\/\(.*\)\//\1/" > build_releases.txt
-
-# missing_releases = kernelctf_releases without db_releases and skipped_releases
-curl -s https://raw.githubusercontent.com/google/security-research/master/kernelctf/server/releases.yaml | grep -Eoh "^[^: ]*"  > kernelctf_releases.txt
-cat kernelctf_releases.txt | grep -v -f db_releases.txt | grep -v -f <(cat skipped_releases.txt | sed 's/\s*#.*//') > missing_releases.txt || true
-if [[ ! -s "missing_releases.txt" ]]; then echo "Nothing is missing from the database, exiting..."; exit 0; fi
-
-printf "The following releases missing from the DB, adding them now:\n\n"
-cat missing_releases.txt | sed 's/$/, /' | tr -d '\n'
-echo
+./get_missing_releases.sh
 
 while IFS= read -r RELEASE <&3; do
     if [ "$1" == "--auto-cleanup" ]; then

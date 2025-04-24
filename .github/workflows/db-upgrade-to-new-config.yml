@@ -1,4 +1,4 @@
-name: Upgrade target db
+name: 'DB: upgrade to new config'
 on:
   workflow_dispatch:
 permissions: {}
@@ -12,7 +12,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{secrets.DB_GCS_SA_KEY}}'
+          credentials_json: '${{ secrets.DB_GCS_SA_KEY }}'
 
       - name: Install kpwn_db prerequisites
         working-directory: kpwn_db
@@ -20,4 +20,4 @@ jobs:
 
       - name: Upgrade DB
         working-directory: scripts
-        run: ./db_upgrade.sh
+        run: ./db_upgrade_config.sh
