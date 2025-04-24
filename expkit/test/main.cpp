@@ -6,6 +6,7 @@
 #include "test/logging/TapLogger.cpp"
 #include "test/tests/TargetDbTests.cpp"
 #include "test/tests/KpwnTests.cpp"
+#include "test/tests/RopActionTests.cpp"
 #include "test/tests/SymbolsTests.cpp"
 #include "test/tests/PivotTests.cpp"
 #include "util/ArgumentParser.cpp"
@@ -29,6 +30,7 @@ public:
         runner_.Add(new SymbolsTest());
         runner_.Add(new PivotTests());
         runner_.Add(new PivotKpwnTests());
+        runner_.Add(new RopActionTests());
 
         runner_.SetSuiteFilter(args_.getOption("test-suites"));
         runner_.SetTestFilter(args_.getOption("tests").value_or("^TODO"));
