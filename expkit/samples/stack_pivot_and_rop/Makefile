@@ -2,6 +2,9 @@ TARGET ?= kernelctf lts-6.1.81
 
 build: exp
 
+clean:
+	rm exp
+
 exp: target_db.kpwn exp.cpp
 	g++ -static -I../.. -o exp exp.cpp
 
@@ -14,6 +17,10 @@ run: build
 
 test: run
 	grep "CTF{secret_flag_deadbeef}" output.txt || { echo "Failed to leak the flag."; grep -q ExpKitError output.txt || { echo "dmesg content: "; cat dmesg.txt; }; exit 1; }
+
+stability_test: build
+	cp exp* ../../../kernel-image-runner/rootfs/
+	../../../kernel-image-runner/test/run_stability_test.sh $(TARGET) /exp.sh
 
 echo:
 	echo $(TARGET)
