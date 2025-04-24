@@ -17,6 +17,8 @@ class Payload {
 public:
     Payload(int size): data_(size), used_bytes_(size, 0), used_size_(0) { }
 
+    size_t Size() { return data_.size(); }
+
     std::vector<uint8_t>& GetData() { return data_; }
 
     std::vector<uint8_t> GetUsedData() const {
