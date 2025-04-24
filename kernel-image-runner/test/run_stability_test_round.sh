@@ -1,0 +1,49 @@
+#!/usr/bin/bash
+set -euo pipefail
+
+STDOUT_DIR="stability_test_outputs"
+
+SCRIPT_DIR=$(dirname $(realpath "$0"))
+cd "$SCRIPT_DIR"
+
+ROUND_ID="$1"
+DISTRO="$2"
+RELEASE="$3"
+RUNNER_ARGS="${@:4}"
+
+usage() {
+    echo "Usage: $0 <round_id> <distro> <release> <runner_args>";
+    exit 1;
+}
+
+if [ -z "$ROUND_ID" ]; then echo "ROUND_ID is missing"; usage; fi
+if [ -z "$DISTRO" ]; then echo "DISTRO is missing"; usage; fi
+if [ -z "$RELEASE" ]; then echo "DISTRO is missing"; usage; fi
+if [ -z "$RUNNER_ARGS" ]; then echo "RUNNER_ARGS are missing"; usage; fi
+
+OUTPUT_FN="$STDOUT_DIR/${DISTRO}_${RELEASE}_round_${ROUND_ID}"
+
+mkdir -p "$STDOUT_DIR" 2>/dev/null || true
+
+if ! timeout --foreground -s SIGKILL 15s ../run.sh $DISTRO $RELEASE $RUNNER_ARGS|sed s/\\r//g > "$OUTPUT_FN"; then
+    echo "#$ROUND_ID: kernel-image-runner failed to run. Check the arguments: '$RUNNER_ARGS'"
+    exit 2;
+fi
+
+OUTPUT=$(cat "$OUTPUT_FN")
+
+set +eo pipefail
+SUCCESS=$(echo "$OUTPUT"|grep 'secret_flag_deadbeef\|YOU.WON')
+EXP_PANIC=$(echo "$OUTPUT"|grep -o '\(BUG:\|usercopy:\|RIP: 0\).*'|head -n 1)
+EXP_EXITED=$(echo "$OUTPUT"|grep -o '\(Attempted to kill init\).*'|tail -n 1)
+EXP_ERROR=$(echo "$OUTPUT"|grep -o '\(\[-\]\).*'|tail -n 1)
+EXP_SEGFAULT=$(echo "$OUTPUT"|grep 'exp.*segfault at')
+LAST_LINE=$(echo "$OUTPUT"|tail -n 1)
+
+# echo needs to be one statement, otherwise the stdout is mixed with other rounds
+if [ ! -z "$SUCCESS" ]; then echo "#$ROUND_ID: Success: $SUCCESS"; exit 0;
+elif [ ! -z "$EXP_ERROR" ]; then echo "#$ROUND_ID: Exploit failed with: $EXP_ERROR"; exit 3;
+elif [ ! -z "$EXP_EXITED" ]; then echo "#$ROUND_ID: Exploit exited with: $EXP_EXITED"; exit 4;
+elif [ ! -z "$EXP_PANIC" ]; then echo "#$ROUND_ID: Kernel paniced with: $EXP_PANIC"; exit 5;
+elif [ ! -z "$EXP_SEGFAULT" ]; then echo "#$ROUND_ID: Exploit segfaulted."; exit 6;
+else echo "#$ROUND_ID: Unknown failure: $LAST_LINE"; exit 7; fi

@@ -14,3 +14,4 @@ rootfs/*
 !rootfs/scripts
 !rootfs/init
 logs/
+test/stability_test_outputs/

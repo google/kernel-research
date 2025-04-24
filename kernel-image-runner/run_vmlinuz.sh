@@ -18,7 +18,7 @@ set -e
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--stdout-file=<path>] -- [<commands-to-run-in-vm>]";
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--stdout-file=<path>] -- [<commands-to-run-in-vm>]" >&2;
     exit 1;
 }
 
@@ -96,4 +96,4 @@ qemu-system-x86_64 -m 3.5G -nographic -nodefaults -no-reboot \
     $SERIAL_PORTS $EXTRA_ARGS \
     -append "console=ttyS0 panic=-1 oops=panic loadpin.enable=0 loadpin.enforce=0$EXTRA_CMDLINE init=/init -- $COMMANDS_TO_RUN"
 
-stty sane || true 2>/dev/null
+stty sane 2>/dev/null || true

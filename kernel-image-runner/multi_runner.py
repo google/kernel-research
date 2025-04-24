@@ -63,7 +63,7 @@ class MultiPrint:
 
 
 def read_pipes(*pipes):
-  pipes=list(pipes)
+  pipes = list(pipes)
   sel = selectors.DefaultSelector()
   for pipe in pipes:
     sel.register(pipe, selectors.EVENT_READ)
@@ -96,6 +96,7 @@ def bold_green(text):
 
 def bold_yellow(text):
   return f"\033[1;33m{text}\033[00m"
+
 
 class ReleaseRunner:
   def __init__(self, multi_runner, distro, release_name):
