@@ -5,3 +5,4 @@ output.txt
 actual_results/*
 samples/**/exp
 samples/**/*.kpwn
+test_results/
