@@ -72,7 +72,7 @@ jobs:
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} --tap
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh 1 ${{ steps.vars.outputs.target }} --tap
 
       - name: Build expkit samples
         if: ${{ success() || failure() }}
@@ -94,7 +94,7 @@ jobs:
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} --tap --test-suites RuntimeTests --tests TODO
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh 1 ${{ steps.vars.outputs.target }} --tap --test-suites RuntimeTests --tests TODO
 
       - name: Send Google Chat Notification (on failure)
         if: ${{ failure() && !inputs.silence_notifications }}

@@ -7,7 +7,7 @@ def read_file(fn):
     return f.read()
 
 def check_tap():
-  tap_results = read_file("tap_results.txt")
+  tap_results = read_file(sys.argv[1])
   tap_match = re.match(r"(?:^|\n)1..(\d+)(.*)\n", tap_results, re.DOTALL)
   if not tap_match:
     print("Could not find tap results in output")
