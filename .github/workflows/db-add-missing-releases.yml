@@ -1,4 +1,4 @@
-name: Update target db
+name: 'DB: add missing releases'
 on:
   workflow_dispatch:
     inputs:
@@ -22,7 +22,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{secrets.DB_GCS_SA_KEY}}'
+          credentials_json: '${{ secrets.DB_GCS_SA_KEY }}'
 
       - name: Install kpwn_db prerequisites
         working-directory: kpwn_db
@@ -32,7 +32,7 @@ jobs:
         id: get_missing_releases
         working-directory: scripts
         run: |
-          ./db_get_missing_releases.sh ${{inputs.rebuild && '--rebuild'}}
+          ./db_get_missing_releases.sh ${{ inputs.rebuild && '--rebuild' }}
           echo "releases=$(cat missing_releases.txt | jq -Rsc 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
@@ -48,7 +48,7 @@ jobs:
       matrix:
         release: ${{ fromJson(needs.get_missing_releases.outputs.releases) }}
       fail-fast: false
-    uses: ./.github/workflows/generate-db-for-release.yml
+    uses: ./.github/workflows/db-generate-for-release.yml
     secrets: inherit
     with:
       release: kernelctf ${{matrix.release}}
@@ -64,7 +64,7 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{secrets.DB_GCS_SA_KEY}}'
+          credentials_json: '${{ secrets.DB_GCS_SA_KEY }}'
 
       - name: Install kpwn_db prerequisites
         working-directory: kpwn_db

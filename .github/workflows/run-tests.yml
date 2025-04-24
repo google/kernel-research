@@ -28,7 +28,7 @@ jobs:
       - name: Fix input variables
         id: vars
         env:
-          target: ${{inputs.target}}
+          target: ${{ inputs.target }}
         run: echo "target=${target:-kernelctf lts-6.1.81}" >> $GITHUB_OUTPUT
 
       - name: Checkout repo
@@ -72,7 +72,7 @@ jobs:
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --tap
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} --tap
 
       - name: Build expkit samples
         if: ${{ success() || failure() }}
@@ -82,7 +82,7 @@ jobs:
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop TARGET="${{steps.vars.outputs.target}}" test
+        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test
 
       - name: Test expkit (local TODO tests only)
         if: ${{ success() || failure() }}
@@ -94,7 +94,7 @@ jobs:
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{steps.vars.outputs.target}} --tap --test-suites RuntimeTests --tests TODO
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} --tap --test-suites RuntimeTests --tests TODO
 
       - name: Send Google Chat Notification (on failure)
         if: ${{ failure() && !inputs.silence_notifications }}
