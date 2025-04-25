@@ -218,7 +218,7 @@ class PivotFinder:
         else:
             raise BadPivot("Memory addr unknown")
 
-    def _parse_jmp_or_call_instruction(self, inst):
+    def _parse_indirect_jmp_or_call_instruction(self, inst):
         # Pattern to match various jmp formats, optionally including 'qword'
         pattern = r"(?:call|jmp)\s+(qword\s+)?\[(\w+)([+-](?:0x[\da-fA-F]+|\d+))?\]"
         match = re.match(pattern, inst)
@@ -238,6 +238,22 @@ class PivotFinder:
             return register, offset
         else:
             raise BadPivot("Address unknown for jmp or call instruction")
+
+    def _parse_direct_jmp_or_call_instruction(self, inst):
+        # Pattern to match various jmp formats, optionally including 'qword'
+        pattern = r"(call|jmp)\s+([a-zA-Z][a-zA-Z0-9]*)"
+        match = re.match(pattern, inst)
+        if match:
+
+            # call or jmp is captured in first group
+            instruction_type = match.group(1)
+
+            # Register is captured in the second group
+            register = match.group(2)
+
+            return instruction_type, register
+        else:
+            raise BadPivot("Not a direct jmp or call")
 
     # instruction analysis functions
     def _check_no_push_pop(self, insts):
@@ -519,7 +535,7 @@ class PivotFinder:
 
         return OneGadgetPivot(address, gadget, pivot_reg, used_offsets, stack_change)
 
-    def _try_match_indirect_pivot(self, address, gadget, pivot_reg):
+    def _try_match_indirect_pattern1(self, address, gadget, pivot_reg):
         """
         After finding a gadget with includes the following pattern 
         push reg ; ... ;  jmp qword [reg+offset];
@@ -533,7 +549,7 @@ class PivotFinder:
         # make sure no push or pop after the first push
         self._check_no_push_pop(middle_insts)
 
-        jump_reg, offset = self._parse_jmp_or_call_instruction(last_inst)
+        jump_reg, offset = self._parse_indirect_jmp_or_call_instruction(last_inst)
         if jump_reg not in PIVOT_REGISTER_NAMES:
             raise BadPivot("Indirect register not allowlisted")
 
@@ -542,7 +558,6 @@ class PivotFinder:
             raise BadPivot("Indirect gadget has large offset")
 
         # for this gadget we can have reads/writes to pivot_reg or jump_reg
-        # TODO: check if allowing these helps or we can simplify
         memory_writes = self._analyze_instruction_reads_writes(
             middle_insts,
             {"rsp", jump_reg},  # rsp/jump_reg should not be modified
@@ -559,6 +574,63 @@ class PivotFinder:
 
         return PushIndirectPivot(address, gadget, indirect_type, pivot_reg, list(memory_writes[pivot_reg]),
                                  jump_reg, jump_used_offsets, offset)
+
+    def _try_match_indirect_pattern2(self, address, gadget, pivot_reg):
+        """
+        After finding a gadget with includes the following pattern
+        push reg1 ; ... ; mov reg2, qword [reg1+offset], call reg2;
+
+        Checks the middle instructions to make sure they are allowlisted safe ones
+        Analyzes memory reads and writes and creates the Pivot
+        """
+
+        # call reg2
+        last_inst = gadget[-1]
+
+        # Assuming that mov reg2, qword [reg1+offset] is always second to the last
+        second_to_last_inst = gadget[-2]
+
+        middle_insts = gadget[1:-2]
+
+        # make sure no push or pop after the first push
+        self._check_no_push_pop(middle_insts)
+
+        instruction_type, jump_call_reg = self._parse_direct_jmp_or_call_instruction(
+            last_inst)
+        if jump_call_reg not in PIVOT_REGISTER_NAMES:
+            raise BadPivot("Indirect register not allowlisted")
+
+        operator, operands = self._split_instruction(second_to_last_inst)
+        if operator != "mov":
+            raise BadPivot("Does not load register for a call")
+
+        if operands[0] != jump_call_reg:
+            raise BadPivot("Loaded register does not match jump call register")
+
+        reg, offset = self._parse_memory_reg_and_offset(operands[1])
+        if reg != pivot_reg:
+            raise BadPivot(
+                "Operand register does not match the pivot register")
+        if offset < -0x80 or offset >= MAX_SHIFT:
+            # These offsets are arbitrary
+            raise BadPivot("Indirect gadget has large offset")
+
+        # for this gadget we can have reads/writes to the data pivot_reg points at
+        memory_writes = self._analyze_instruction_reads_writes(
+            middle_insts,
+            {"rsp", pivot_reg},  # rsp/pivot_reg should not be modified
+            {pivot_reg}  # can read/write to pivot_reg
+        )
+
+        # check memory writes[jump_reg] don't overlap jump offset
+        used_offsets = list(memory_writes[pivot_reg])
+
+        self._check_write_collision_with_rip_offset(
+            used_offsets, offset)
+
+        return PushIndirectPivot(address, gadget, instruction_type, pivot_reg, list(memory_writes[pivot_reg]),
+                                 pivot_reg, list(memory_writes[pivot_reg]), offset)
+
 
     def _check_if_pivot(self, address, gadget):
         """
@@ -600,7 +672,10 @@ class PivotFinder:
 
             # check if push ... jump|call [reg]
             if last_inst.startswith("jmp") or last_inst.startswith("call"):
-                return self._try_match_indirect_pivot(address, gadget, pivot_reg)
+                if '[' in last_inst:
+                    return self._try_match_indirect_pattern1(address, gadget, pivot_reg)
+                else:
+                    return self._try_match_indirect_pattern2(address, gadget, pivot_reg)
 
         # check if [popN, poprsp, popN ret]
         if re.match(POP_PATTERN, first_inst):
