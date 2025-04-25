@@ -49,9 +49,9 @@ def main():
 
   default_config = MetaConfig.from_desc(config.symbols, config.rop_actions, config.structs)
 
+  db_config = None
   targets = []
   if args.input_file:
-    db_config = None
     input_files = sorted(glob.glob(args.input_file, recursive=True))
     for input_file in input_files:
       logger.info("Processing input file: %s", input_file)
