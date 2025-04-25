@@ -50,4 +50,4 @@ jobs:
 
       - name: Create db for release
         working-directory: ./scripts
-        run: ./db_process_release.sh ${{ inputs.release }}
+        run: ./db_process_release.sh ${{ inputs.release }} --upload
