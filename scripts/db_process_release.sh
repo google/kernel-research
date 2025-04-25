@@ -33,10 +33,12 @@ echo "Creating db for release $DISTRO $RELEASE"
 "$KPWN_DB_DIR/kpwn_db.py" -o db.kpwn --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
 "$KPWN_DB_DIR/kpwn_db.py" -i db.kpwn -o db.json --indent 4
 
-echo "Uploading dbs"
-for EXT in kpwn json; do
-    gcloud storage cp -Z -a publicRead db.$EXT gs://kernel-research/pwnkit/db/$DISTRO/$RELEASE.$EXT
-done
+if [[ "$3" == "--upload" ]]; then
+    echo "Uploading dbs"
+    for EXT in kpwn json; do
+        gcloud storage cp -Z -a publicRead db.$EXT gs://kernel-research/pwnkit/db/$DISTRO/$RELEASE.$EXT
+    done
 
-echo "Uploading missing kernel-image-db information"
-gcloud storage rsync "$IMAGE_DB_DIR/releases/$DISTRO/$RELEASE" "gs://kernel-research/kernel-image-db/releases/$DISTRO/$RELEASE" -a publicRead -x "^(?!(btf|btf.json|rop_actions.json|slabinfo.txt|stack_pivots.json|structs.json|symbols.txt|version.txt)$).*"
+    echo "Uploading missing kernel-image-db information"
+    gcloud storage rsync "$IMAGE_DB_DIR/releases/$DISTRO/$RELEASE" "gs://kernel-research/kernel-image-db/releases/$DISTRO/$RELEASE" -a publicRead -x "^(?!(btf|btf.json|rop_actions.json|slabinfo.txt|stack_pivots.json|structs.json|symbols.txt|version.txt)$).*"
+fi
