@@ -494,12 +494,12 @@ class RopGeneratorAngrop:
            RopChain: The constructed ROP chain.
         """
         items = [self._find_pop_one_reg("rdi"),
-                 address,
-                 self._find_pop_one_reg("rsi"),
                  value,
+                 self._find_pop_one_reg("rsi"),
+                 address,
                  RopChainOffset(
                    kernel_offset=self.find_memory_write(),
-                   description="mov qword ptr [rdi], rsi")]
+                   description="mov qword ptr [rsi], rdi")]
 
         return RopAction(
           type_id=0x04,
