@@ -253,11 +253,15 @@ public:
             throw ExpKitError("exploit failed, the win_target was not called :(");
     }
 
-    ~Kpwn() {
+    void Close() {
         for (auto probe: std::set(installed_probes_))
             RemoveKprobe(probe);
 
         if (fd_ != -1)
             Syscalls::close(fd_);
+    }
+
+    ~Kpwn() {
+        Close();
     }
 };
