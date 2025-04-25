@@ -9,7 +9,6 @@ cd "$SCRIPT_DIR"
 
 DISTRO="${1:-ubuntu}"
 RELEASE="${2:-4.15.0-20.21}"
-LOG_PREFIX="${DISTRO}_${RELEASE}_round_"
 # echo "${@:3}"
 
 echo "Updating rootfs..."
@@ -20,7 +19,7 @@ echo "Compiling kpwn module..."
 
 echo "Running tests..."
 mkdir -p $LOG_DIR || true
-rm $LOG_DIR/$LOG_PREFIX* 2>/dev/null || true
+rm $LOG_DIR/round_* 2>/dev/null || true
 
 ROUNDS=20
 RESULT=$(parallel -i ./run_stability_test_round.sh {} "$DISTRO" "$RELEASE" --custom-modules=keep ${@:3} -- $(seq 1 $ROUNDS) 2>/dev/null | sort -V || true)
@@ -33,9 +32,10 @@ FIRST_PANIC_FN_ID=$(echo "$RESULT"|grep panic|head -n 1|grep -o '[0-9]\+'|head -
 
 echo "Summary: $SUCCESS success runs out of $ROUNDS => $(($SUCCESS*100/$ROUNDS))%"
 if [ ! -z "$FIRST_PANIC_FN_ID" ]; then
-    cp "$LOG_DIR/$LOG_PREFIX$FIRST_PANIC_FN_ID" "$LOG_DIR/panic_sample.txt"
+    FN="$LOG_DIR/round_${FIRST_PANIC_FN_ID}"
+    cp "${FN}_dmesg.txt" "$LOG_DIR/panic_sample.txt"
     echo "First panic:"
-    cat "$LOG_DIR/$LOG_PREFIX$FIRST_PANIC_FN_ID"|grep -m1 -A14 "\] BUG: "
-    echo "See $LOG_DIR/$LOG_PREFIX$FIRST_PANIC_FN_ID for more info"
+    cat "${FN}_dmesg.txt"|grep -m1 -A14 "\] BUG: "
+    echo "See ${FN}_{dmesg,output} for more info"
 fi
 stty sane
