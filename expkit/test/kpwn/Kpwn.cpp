@@ -257,8 +257,10 @@ public:
         for (auto probe: std::set(installed_probes_))
             RemoveKprobe(probe);
 
-        if (fd_ != -1)
+        if (fd_ != -1) {
             Syscalls::close(fd_);
+            fd_ = -1;
+        }
     }
 
     ~Kpwn() {

