@@ -21,23 +21,25 @@ if [ -z "$DISTRO" ]; then echo "DISTRO is missing"; usage; fi
 if [ -z "$RELEASE" ]; then echo "DISTRO is missing"; usage; fi
 if [ -z "$RUNNER_ARGS" ]; then echo "RUNNER_ARGS are missing"; usage; fi
 
-OUTPUT_FN="$STDOUT_DIR/${DISTRO}_${RELEASE}_round_${ROUND_ID}"
+OUTPUT_FN="$STDOUT_DIR/round_${ROUND_ID}_output.txt"
+DMESG_FN="$STDOUT_DIR/round_${ROUND_ID}_dmesg.txt"
 
 mkdir -p "$STDOUT_DIR" 2>/dev/null || true
 
-if ! timeout --foreground -s SIGKILL 15s ../run.sh $DISTRO $RELEASE $RUNNER_ARGS|sed s/\\r//g > "$OUTPUT_FN"; then
+if ! timeout --foreground -s SIGKILL 15s ../run.sh $DISTRO $RELEASE --only-command-output --dmesg=$DMESG_FN $RUNNER_ARGS|sed s/\\r//g > "$OUTPUT_FN"; then
     echo "#$ROUND_ID: kernel-image-runner failed to run. Check the arguments: '$RUNNER_ARGS'"
     exit 2;
 fi
 
 OUTPUT=$(cat "$OUTPUT_FN")
+DMESG=$(cat "$DMESG_FN")
 
 set +eo pipefail
 SUCCESS=$(echo "$OUTPUT"|grep 'secret_flag_deadbeef\|YOU.WON')
-EXP_PANIC=$(echo "$OUTPUT"|grep -o '\(BUG:\|usercopy:\|RIP: 0\).*'|head -n 1)
-EXP_EXITED=$(echo "$OUTPUT"|grep -o '\(Attempted to kill init\).*'|tail -n 1)
+EXP_PANIC=$(echo "$DMESG"|grep -o '\(BUG:\|usercopy:\|RIP: 0\).*'|head -n 1)
+EXP_EXITED=$(echo "$DMESG"|grep -o '\(Attempted to kill init\).*'|tail -n 1)
 EXP_ERROR=$(echo "$OUTPUT"|grep -o '\(\[-\]\).*'|tail -n 1)
-EXP_SEGFAULT=$(echo "$OUTPUT"|grep 'exp.*segfault at')
+EXP_SEGFAULT=$(echo "$DMESG"|grep 'exp.*segfault at')
 LAST_LINE=$(echo "$OUTPUT"|tail -n 1)
 
 # echo needs to be one statement, otherwise the stdout is mixed with other rounds
