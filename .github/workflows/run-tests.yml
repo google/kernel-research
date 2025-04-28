@@ -48,6 +48,11 @@ jobs:
           cd kpwn_db
           pip install -r requirements.txt
 
+      - name: Environment info
+        run: |
+          g++ --version
+          ldd --version
+
       - name: Download cached kpwn module # to skip compilation and speedup tests
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
         run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v1.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
