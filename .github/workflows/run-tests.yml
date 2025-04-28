@@ -96,6 +96,16 @@ jobs:
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh 1 ${{ steps.vars.outputs.target }} --tap --test-suites RuntimeTests --tests TODO
 
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            expkit/samples/**/exp
+            expkit/bin/test
+            expkit/test_results
+            kernel-image-db/releases/**/custom_modules.tar
+
       - name: Send Google Chat Notification (on failure)
         if: ${{ failure() && !inputs.silence_notifications }}
         env:
