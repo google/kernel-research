@@ -64,7 +64,7 @@ void win() {
     puts("[+] Testing access as root:");
     const char *sh_args[] = {"sh", "-c", "id; cat /flag", NULL};
     int ret = execve("/bin/sh", (char**)sh_args, NULL);
-    printf("[-] execve failed ret = %d, errno = %d\n", ret, errno);
+    printf("[-] execve failed ret = %d, errno = %d, exiting...\n", ret, errno);
     _exit(1);
 }
 
