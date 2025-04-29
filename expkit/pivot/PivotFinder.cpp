@@ -190,7 +190,6 @@ public:
         if (include_extra_slot) search_size += 8;
         return FindShiftsInternal(from_offset, std::nullopt, search_size);
     }
->>>>>>> 9b2e818 (expkit: use a breadth first search for stack pivots, allow 'retn off' gadgets)
 
     std::optional<StackShiftingInfo> FindShiftsInternal(uint64_t from_offset, std::optional<uint64_t> min_to_offset, std::optional<uint64_t> min_next_space) {
         if(!min_to_offset && !min_next_space) {
