@@ -1,13 +1,21 @@
 #!/usr/bin/env -S python3 -u
 import re
+import os
 import sys
 
 def read_file(fn):
+  if not os.path.isfile(fn):
+    raise RuntimeError(f"File not found: {fn}")
+
   with open(fn, "rt") as f:
     return f.read()
 
+round_id = sys.argv[1]
+tap_fn = f"test_results/round_{round_id}.txt"
+dmesg_fn = f"test_results/dmesg_{round_id}.txt"
+
 def check_tap():
-  tap_results = read_file(sys.argv[1])
+  tap_results = read_file(tap_fn)
   tap_match = re.match(r"(?:^|\n)1..(\d+)(.*)\n", tap_results, re.DOTALL)
   if not tap_match:
     print("Could not find tap results in output")
@@ -23,13 +31,17 @@ def check_tap():
   return not missing_tests
 
 def check_dmesg():
-  dmesg = read_file("dmesg.txt")
+  dmesg = read_file(dmesg_fn)
   crash = re.split(r"=== COMMAND-BEGIN:.*?===\n", dmesg)[1]
   dmesg_success = "=== COMMAND-END ===" in crash and "Attempted to kill init" in crash
   if not dmesg_success:
     print(f"Crashed:\n{crash}")
   return dmesg_success
 
-success = check_tap() & check_dmesg()
+success = False
+try:
+  success = check_tap() & check_dmesg()
+except Exception as e:
+  print(str(e))
 
 sys.exit(0 if success else 1)

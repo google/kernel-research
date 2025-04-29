@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-set -euo pipefail
+set -e
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 RUNNER_DIR="$SCRIPT_DIR/.."
@@ -10,21 +10,25 @@ cd "$SCRIPT_DIR"
 DISTRO="${1:-ubuntu}"
 RELEASE="${2:-4.15.0-20.21}"
 # echo "${@:3}"
+RELEASE_DIR="$SCRIPT_DIR/../../kernel-image-db/releases/$DISTRO/$RELEASE"
 
 echo "Updating rootfs..."
 (cd $RUNNER_DIR; ./update_rootfs_image.sh)
 
-echo "Compiling kpwn module..."
-(cd $RUNNER_DIR; ./compile_custom_modules.sh "$DISTRO" "$RELEASE" kpwn) || (echo "failed: $?..." && exit 1)
+if [[ ( ! -v CUSTOM_MODULES_KEEP || ! -f "$RELEASE_DIR/custom_modules.tar") ]]; then
+    echo "Compiling kpwn module..."
+    (cd $RUNNER_DIR; ./compile_custom_modules.sh "$DISTRO" "$RELEASE" kpwn) || (echo "failed: $?..." && exit 1)
+fi
 
-echo "Running tests..."
 mkdir -p $LOG_DIR || true
 rm $LOG_DIR/round_* 2>/dev/null || true
 
+echo "Running tests..."
 ROUNDS=20
-RESULT=$(parallel -i ./run_stability_test_round.sh {} "$DISTRO" "$RELEASE" --custom-modules=keep ${@:3} -- $(seq 1 $ROUNDS) 2>/dev/null | sort -V || true)
-stty sane
+RESULT=$(parallel -j$(nproc) -i ./run_stability_test_round.sh {} "$DISTRO" "$RELEASE" --custom-modules=keep ${@:3} -- $(seq 1 $ROUNDS) | sort -V || true)
+stty sane 2>/dev/null || true
 
+echo "Results:"
 echo "$RESULT"
 echo
 SUCCESS=$(echo "$RESULT"|grep Success|wc -l)
@@ -39,6 +43,6 @@ if [ ! -z "$FIRST_PANIC_FN_ID" ]; then
     cat "${FN}_dmesg.txt"|grep -m1 -A14 "\] BUG: "
     echo "See ${FN}_{dmesg,output} for more info"
 fi
-stty sane
+stty sane 2>/dev/null || true
 
-exit $(( $PERCENT < 95 ))
+exit $(( $PERCENT < 100 ))
