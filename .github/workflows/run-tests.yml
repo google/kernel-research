@@ -80,7 +80,7 @@ jobs:
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh 1 ${{ steps.vars.outputs.target }} --tap
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
 
       - name: Build expkit samples
         if: ${{ success() || failure() }}
@@ -90,7 +90,7 @@ jobs:
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test
+        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test stability_test
 
       - name: Test expkit (local TODO tests only)
         if: ${{ success() || failure() }}
