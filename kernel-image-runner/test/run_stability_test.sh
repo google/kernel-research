@@ -29,8 +29,9 @@ echo "$RESULT"
 echo
 SUCCESS=$(echo "$RESULT"|grep Success|wc -l)
 FIRST_PANIC_FN_ID=$(echo "$RESULT"|grep panic|head -n 1|grep -o '[0-9]\+'|head -n 1 || true)
+PERCENT=$(( (SUCCESS * 100) / ROUNDS))
 
-echo "Summary: $SUCCESS success runs out of $ROUNDS => $(($SUCCESS*100/$ROUNDS))%"
+echo "Summary: $SUCCESS success runs out of $ROUNDS => $PERCENT%"
 if [ ! -z "$FIRST_PANIC_FN_ID" ]; then
     FN="$LOG_DIR/round_${FIRST_PANIC_FN_ID}"
     cp "${FN}_dmesg.txt" "$LOG_DIR/panic_sample.txt"
@@ -39,3 +40,5 @@ if [ ! -z "$FIRST_PANIC_FN_ID" ]; then
     echo "See ${FN}_{dmesg,output} for more info"
 fi
 stty sane
+
+exit $(( $PERCENT < 95 ))
