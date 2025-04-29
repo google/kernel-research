@@ -29,7 +29,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --only-command-output) ONLY_COMMAND_OUTPUT=1; shift;;
     --dmesg=*) DMESG="${1#*=}"; shift;;
-    --gdb|--snapshot|--nokaslr) RUN_ARGS+=" $1"; shift;;
+    --gdb|--snapshot|--nokaslr|--no-rootfs-update) RUN_ARGS+=" $1"; shift;;
     --dbgsym) DBGSYM=1; shift;;
     --custom-modules=*) CUSTOM_MODULES="${1#*=}"; shift;;
     --) # stop processing special arguments after "--"

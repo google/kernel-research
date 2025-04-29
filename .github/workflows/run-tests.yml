@@ -44,7 +44,10 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Install Linux package prerequisites
-        run: sudo apt-get update && sudo apt install -yq --no-install-recommends build-essential flex bison bc ca-certificates libelf-dev libssl-dev cpio pahole qemu-system-x86 libkeyutils-dev
+        run: |
+            sudo apt-get update
+            sudo apt remove parallel -yq
+            sudo apt install -yq --no-install-recommends build-essential flex bison bc ca-certificates libelf-dev libssl-dev cpio pahole qemu-system-x86 libkeyutils-dev moreutils
 
       - name: Install tool prerequisites
         run: |
@@ -53,12 +56,14 @@ jobs:
 
       - name: Environment info
         run: |
+          set -x
           g++ --version
           ldd --version
+          man parallel|cat
 
       - name: Download cached kpwn module # to skip compilation and speedup tests
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
-        run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v1.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
+        run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v2.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
 
       - name: Download target release
         if: ${{ steps.vars.outputs.target != 'kernelctf lts-6.1.81' }}
@@ -82,6 +87,11 @@ jobs:
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
 
+      - name: Move test results to separate dir
+        if: ${{ success() || failure() }}
+        working-directory: ./expkit
+        run: mv test_results test_results_prod
+
       - name: Build expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
@@ -102,7 +112,12 @@ jobs:
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh 1 ${{ steps.vars.outputs.target }} --tap --test-suites RuntimeTests --tests TODO
+        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
+
+      - name: Move test results to separate dir
+        if: ${{ success() || failure() }}
+        working-directory: ./expkit
+        run: mv test_results test_results_todo
 
       - name: Upload artifacts
         if: always()
@@ -112,8 +127,9 @@ jobs:
           path: |
             expkit/samples/**/exp
             expkit/bin/test
-            expkit/test_results
+            expkit/test_results*
             kernel-image-db/releases/**/custom_modules.tar
+            kernel-image-runner/stability_test_outputs
 
       - name: Send Google Chat Notification (on failure)
         if: ${{ failure() && !inputs.silence_notifications }}
