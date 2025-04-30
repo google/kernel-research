@@ -65,12 +65,12 @@ jobs:
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
         run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v2.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
 
-      - name: Download target release
+      - name: Compile kpwn for target
         if: ${{ steps.vars.outputs.target != 'kernelctf lts-6.1.81' }}
-        working-directory: ./kernel-image-db
         run: |
-          ./download_release.sh ${{steps.vars.outputs.target}} "vmlinuz,modules"
-          ./collect_runtime_data.sh  # we need version.txt for compiling the correct kpwn module
+          ./kernel-image-db/download_release.sh ${{steps.vars.outputs.target}} "vmlinuz,modules"
+          ./kernel-image-db/collect_runtime_data.sh  # we need version.txt for compiling the correct kpwn module
+          ./kernel-image-runner/compile_custom_modules.sh ${{steps.vars.outputs.target}} kpwn
 
       - name: Test kpwn_db
         if: ${{ success() || failure() }}
