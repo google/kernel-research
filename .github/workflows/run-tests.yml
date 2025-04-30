@@ -129,7 +129,7 @@ jobs:
             expkit/bin/test
             expkit/test_results*
             kernel-image-db/releases/**/custom_modules.tar
-            kernel-image-runner/stability_test_outputs
+            kernel-image-runner/test/stability_test_outputs
 
       - name: Send Google Chat Notification (on failure)
         if: ${{ failure() && !inputs.silence_notifications }}
