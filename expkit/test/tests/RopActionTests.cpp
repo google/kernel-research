@@ -6,7 +6,7 @@
 #include "test/TestUtils.cpp"
 #include "util/HexDump.cpp"
 #include "util/error.cpp"
-#include "util/Payload.cpp"
+#include "payloads/Payload.cpp"
 
 class RopActionTests: public TestSuite {
     Kpwn* kpwn_;
@@ -29,8 +29,8 @@ public:
         auto target_offs = 16;
         auto target_buf_addr = kpwn_->AllocBuffer(p.GetData(), true);
 
-        RopChain rop(kaslr_base);
-        target.AddRopAction(rop, RopActionId::WRITE_WHAT_WHERE_64, {target_buf_addr + target_offs, new_value});
+        RopChain rop(target, kaslr_base);
+        rop.AddRopAction(RopActionId::WRITE_WHAT_WHERE_64, {target_buf_addr + target_offs, new_value});
         rop.Add(rip_recovery);
 
         auto rop_buf_addr = kpwn_->AllocBuffer(rop.GetData(), true);
@@ -51,8 +51,8 @@ public:
         auto rip_recovery = kpwn_->GetRipControlRecoveryAddr();
         auto orig_pid = getpid();
 
-        RopChain rop(kaslr_base);
-        target.AddRopAction(rop, RopActionId::TELEFORK, {2000});
+        RopChain rop(target, kaslr_base);
+        rop.AddRopAction(RopActionId::TELEFORK, {2000});
         rop.Add(rip_recovery);
 
         Payload p(4096);

