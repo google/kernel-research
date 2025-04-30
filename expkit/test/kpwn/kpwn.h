@@ -113,18 +113,18 @@ enum kprobe_log_mode {
 };
 
 typedef struct {
-    uint64_t entry_size;
-    uint64_t arguments[6];
-    uint64_t return_value;
-    uint64_t call_stack_size;
-    uint8_t call_stack[];
+    volatile uint64_t entry_size;
+    volatile uint64_t arguments[6];
+    volatile uint64_t return_value;
+    volatile uint64_t call_stack_size;
+    volatile uint8_t call_stack[];
 } kprobe_log_entry;
 
 typedef struct {
-    uint64_t struct_size;
-    uint64_t entry_count;
-    uint64_t next_offset; // next writable offset
-    uint64_t missed_logs; // number of logs could not be written to due insufficient buffer space
+    volatile uint64_t struct_size;
+    volatile uint64_t entry_count;
+    volatile uint64_t next_offset; // next writable offset
+    volatile uint64_t missed_logs; // number of logs could not be written to due insufficient buffer space
     kprobe_log_entry entries[];
 } kprobe_log;
 

@@ -183,7 +183,7 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
             } else {
                 data->log_entry_user_ptr = (kprobe_log_entry*)(((uint8_t*)&wr->args.logs->entries) + log.next_offset);
                 char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
-                DATA_TO_USER(call_stack_buf, &data->log_entry_user_ptr->call_stack, new_entry.call_stack_size);
+                DATA_TO_USER(call_stack_buf, (uint8_t*)&data->log_entry_user_ptr->call_stack, new_entry.call_stack_size);
                 put_cpu_ptr(cpu_call_stack);
                 STRUCT_TO_USER(&new_entry, data->log_entry_user_ptr);
 

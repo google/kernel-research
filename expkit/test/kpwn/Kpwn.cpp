@@ -57,7 +57,7 @@ public:
             CallLog log;
             log.function_name = args_.function_name;
             for (int j = 0; j < args_.arg_count; j++)
-                log.arguments.push_back(entry->arguments[j]);
+                log.arguments.push_back((uint64_t) entry->arguments[j]);
             log.return_value = entry->return_value;
             log.call_stack = std::string((char*)entry->call_stack, entry->call_stack_size);
             result.push_back(log);
@@ -65,8 +65,11 @@ public:
             entry = (kprobe_log_entry*)(((uint8_t*) entry) + entry->entry_size);
         }
 
-        if (clear_log)
+        if (clear_log) {
             args_.logs->entry_count = 0;
+            args_.logs->next_offset = 0;
+            args_.logs->missed_logs = 0;
+        }
 
         return result;
     }
