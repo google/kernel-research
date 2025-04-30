@@ -78,7 +78,6 @@ typedef struct {
 } kretprobe_wrapper;
 
 #define CALL_STACK_SIZE 4096
-DEFINE_PER_CPU(int, _kprobe_disabled);
 DEFINE_PER_CPU(char[CALL_STACK_SIZE], cpu_call_stack);
 
 #define GET_CPU_VAR(var_name) ({ typeof(var_name) __temp = get_cpu_var(var_name); put_cpu_var(var_name); __temp; })
@@ -124,14 +123,13 @@ struct kretprobe* get_kretprobe_(struct kretprobe_instance *ri) {
 #endif
 }
 
-static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
-{
+static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs) {
     struct kretprobe* rp = get_kretprobe_(ri);
     kretprobe_wrapper* wr = container_of(rp, kretprobe_wrapper, kretprobe);
     kprobe_data* data = (kprobe_data*) ri->data;
 
     // !current->mm - skipping kernel threads
-    if (GET_CPU_VAR(_kprobe_disabled) || !current->mm || (wr->args.pid_filter != -1 && current->pid != wr->args.pid_filter))
+    if (!current->mm || (wr->args.pid_filter != -1 && current->pid != wr->args.pid_filter))
         return 1;
 
     bool entry_log = wr->args.log_mode & ENTRY;
@@ -143,13 +141,13 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 
     kprobe_log_entry new_entry = { 0, { regs->di, regs->si, regs->dx, regs->cx, regs->r8, regs->r9 }, 0, 0 };
 
+    // TODO: also filter out if this comes from install_kprobe or remove_kprobe (or any function which is within kpwn module)
+    char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
     bool filter_out = false;
     if (log_call || print_callstack || log_filter) {
-        char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
         new_entry.call_stack_size = my_dump_stack(rp->kp.symbol_name, call_stack_buf, CALL_STACK_SIZE);
         if (log_filter && new_entry.call_stack_size)
             filter_out = !strstr(call_stack_buf, wr->args.log_call_stack_filter);
-        put_cpu_ptr(cpu_call_stack);
     }
 
     if (filter_out)
@@ -165,10 +163,8 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
     }
 
     if (log_call || print_callstack) {
-        char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
         if (print_callstack)
             LOG("KPROBE:   stack trace: %s", call_stack_buf);
-        put_cpu_ptr(cpu_call_stack);
 
         if (log_call) {
             kprobe_log log;
@@ -182,9 +178,7 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
                 LOG("KPROBE:   ERROR: could not log call, there were not enough space in user-space buffer (free_space=%d, log_entry_size=%llu)", free_space, new_entry.entry_size);
             } else {
                 data->log_entry_user_ptr = (kprobe_log_entry*)(((uint8_t*)&wr->args.logs->entries) + log.next_offset);
-                char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
                 DATA_TO_USER(call_stack_buf, (uint8_t*)&data->log_entry_user_ptr->call_stack, new_entry.call_stack_size);
-                put_cpu_ptr(cpu_call_stack);
                 STRUCT_TO_USER(&new_entry, data->log_entry_user_ptr);
 
                 // TODO: this should be written atomicly... fix race
@@ -201,8 +195,7 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
 }
 NOKPROBE_SYMBOL(entry_handler);
 
-static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs)
-{
+static int ret_handler(struct kretprobe_instance *ri, struct pt_regs *regs) {
     struct kretprobe* rp = get_kretprobe_(ri);
     kretprobe_wrapper* wr = container_of(rp, kretprobe_wrapper, kretprobe);
     struct kprobe_data *data = (struct kprobe_data *)ri->data;
@@ -246,7 +239,6 @@ static int sym_lookup(void) {
 }
 
 static int install_kprobe(kprobe_args* args, kretprobe_wrapper** wrapper) {
-    SET_CPU_VAR(_kprobe_disabled, 1);
     kretprobe_wrapper* wr = kzalloc(sizeof(kretprobe_wrapper), GFP_KERNEL);
     *wrapper = wr;
     if (args->arg_count > 6)
@@ -258,17 +250,14 @@ static int install_kprobe(kprobe_args* args, kretprobe_wrapper** wrapper) {
     wr->kretprobe.maxactive = 20;
     wr->kretprobe.kp.symbol_name = wr->args.function_name;
     int res = CHECK_ZERO_NO_RET(register_kretprobe(&wr->kretprobe));
-    SET_CPU_VAR(_kprobe_disabled, 0);
     if (res) return ERROR_GENERIC;
     LOG("KPROBE: %s: hook installed (addr=0x%llx, name=%pBb)", wr->args.function_name, (uint64_t)wr->kretprobe.kp.addr, wr->kretprobe.kp.addr);
     return SUCCESS;
 }
 
 static void remove_kprobe(kretprobe_wrapper* wr) {
-    SET_CPU_VAR(_kprobe_disabled, 1);
     unregister_kretprobe(&wr->kretprobe);
     kfree(wr);
-    SET_CPU_VAR(_kprobe_disabled, 0);
 }
 
 static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
