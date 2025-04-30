@@ -26,6 +26,19 @@ struct PayloadData {
     }
 };
 
+/**
+ * PayloadBuilder allows the user to specify multiple buffers that they have control of
+ * as well as the register(s) pointing at each buffer.
+ *
+ * AddPayload and AddRopChain then call Build() to set up the buffer for pivoting and executing a RopChain.
+ *
+ * Implementation details:
+ *
+ * There will be a StackShiftingInfo for every RopAction.
+ * e.g. PayloadBuilder.chosen_shifts_.size() == PayloadBuilder.rop_actions_.size()
+ * if we can store two actions adjacent to each other then the StackShiftingInfo
+ * between them will be an empty shift.
+ */
 class PayloadBuilder {
   public:
     PayloadBuilder(const Pivots &pivots, uint64_t kaslr_base) : pivots_(pivots), kaslr_base_(kaslr_base){}
@@ -41,9 +54,9 @@ class PayloadBuilder {
     void AddRopChain(const RopChain& rop_chain);
 
     // Build the final payload.
-    bool build(bool need_pivot = true);
+    bool Build(bool need_pivot = true);
 
-    std::string GetDescription();
+    void PrintDebugInfo() const;
 
   private:
 

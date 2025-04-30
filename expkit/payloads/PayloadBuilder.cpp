@@ -31,8 +31,8 @@ void PayloadBuilder::AddRopChain(const RopChain& rop_chain) {
     rop_actions_.insert(rop_actions_.end(), new_actions.begin(), new_actions.end());
 }
 
-bool PayloadBuilder::build(bool need_pivot) {
-    // if there's no pivot how do we know where we are building?? Assume the first payload?
+bool PayloadBuilder::Build(bool need_pivot) {
+    // TODO handle case with no pivot?
 
     // Create a vector of references to the payloads
     std::vector<std::reference_wrapper<PayloadData>> data_refs;
@@ -79,16 +79,23 @@ bool PayloadBuilder::build(bool need_pivot) {
     for(auto& item: items) {
         if(TryPayloadPivot(std::get<0>(item).get().payload, std::get<1>(item))) {
             **rip_pointer = kaslr_base_ + std::get<1>(item).GetGadgetOffset();
-        } return true;
+            return true;
+        }
     }
 
     return false; // Or true, depending on default success behavior.
 }
 
-std::string PayloadBuilder::GetDescription() {
-    std::string str = "Payload built with:\n";
+void PayloadBuilder::PrintDebugInfo() const {
+    if (rop_actions_.size() != chosen_shifts_.size()) {
+        printf("[-] Payload build failed\n");
+        return;
+    }
+
+    printf("[+] Payload built with:\n");
+
     if (chosen_pivot_) {
-        str += "  Stack pivot: " + chosen_pivot_->GetDescription() + "\n";
+        printf("[+]    Stack pivot: %s\n", chosen_pivot_->GetDescription().c_str());
     }
     uint64_t offset = chosen_pivot_->GetDestinationOffset()+8;
 
@@ -97,20 +104,32 @@ std::string PayloadBuilder::GetDescription() {
         uint64_t to_offset = shift_info.to_offset;
         if(shift_info.stack_shifts.size() > 0) {
             uint64_t ret_offset = shift_info.next_ret_offset;
-            str += "  Shifts: from " + intToHex(shift_info.from_offset) + " to next ret: " + 
-                   intToHex(ret_offset) + " and stack pos: " + intToHex(to_offset) + "\n";
+            printf("[+]    Shifts from: %#x to next ret: %#x and stack pos: %#x\n",
+                   shift_info.from_offset, ret_offset, to_offset);
             for (auto& shift : shift_info.stack_shifts) {
                 uint64_t sp_offset = offset + shift.pivot.shift_amount;
                 uint64_t ret_offset = offset + shift.pivot.ret_offset;
-                str += "    Stack shift @" + intToHex(shift.pivot.address) + " at offset: " + intToHex(shift.ret_offset) +
-                    " next ret: " + intToHex(ret_offset) + " next sp: " + intToHex(sp_offset) + "\n";
+                printf("[+]        Stack shift @%#x at offset: %#x next ret: %#x next sp: %#x\n",
+                       shift.pivot.address, shift.ret_offset, ret_offset, sp_offset);
             }
         }
-        // TODO print where this is stored more clearly
-        str += "  rop action of size: " + intToHex(rop_actions_[i].values.size()*8) + "\n";
-    }
 
-    return str;
+        uint64_t rop_chain_size = rop_actions_[i].values.size()*8;
+        uint64_t num_actions = 1;
+        // merge actions for printing while there's no shifts after the current index
+        while (i+1 < chosen_shifts_.size() && chosen_shifts_[i+1].stack_shifts.size() == 0) {
+            i++;
+            num_actions++;
+            rop_chain_size += rop_actions_[i].values.size()*8;
+        }
+
+        if (to_offset != shift_info.next_ret_offset + 8) {
+            // this case is a retn
+            printf("[+]    first rop gadget at: %#x (for retn)\n", shift_info.next_ret_offset);
+            rop_chain_size -= 8;
+        }
+        printf("[+]    rop chain at offset: %#x of size: %#x\n", to_offset, rop_chain_size);
+    }
 }
 
 bool PayloadBuilder::TryPayloadPivot(Payload& payload, StackPivot pivot) {
@@ -132,6 +151,8 @@ bool PayloadBuilder::TryPayloadPivot(Payload& payload, StackPivot pivot) {
                                                 );
 
         if (!shifts ) {
+            // failed restore payload
+            payload.Restore(snapshot);
             return false;
         }
 
