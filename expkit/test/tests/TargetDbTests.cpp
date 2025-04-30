@@ -6,6 +6,7 @@
 #include "target/KpwnParser.cpp"
 #include "target/Target.cpp"
 #include "target/TargetDb.cpp"
+#include "payloads/RopChain.cpp"
 #include "util/file.cpp"
 
 struct TargetDbTests: TestSuite {
@@ -85,14 +86,16 @@ struct TargetDbTests: TestSuite {
         auto target = getLts6181();
 
         auto kaslr_base = 0x100000000ul;
-        RopChain rop(kaslr_base);
-        target.AddRopAction(rop, RopActionId::TELEFORK, { 5000 });
+        RopChain rop(target, kaslr_base);
+        rop.AddRopAction(RopActionId::TELEFORK, { 5000 });
 
-        ASSERT_EQ(4, rop.items_.size());
-        ASSERT_EQ(kaslr_base + 0x18f0d0 /* FORK */, rop.items_[0]);
-        ASSERT_EQ(kaslr_base + 0x21f5 /* POP_RDI */, rop.items_[1]);
-        ASSERT_EQ(5000 /* time_msec */, rop.items_[2]);
-        ASSERT_EQ(kaslr_base + 0x227a50 /* MSLEEP */, rop.items_[3]);
+        std::vector<RopAction> actions = rop.GetActions();
+        ASSERT_EQ(1, actions.size());
+        ASSERT_EQ(4, actions[0].values.size());
+        ASSERT_EQ(kaslr_base + 0x18f0d0 /* FORK */, actions[0].values[0]);
+        ASSERT_EQ(kaslr_base + 0x21f5 /* POP_RDI */, actions[0].values[1]);
+        ASSERT_EQ(5000 /* time_msec */, actions[0].values[2]);
+        ASSERT_EQ(kaslr_base + 0x227a50 /* MSLEEP */, actions[0].values[3]);
     }
 
     TEST_METHOD(pivotsLts6181, "stack pivots are correct (lts-6.1.81)") {

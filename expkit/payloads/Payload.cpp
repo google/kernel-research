@@ -30,10 +30,6 @@ public:
         return std::vector<uint8_t>(data_.begin(), data_.begin() + used_size_);
     }
 
-    uint64_t Size() {
-        return data_.size();
-    }
-
     bool CheckFree(uint64_t offset, uint64_t len, bool throws = false) {
         if (offset + len > data_.size()) {
             if (throws)

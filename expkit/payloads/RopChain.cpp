@@ -39,6 +39,12 @@ public:
         actions_.push_back(action);
     }
 
+    void Add(uint64_t item, bool offset = false) {
+        RopAction fake_action;
+        fake_action.values.push_back((offset ? kaslr_base_ : 0) + item);
+        actions_.push_back(fake_action);
+    }
+
     std::vector<uint8_t> GetData() const {
         // Collect the actions into a single uint64_t vector
         std::vector<uint64_t> items;
