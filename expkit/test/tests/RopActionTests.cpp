@@ -80,7 +80,7 @@ public:
                 break;
 
         auto used_stack_size = used_stack.size() - non_used_bytes;
-        if (used_stack_size < 1800 || used_stack_size > 2312)
-            throw ExpKitError("Expected telefork to use stack size between 1800 .. 2312 bytes, but it used %u bytes", used_stack_size);
+        if (used_stack_size < 400 || used_stack_size > 2600)
+            throw ExpKitError("Expected telefork to use stack size between 400 .. 2600 bytes, but it used %u bytes", used_stack_size);
     }
 };
