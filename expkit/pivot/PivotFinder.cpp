@@ -246,8 +246,6 @@ public:
             for (int i = 0; i < pivots_.stack_shifts.size(); i++) {
                 StackShiftPivot pivot = pivots_.stack_shifts[i];
 
-                if (pivot.ret_offset + 8 == pivot.shift_amount) continue; // force retn
-
                 uint64_t new_sp = sp+pivot.shift_amount;
                 // skip shifts which shift past the payload
                 if (new_sp > payload_.Size()) continue;
