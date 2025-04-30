@@ -24,6 +24,7 @@ permissions: {}
 jobs:
   tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Fix input variables
         id: vars
@@ -85,7 +86,7 @@ jobs:
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
+        run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
@@ -100,19 +101,19 @@ jobs:
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 make -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test stability_test
+        run: CUSTOM_MODULES_KEEP=1 timeout 2m make -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test stability_test
 
       - name: Test expkit (local TODO tests only)
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./expkit
-        run: "make bin/test && bin/test --test-suites StaticTests --tests TODO"
+        run: timeout 2m make bin/test && bin/test --test-suites StaticTests --tests TODO
 
       - name: Test expkit (QEMU TODO tests only)
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
+        run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
