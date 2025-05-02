@@ -16,9 +16,17 @@
 #include "utils.h"
 #include "kpwn.h"
 
-uint64_t saved_rsp;
+volatile uint64_t saved_r12;
+volatile uint64_t saved_r13;
+volatile uint64_t saved_r14;
+volatile uint64_t saved_r15;
+volatile uint64_t saved_rbx;
+volatile uint64_t saved_rsp;
+volatile uint64_t saved_rbp;
 
-void rip_control(rip_control_args* regs) {
+#define NOINST __attribute__((no_instrument_function))
+
+void noinline rip_control(rip_control_args* regs) {
     register rip_control_args* regs_asm asm("r15") = regs;
 
     LOG("rip_control: action=0x%llx, rsp=0x%llx, value@rsp=0x%llx, regs_to_set=0x%llx, rip=0x%llx, saved_rsp=0x%llx, value@saved_rsp=0x%llx",
@@ -144,19 +152,31 @@ void rip_control(rip_control_args* regs) {
     LOG("kpwn: rip_control, after asm");
 }
 
-void noinline rip_control_wrapper(rip_control_args* regs) {
+void noinline NOINST rip_control_wrapper(rip_control_args* regs) {
     __asm__ (
         ".intel_syntax noprefix\n"
+        "mov saved_r12, r12\n"
+        "mov saved_r13, r13\n"
+        "mov saved_r14, r14\n"
+        "mov saved_r15, r15\n"
+        "mov saved_rbx, rbx\n"
         "mov saved_rsp, rsp\n"
+        "mov saved_rbp, rbp\n"
         ".att_syntax prefix\n"
     );
     rip_control(regs);
 }
 
-void rip_control_recover(void) {
+void noinline NOINST rip_control_recover(void) {
     __asm__ (
         ".intel_syntax noprefix\n"
+        "mov r12, saved_r12\n"
+        "mov r13, saved_r13\n"
+        "mov r14, saved_r14\n"
+        "mov r15, saved_r15\n"
+        "mov rbx, saved_rbx\n"
         "mov rsp, saved_rsp\n"
+        "mov rbp, saved_rbp\n"
         ".att_syntax prefix\n"
     );
 }
