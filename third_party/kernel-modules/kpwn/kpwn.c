@@ -150,8 +150,10 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs) {
             filter_out = !strstr(call_stack_buf, wr->args.log_call_stack_filter);
     }
 
-    if (filter_out)
+    if (filter_out) {
+        put_cpu_ptr(cpu_call_stack);
         return 1;
+    }
 
     if (entry_log) {
         char args_str[128];
@@ -191,6 +193,7 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs) {
         }
     }
 
+    put_cpu_ptr(cpu_call_stack);
     return 0;
 }
 NOKPROBE_SYMBOL(entry_handler);
