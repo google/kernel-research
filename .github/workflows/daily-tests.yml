@@ -10,7 +10,9 @@ jobs:
       matrix:
         target:
           # oldest 6.1 (which also have vmlinux file)
-          - kernelctf lts-6.1.35
+          # - kernelctf lts-6.1.35
+          # 6.1.35 hangs randomly at boot a lot, without any error
+          - kernelctf lts-6.1.36
           # newest 6.1
           - kernelctf lts-6.1.81
           # oldest 6.6
