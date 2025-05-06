@@ -35,6 +35,7 @@ public:
         runner_.SetSuiteFilter(args_.getOption("test-suites"));
         runner_.SetTestFilter(args_.getOption("tests").value_or("^TODO"));
         runner_.SetTargetDbPath(args_.getOption("target-db").value_or("test/artifacts/targets.kpwn"));
+        runner_.SetRepeatCount(args_.getInt("repeat").value_or(1));
 
         if (args_.getOption("tap"))
             runner_.SetLogger(new TapLogger());
