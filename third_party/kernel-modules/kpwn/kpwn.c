@@ -267,7 +267,10 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
     kpwn_message msg;
     void* user_ptr = (void*) arg;
 
-    LOG("dev_ioctl, cmd=%x, arg=%lx", cmd, arg);
+    uint name_idx = cmd - FIRST_CMD_ID;
+    const char* cmd_name = 0 <= name_idx && name_idx < sizeof(cmd_names)/sizeof(cmd_names[0]) ? cmd_names[name_idx] : "INVALID";
+
+    LOG("dev_ioctl, cmd=%s (0x%x), arg=%lx", cmd_name, cmd, arg);
     switch (cmd) {
         case ALLOC_BUFFER:
             long res = alloc_buffer(&msg, (void*)arg);
