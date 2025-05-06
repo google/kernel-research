@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <linux/types.h>
+
 #define DEVICE_NAME "kpwn"
 typedef struct kpwn_message {
     uint64_t length;
@@ -24,7 +26,9 @@ typedef struct kpwn_message {
     uint8_t gfp_account;
 } kpwn_message;
 
-enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE, GET_RIP_CONTROL_RECOVERY, CHECK_WIN };
+#define FIRST_CMD_ID 0x1000
+enum kpwn_cmd { ALLOC_BUFFER = FIRST_CMD_ID, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE, GET_RIP_CONTROL_RECOVERY, CHECK_WIN };
+const char* cmd_names[] = { "ALLOC_BUFFER", "KFREE", "KASLR_LEAK", "WIN_TARGET", "RIP_CONTROL", "ARB_READ", "ARB_WRITE", "INSTALL_KPROBE", "PRINTK", "SYM_ADDR", "REMOVE_KPROBE", "GET_RIP_CONTROL_RECOVERY", "CHECK_WIN" };
 
 enum kpwn_errors {
     SUCCESS = 0,
@@ -64,6 +68,8 @@ enum rip_action {
     RET = 0x3,
     NONE = 0x4,
 };
+
+const char* rip_action_names[] = { "undefined (0x00)", "JMP_RIP", "CALL_RIP", "RET", "NONE" };
 
 typedef struct {
     // 0x00

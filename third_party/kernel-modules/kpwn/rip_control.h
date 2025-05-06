@@ -29,8 +29,10 @@ volatile uint64_t saved_rbp;
 void noinline rip_control(rip_control_args* regs) {
     register rip_control_args* regs_asm asm("r15") = regs;
 
-    LOG("rip_control: action=0x%llx, rsp=0x%llx, value@rsp=0x%llx, regs_to_set=0x%llx, rip=0x%llx, saved_rsp=0x%llx, value@saved_rsp=0x%llx",
-        regs->action, regs->rsp, regs->rsp == 0 ? 0 : *(uint64_t*)regs->rsp, regs->regs_to_set, regs->rip, saved_rsp, *(uint64_t*)saved_rsp);
+    const char* action_name = 1 <= regs->action && regs->action <= sizeof(rip_action_names) / sizeof(rip_action_names[0]) ? rip_action_names[regs->action] : "INVALID";
+
+    LOG("rip_control: action=%s (0x%llx), rsp=0x%llx, value@rsp=0x%llx, regs_to_set=0x%llx, rip=0x%llx, saved_rsp=0x%llx, value@saved_rsp=0x%llx",
+        action_name, regs->action, regs->rsp, regs->rsp == 0 ? 0 : *(uint64_t*)regs->rsp, regs->regs_to_set, regs->rip, saved_rsp, *(uint64_t*)saved_rsp);
 
     if (regs->action != JMP_RIP && regs->action != CALL_RIP && regs->action != RET && regs->action != NONE) {
         LOG("rip_control: invalid action (0x%llx)!", regs->action);
