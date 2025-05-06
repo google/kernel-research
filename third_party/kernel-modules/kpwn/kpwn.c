@@ -55,7 +55,7 @@ static long alloc_buffer(kpwn_message* msg, void* user_ptr) {
 
 unsigned long won = 0;
 
-static void win_target(void) {
+static NOINST void win_target(void) {
     //LOG("win_target was called.\n\n!!! YOU WON !!! \n");
     won = 1;
 }
