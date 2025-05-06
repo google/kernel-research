@@ -60,6 +60,7 @@ class TestRunner {
     vector<unique_ptr<TestSuite>> test_suites_;
     ConditionMatcher test_suite_filter_;
     ConditionMatcher test_filter_;
+    uint repeat_count_ = 1;
     unique_ptr<TestLogger> logger_;
     TestEnvironment environment;
 
@@ -89,6 +90,10 @@ public:
 
     void SetTargetDbPath(const std::string& target_db_path) {
         environment.SetTargetDbPath(target_db_path);
+    }
+
+    void SetRepeatCount(uint repeat_count) {
+        repeat_count_ = repeat_count;
     }
 
     const vector<unique_ptr<TestSuite>>& GetTestSuites() {
@@ -133,7 +138,8 @@ public:
                 testSuite->had_errors = false;
                 logger_->TestBegin(*testSuite, test, test_idx);
                 try {
-                    test.func();
+                    for (int repeat_id = 0; repeat_id < repeat_count_; repeat_id++)
+                        test.func();
                     testSuite->AssertLogs(false);
                     testSuite->AssertNoErrors();
                     logger_->TestSuccess(*testSuite, test, test_idx);
