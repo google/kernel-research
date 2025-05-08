@@ -36,7 +36,7 @@ public:
         return target_db_.value();
     }
 
-    const Target& GetTarget() {
+    Target& GetTarget() {
         if (!target_)
             target_ = GetTargetDb().AutoDetectTarget();
         return target_.value();
