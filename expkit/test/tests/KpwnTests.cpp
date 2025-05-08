@@ -87,6 +87,7 @@ public:
         Payload p(256);
         p.Set(0, win_target);
         p.Set(8, rip_recovery);
+        p.Set(16, 0xffffffff41414141); // crash if rip_recovery fails
         auto buf_addr = kpwn_->AllocBuffer(p.GetData(), true);
         Log("buf_addr = 0x%lx", buf_addr);
 
