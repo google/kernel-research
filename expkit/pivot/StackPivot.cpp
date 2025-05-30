@@ -65,8 +65,26 @@ public:
         return one_gadget_ ? one_gadget_->next_rip_offset : pop_gadget_->next_rip_offset;
     }
 
-    void ApplyToPayload(Payload& payload, uint64_t kaslr_base) {
+    void ApplyToPayload(Payload &payload, uint64_t kaslr_base)
+    {
         if (push_gadget_ && pop_gadget_)
             payload.Set(push_gadget_->next_rip_offset, kaslr_base + pop_gadget_->address);
+
+        // Handle clobbered offsets
+        if (one_gadget_)
+            // Go through all the used offsets and reserve
+            for (auto used_offset : one_gadget_->pivot_reg.used_offsets)
+                payload.Reserve(used_offset, 8);
+
+        if (push_gadget_)
+        {
+            // Currently our code guarantees that indirect_reg and push_reg point at the same buffer
+            // TODO: Check if push_reg and indirect_reg are pointing to the same buffer
+            // since we might want to support them pointing at different buffers eventually.
+            for (auto used_offset : push_gadget_->indirect_reg.used_offsets)
+                payload.Reserve(used_offset, 8);
+            for (auto used_offset : push_gadget_->push_reg.used_offsets)
+                payload.Reserve(used_offset, 8);
+        }
     }
 };
