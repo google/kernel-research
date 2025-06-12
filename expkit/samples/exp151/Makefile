@@ -9,6 +9,9 @@ build: exp
 exp: target_db.kpwn exploit.cpp
 	g++ -o exp exploit.cpp $(INCLUDES) $(LIBS) -static
 
+prerequisites:
+	sudo apt-get install libnl-nf-3-dev libnl-route-3-dev
+
 target_db.kpwn:
 	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
 
