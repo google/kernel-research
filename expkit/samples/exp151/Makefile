@@ -16,7 +16,7 @@ run: build
 #run:
 	cp exp* ../../../kernel-image-runner/rootfs/
 	#../../../kernel-image-runner/run.sh $(TARGET) --gdb --dbgsym --nokaslr -- /exp.sh | tee output.txt
-	../../../kernel-image-runner/run.sh $(TARGET) --nokaslr -- /exp.sh | tee output.txt
+	../../../kernel-image-runner/run.sh $(TARGET) -- /exp.sh | tee output.txt
 
 test: run
 	grep "CTF{secret_flag_deadbeef}" output.txt || { echo "Failed to leak the flag."; echo "dmesg content: "; cat dmesg.txt; exit 1; }
