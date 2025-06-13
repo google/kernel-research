@@ -17,12 +17,12 @@ symbols = {
 
     # nm: D - initialized data section, global
     SYM_STRUCT | 0x01: "init_nsproxy",
-    SYM_STRUCT | 0x02: "nft_last_type",
+    SYM_STRUCT | 0x02: "nft_last_type?",
 
     # nm: d - initialized data section, local
     SYM_OPS | 0x01: "anon_pipe_buf_ops",
     SYM_OPS | 0x02: "qfq_qdisc_ops",
-    SYM_OPS | 0x03: "nft_last_ops"
+    SYM_OPS | 0x03: "nft_last_ops?"
 }
 
 rop_actions = {
@@ -47,8 +47,8 @@ structs = {
     "Qdisc_ops": ["change"],
     "sock": ["sk_destruct", "sk_rcu.next"],
     "netlink_sock": ["sk.sk_destruct", "sk.sk_rcu.next", "sk.sk_rcu.func", "netlink_bind", "sk.sk_write_space"],
-    "nft_expr_ops": ["dump", "type"],
-    "nft_bitmap_elem": [],
-    "nft_set_elem_expr": [],
-    "nft_expr": ["ops"],
+    "nft_expr_ops?": ["dump?", "type?"],
+    "nft_bitmap_elem?": [],
+    "nft_set_elem_expr?": [],
+    "nft_expr?": ["ops?"],
 }
