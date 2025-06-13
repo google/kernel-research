@@ -6,6 +6,7 @@ from pydantic.dataclasses import dataclass
 class SymbolMeta():
   type_id: int
   name: str
+  optional: bool
 
 @dataclass
 class RopActionArg():
@@ -36,6 +37,7 @@ class StructFieldMeta():
 @dataclass
 class StructMeta():
   struct_name: str
+  optional: bool
   fields: List[StructFieldMeta]
 
 @dataclass
@@ -50,8 +52,8 @@ class MetaConfig():
                 rop_actions: Dict[int, str] = {},
                 structs: Dict[str, List[str]] = {}):
     symbols = [
-        SymbolMeta(type_id=type_id, name=name)
-        for type_id, name in symbols.items()
+            SymbolMeta(type_id=type_id, name=name[:-1] if name.endswith("?") else name, optional=name.endswith("?"))
+        for type_id, name, optional in symbols.items()
     ]
     rop_actions = [
         RopActionMeta.from_config(type_id, desc)
@@ -59,13 +61,15 @@ class MetaConfig():
     ]
 
     structs_ = []
-    for struct_name, fields in structs.items():
+    for struct_name, optional, fields in structs.items():
+      optional_ = struct_name.endswith("?")
+      struct_name = struct_name[:-1] if optional_ else struct_name
       fields_ = []
       for field_name in fields:
         optional = field_name.endswith("?")
         if optional:
           field_name = field_name[:-1]
         fields_.append(StructFieldMeta(field_name=field_name, optional=optional))
-      structs_.append(StructMeta(struct_name=struct_name, fields=fields_))
+      structs_.append(StructMeta(struct_name=struct_name, optional=optional_, fields=fields_))
 
     return cls(symbols=symbols, rop_actions=rop_actions, structs=structs_)
