@@ -14,7 +14,6 @@ class SymbolWriter:
         if minimal:
           continue
         wr_struct.zstr_u2(meta.name)  # name_len + name
-        wr_struct.u1(meta.optional)   # optional 
 
   def write_target(self, wr_target, target):
     for meta in self.symbols_meta:
@@ -33,8 +32,7 @@ class SymbolReader:
       r = reader.struct()
       type_id = r.u4()
       name = r.zstr_u2()
-      optional = r.u1()
-      self.meta.append(SymbolMeta(type_id, name, optional == 1))
+      self.meta.append(SymbolMeta(type_id, name))
     return self.meta
 
   def read_target(self, reader):

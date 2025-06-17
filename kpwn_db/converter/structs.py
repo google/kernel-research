@@ -13,7 +13,6 @@ class StructWriter:
   def write_meta(self, wr):
     for s in wr.list(self.structs_meta):
       wr.zstr(s.struct_name)
-      wr.u1(s.optional)
       for f in wr.list(s.fields):
         wr.zstr(f.field_name)
         wr.u1(f.optional)
@@ -57,13 +56,12 @@ class StructReader:
     self.meta = []
     for _ in range(r_hdr.varuint()):
       struct_name = r_hdr.zstr()
-      optional_ = r_hdr.u1()
       fields = []
       for _ in range(r_hdr.varuint()):
         field_name = r_hdr.zstr()
         optional = r_hdr.u1()
         fields.append(StructFieldMeta(field_name, optional == 1))
-      self.meta.append(StructMeta(struct_name, optional_ == 1, fields))
+      self.meta.append(StructMeta(struct_name, fields))
     self.struct_layouts_db_offset = r_hdr.u4()
     return self.meta
 
