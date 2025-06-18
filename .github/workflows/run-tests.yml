@@ -65,7 +65,7 @@ jobs:
       - name: Download cached kpwn module # to skip compilation and speedup tests
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
         # uploaded with "gsutil cp -Z -a public-read kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar gs://kernel-research/pwnkit/kpwn_lts6181_v4.tar"
-        run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v4.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
+        run: curl https://storage.googleapis.com/kernel-research/pwnkit/kpwn_lts6181_v5.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
 
       - name: Compile kpwn for target
         if: ${{ steps.vars.outputs.target != 'kernelctf lts-6.1.81' }}
@@ -101,7 +101,6 @@ jobs:
 
       - name: Test expkit samples
         if: ${{ success() || failure() }}
-        continue-on-error: true # TODO: fix the tests
         working-directory: ./expkit
         run: CUSTOM_MODULES_KEEP=1 timeout 2m make -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test stability_test
 

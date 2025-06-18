@@ -32,6 +32,7 @@ class Kpwn;
 
 class Kprobe {
     kprobe_args args_;
+    const size_t logs_size = 16 * 4096;
 public:
     Kprobe(const char* function_name, uint8_t arg_count = 0, enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN), const char* log_call_stack_filter = nullptr) {
         args_ = { .pid_filter = getpid(), .arg_count = arg_count, .log_mode = (uint8_t) log_mode, .logs = 0 };
@@ -40,8 +41,8 @@ public:
             if (log_call_stack_filter)
                 strncpy(args_.log_call_stack_filter, log_call_stack_filter, sizeof(args_.log_call_stack_filter));
 
-            kprobe_log* log = (kprobe_log*) malloc(64 * 1024);
-            log->struct_size = 64 * 1024;
+            kprobe_log* log = (kprobe_log*) mmap(NULL, logs_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            log->struct_size = logs_size;
             log->missed_logs = 0;
             log->next_offset = 0;
             log->entry_count = 0;
@@ -87,7 +88,7 @@ public:
 
     ~Kprobe() {
         if (args_.logs)
-            free(args_.logs);
+            munmap(args_.logs, args_.logs->struct_size);
     }
 
     friend class Kpwn;
