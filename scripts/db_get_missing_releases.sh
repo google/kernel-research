@@ -14,31 +14,20 @@
 # limitations under the License.
 set -eo pipefail
 
-SCRIPT_DIR=$(dirname $(realpath "$0"))
-IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
-KPWN_DB_DIR="$SCRIPT_DIR/../kpwn_db"
-
 if [ "$1" == "--rebuild" ]; then
-    echo -n > db_releases.txt
     echo -n > gcs_releases.txt
 else
-    gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kpwn db.kpwn; echo
-    "$KPWN_DB_DIR/kpwn_db.py" -i db.kpwn --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
-
     gcloud storage ls gs://kernel-research/pwnkit/db/kernelctf/*.kpwn |sed -E "s/.*kernelctf\/(.*)\.kpwn/\\1/" > gcs_releases.txt
 fi
 
 # gcloud storage ls gs://kernelctf-build/releases | sed "s/.*releases\/\(.*\)\//\1/" > build_releases.txt
 
-# missing_releases = kernelctf_releases without db_releases and skipped_releases
+# missing_releases = kernelctf_releases without gcs_releases and skipped_releases
 curl -s https://raw.githubusercontent.com/google/security-research/master/kernelctf/server/releases.yaml | grep -Eoh "^[^: ]*"  > kernelctf_releases.txt
 cat kernelctf_releases.txt | grep -v -f gcs_releases.txt | grep -v -f <(cat skipped_releases.txt | sed 's/\s*#.*//') > missing_gcs_releases.txt || true
-cat gcs_releases.txt | grep -v -f db_releases.txt > missing_db_releases.txt || true
+
+if [[ ! -s "missing_gcs_releases.txt" ]]; then echo "Nothing is missing from GCS, exiting..."; exit 0; fi
 
 echo "The following releases were not processed yet: "
 cat missing_gcs_releases.txt | sed 's/$/, /' | tr -d '\n'
-echo
-
-echo "The following releases were not merged into the DB yet: "
-cat missing_db_releases.txt | sed 's/$/, /' | tr -d '\n'
 echo
