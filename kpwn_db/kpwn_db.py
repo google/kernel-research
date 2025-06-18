@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import re
+import pprint
 
 KPWN_DB_DIR = os.path.abspath(f"{__file__}/..")
 sys.path.append(KPWN_DB_DIR)
@@ -57,7 +58,11 @@ def main():
       logger.info("Processing input file: %s", input_file)
       db = read_kpwn_db(input_file)
       if db_config and db_config != db.meta:
-        return parser.error("all input files must have the same config")
+        with open("old_config.txt", "wt") as f: f.write(pprint.pformat(db_config))
+        with open("new_config.txt", "wt") as f: f.write(pprint.pformat(db.meta))
+        sys.stderr.write(f"Error: all input files must have the same config\nDiff:\n")
+        os.system("diff old_config.txt new_config.txt 1>&2")
+        os._exit(1)
       db_config = db.meta
       targets += db.targets
     new_config = db_config
