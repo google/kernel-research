@@ -6,7 +6,7 @@
 #include "pivot/Pivots.cpp"
 #include "util/error.cpp"
 #include "util/str.cpp"
-#include "payloads/Payload.cpp"
+#include "payloads/Payload.h"
 
 // TODO use subclasses?
 class StackPivot {
