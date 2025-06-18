@@ -301,12 +301,12 @@ static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned lon
         case ARB_READ:
             STRUCT_FROM_USER(&msg, user_ptr);
             //LOG("ARB_READ: kernel=0x%llx, user=0x%llx, len=%llu", (uint64_t)msg.kernel_ptr, (uint64_t)msg.data, msg.length);
-            DATA_TO_USER(msg.kernel_ptr, msg.data, msg.length);
+            RAW_DATA_TO_USER(msg.kernel_ptr, msg.data, msg.length);
             return SUCCESS;
 
         case ARB_WRITE:
             STRUCT_FROM_USER(&msg, user_ptr);
-            DATA_FROM_USER(msg.kernel_ptr, msg.data, msg.length);
+            RAW_DATA_FROM_USER(msg.kernel_ptr, msg.data, msg.length);
             return SUCCESS;
 
         case INSTALL_KPROBE:
