@@ -5,8 +5,8 @@
 #include <queue>
 #include "pivot/Pivots.cpp"
 #include "pivot/StackPivot.cpp"
-#include "payloads/Payload.cpp"
-#include "payloads/RopChain.cpp"
+#include "payloads/Payload.h"
+#include "payloads/RopChain.h"
 #include "util/stdutils.cpp"
 
 struct StackShiftInfo {
