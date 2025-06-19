@@ -6,8 +6,8 @@
 #include "test/TestUtils.cpp"
 #include "util/HexDump.cpp"
 #include "util/error.cpp"
-#include "payloads/RopChain.cpp"
-#include "payloads/Payload.cpp"
+#include "payloads/RopChain.h"
+#include "payloads/Payload.h"
 
 class RopActionTests: public TestSuite {
     Kpwn* kpwn_;

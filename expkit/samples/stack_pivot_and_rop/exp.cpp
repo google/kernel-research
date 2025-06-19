@@ -2,20 +2,19 @@
 
 #include <cassert>
 #include <cerrno>
-#include <target/TargetDb.cpp>
+#include <target/TargetDb.hpp>
 #include <test/kpwn/Kpwn.cpp>
 #include <util/incbin.cpp>
 #include <util/syscalls.cpp>
 #include <util/error.cpp>
 #include <util/pwn_utils.cpp>
-#include <payloads/Payload.cpp>
-#include <payloads/RopChain.cpp>
+#include <payloads/Payload.h>
+#include <payloads/RopChain.h>
 #include <util/HexDump.cpp>
 #include <util/ArgumentParser.cpp>
 #include <rip/RopUtils.cpp>
 #include <pivot/PivotFinder.cpp>
 #include <payloads/PayloadBuilder.h>
-#include <payloads/PayloadBuilder.cpp>
 
 INCBIN(target_db, "target_db.kpwn");
 
