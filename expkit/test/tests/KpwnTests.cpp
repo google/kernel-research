@@ -5,7 +5,7 @@
 #include "test/TestSuite.cpp"
 #include "test/kpwn/kpwn.h"
 #include "util/error.cpp"
-#include "payloads/Payload.cpp"
+#include "payloads/Payload.h"
 
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;

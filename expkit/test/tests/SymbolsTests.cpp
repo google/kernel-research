@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdio>
-#include "target/KpwnParser.cpp"
+#include "target/KpwnParser.hpp"
 #include "test/TestSuite.cpp"
 #include "test/TestUtils.cpp"
 #include "test/kpwn/Kpwn.cpp"

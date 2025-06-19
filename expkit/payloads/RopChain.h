@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <cstring> // For memcpy, typically included in .cpp if not directly used in header
-#include "target/Target.cpp" 
+#include "target/Target.hpp" 
 
 // Forward declarations for types used in the header if their full definitions
 // are not strictly needed (e.g., if only pointers/references are used),
