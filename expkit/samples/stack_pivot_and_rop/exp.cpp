@@ -16,6 +16,9 @@
 #include <pivot/PivotFinder.cpp>
 #include <payloads/PayloadBuilder.h>
 
+// ugly hack to include cpp files into compilation until we make a proper build system
+#include "build_hack.h"
+
 INCBIN(target_db, "target_db.kpwn");
 
 typedef struct pipe_buf_operations {
