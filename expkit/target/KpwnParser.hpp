@@ -1,0 +1,200 @@
+#pragma once
+
+#include <cstdint>
+#include <cstring>
+#include <map>
+#include <optional>
+#include <vector>
+#include "target/BinaryReader.hpp"
+#include "target/Target.hpp"
+#include "pivot/Pivots.cpp"
+
+struct FieldMeta {
+    std::string field_name;
+    bool optional;
+};
+
+struct StructMeta {
+    std::string struct_name;
+    std::vector<FieldMeta> fields;
+};
+
+class KpwnParser: protected BinaryReader {
+protected:
+    uint64_t offset_targets_ = 0, offset_struct_layouts_ = 0;
+    bool has_structs_data_ = false;
+    uint32_t num_targets_;
+    std::vector<std::string> symbol_names_;
+    std::vector<RopActionId> rop_action_ids_;
+    std::vector<StructMeta> structs_meta_;
+    std::map<uint64_t, Struct> struct_layouts_;
+
+    /**
+     * @brief Parses the symbols header section of the Kpwn file.
+     * @details Reads the number of symbols and their metadata, storing the symbol names.
+     * @throws ExpKitError if there's an error reading the binary data.
+     */
+    void ParseSymbolsHeader();
+
+    /**
+     * @brief Parses the symbols section for a given target.
+     * @details Reads the symbol values based on the parsed symbol names and populates the target's symbols map.
+     * @param target The Target object to populate with symbols.
+     * @throws ExpKitError if there's an error reading the binary data.
+     */
+    void ParseSymbols(Target& target);
+
+    /**
+     * @brief Parses the ROP actions header section of the Kpwn file.
+     * @details Reads the number of ROP actions and their metadata, storing the ROP action IDs and optionally parsing detailed metadata.
+     * @param parse_known_metadata If true, parses the description and arguments for each ROP action.
+     * @throws ExpKitError if there's an error reading the binary data.
+     */
+    void ParseRopActionsHeader(bool parse_known_metadata);
+
+    /**
+     * @brief Parses the ROP actions section for a given target.
+     * @details Reads the ROP item sequences for each ROP action based on the parsed ROP action IDs and populates the target's rop_actions map.
+     * @param target The Target object to populate with ROP actions.
+     * @throws ExpKitError if there's an error reading the binary data.
+     */
+    void ParseRopActions(Target& target);
+
+    /**
+     * @brief Reads RegisterUsage data from the binary stream.
+     * @return A RegisterUsage object containing the parsed register and used offsets.
+     * @throws ExpKitError if there's an error reading the binary data.
+     */
+    RegisterUsage ReadRegisterUsage();
+
+    /**
+     * @brief Parses the pivots section for a given target.
+     * @details Reads various types of pivots (one-gadgets, push indirects, pop rsp, stack shifts) and populates the target's pivots structure.
+     * @param target The Target object to populate with pivots.
+     * @throws ExpKitError if there's an error reading the binary data.
+     */
+    void ParsePivots(Target& target);
+
+    /**
+     * @brief Parses the structs header section of the Kpwn file.
+     * @details Reads the metadata for each struct, including its name and fields, and stores it. Also reads the offset to the struct layouts.
+     * @throws ExpKitError if there's an error reading the binary data.
+     */
+    void ParseStructsHeader();
+
+    /**
+     * @brief Parses a specific struct layout from the binary stream.
+     * @details Seeks to the specified layout index, reads the struct's size, name, and field offsets and sizes.
+     * @param layout_idx The index of the struct layout to parse.
+     * @return A reference to the parsed Struct object.
+     * @throws ExpKitError if there's an error reading the binary data or if a non-optional field is missing.
+     */
+    Struct& ParseStructLayout(uint64_t layout_idx);
+
+    /**
+     * @brief Retrieves a struct layout, parsing it if necessary.
+     * @param layout_idx The index of the struct layout to retrieve.
+     * @return A reference to the Struct object.
+     * @throws ExpKitError if there's an error parsing the struct layout.
+     */
+    Struct& GetStructLayout(uint64_t layout_idx);
+
+    /**
+     * @brief Parses the structs section for a given target.
+     * @details Reads the struct layout indices for each struct metadata entry and retrieves or parses the corresponding struct layouts, populating the target's structs map.
+     * @param target The Target object to populate with structs.
+     */
+    void ParseStructs(Target& target);
+
+    /**
+     * @brief Parses targets from the Kpwn file that match the optional filter criteria.
+     * @param distro Optional filter for the distribution name.
+     * @param release_name Optional filter for the release name.
+     * @param version Optional filter for the version string.
+     * @return A vector of Target objects that match the specified criteria.
+     * @throws ExpKitError if there's an error parsing the binary data.
+     */
+    std::vector<Target> ParseTargets(
+        std::optional<const std::string> distro,
+        std::optional<const std::string> release_name,
+        std::optional<const std::string> version);
+
+    /**
+     * @brief Parses and retrieves a single target matching the specified criteria.
+     * @param distro Optional filter for the distribution name.
+     * @param release_name Optional filter for the release name.
+     * @param version Optional filter for the version string.
+     * @param throw_on_missing If true, throws an exception if no target or multiple targets are found.
+     * @return An optional containing the matched Target object, or std::nullopt if no target is found and throw_on_missing is false.
+     * @throws ExpKitError if no target or multiple targets are found and throw_on_missing is true.
+     */
+    std::optional<Target> ParseTarget(
+        std::optional<const std::string> distro,
+        std::optional<const std::string> release_name,
+        std::optional<const std::string> version, bool throw_on_missing);
+
+   public:
+    std::map<RopActionId, RopActionMeta> rop_action_meta_;
+
+    /**
+     * @brief Constructs a KpwnParser from a buffer.
+     * @param buffer The buffer containing the Kpwn data.
+     * @param size The size of the buffer.
+     */
+    KpwnParser(const uint8_t* buffer, size_t size);
+
+    /**
+     * @brief Constructs a KpwnParser from a vector of bytes.
+     * @param data The vector containing the Kpwn data.
+     */
+    KpwnParser(const std::vector<uint8_t> data);
+
+    /**
+     * @brief Constructs a KpwnParser by reading data from a file.
+     * @param filename The path to the Kpwn file.
+     * @return A KpwnParser object initialized with the file's content.
+     * @throws ExpKitError if the file cannot be read.
+     */
+    static KpwnParser FromFile(const char* filename);
+
+    /**
+     * @param log The logger instance to use.
+     */
+    void SetLog(ILog* log);
+
+    /**
+     * @brief Parses the header section of the Kpwn file.
+     * @details Reads the magic number, version, and the offsets to the different data sections (symbols, ROP actions, structs, targets). Optionally parses known metadata.
+     * @param parse_known_metadata If true, parses detailed metadata for ROP actions.
+     * @throws ExpKitError if the magic number is invalid, the version is unsupported, or there's an error reading the binary data.
+     */
+    void ParseHeader(bool parse_known_metadata = false);
+
+    /**
+     * @brief Retrieves a target by its distribution and release name.
+     * @param distro The distribution name of the target.
+     * @param release_name The release name of the target.
+     * @param throw_on_missing If true, throws an exception if no target or multiple targets are found.
+     * @return An optional containing the matched Target object, or std::nullopt if no target is found and throw_on_missing is false.
+     * @throws ExpKitError if no target or multiple targets are found for the given distro and release name, and throw_on_missing is true.
+     */
+    std::optional<Target> GetTarget(const std::string& distro,
+                                    const std::string& release_name,
+                                    bool throw_on_missing = false);
+
+    /**
+     * @brief Retrieves a target by its full version string.
+     * @param version The full version string of the target.
+     * @param throw_on_missing If true, throws an exception if no target or multiple targets are found.
+     * @return An optional containing the matched Target object, or std::nullopt if no target is found and throw_on_missing is false.
+     * @throws ExpKitError if no target or multiple targets are found for the given version, and throw_on_missing is true.
+     */
+    std::optional<Target> GetTarget(const std::string& version,
+                                    bool throw_on_missing = false);
+
+    /**
+     * @brief Retrieves all targets available in the Kpwn file.
+     * @return A vector of all Target objects found in the file.
+     */
+    std::vector<Target> GetAllTargets();
+};

@@ -3,10 +3,10 @@
 #include <cstdio>
 #include "test/TestUtils.cpp"
 #include "test/TestSuite.cpp"
-#include "target/KpwnParser.cpp"
-#include "target/Target.cpp"
-#include "target/TargetDb.cpp"
-#include "payloads/RopChain.cpp"
+#include "target/KpwnParser.hpp"
+#include "target/Target.hpp"
+#include "target/TargetDb.hpp"
+#include "payloads/RopChain.h"
 #include "util/file.cpp"
 
 struct TargetDbTests: TestSuite {

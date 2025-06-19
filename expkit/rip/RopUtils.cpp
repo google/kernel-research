@@ -2,7 +2,7 @@
 
 #include <sys/mman.h>
 #include <cstring>
-#include "payloads/RopChain.cpp"
+#include "payloads/RopChain.h"
 
 class RopUtils {
 public:

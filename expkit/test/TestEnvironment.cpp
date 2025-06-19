@@ -1,8 +1,8 @@
 #pragma once
 
 #include <optional>
-#include "target/KpwnParser.cpp"
-#include "target/TargetDb.cpp"
+#include "target/KpwnParser.hpp"
+#include "target/TargetDb.hpp"
 #include "test/kpwn/Kpwn.cpp"
 #include "util/file.cpp"
 
