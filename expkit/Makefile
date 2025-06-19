@@ -1,4 +1,4 @@
-SRCS := $(shell find . -name "*.cpp")
+SRCS := $(shell find . -name "*.cpp" ! -path "./samples/*")
 SAMPLES := $(shell ls samples)
 
 exp: $(SRCS) target_db.kpwn
