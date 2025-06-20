@@ -1,4 +1,4 @@
-#include "Payload.h"
+#include "Payload.hpp"
 #include <stdexcept>
 
 Payload::Payload(int size): data_(size), used_bytes_(size, 0), used_size_(0) { }

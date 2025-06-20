@@ -2,11 +2,11 @@
 
 #include <cstdio>
 #include "target/KpwnParser.hpp"
-#include "test/TestSuite.cpp"
-#include "test/TestUtils.cpp"
-#include "test/kpwn/Kpwn.cpp"
-#include "util/file.cpp"
-#include "util/str.cpp"
+#include "test/TestSuite.hpp"
+#include "test/TestUtils.hpp"
+#include "test/kpwn/Kpwn.hpp"
+#include "util/file.hpp"
+#include "util/str.hpp"
 
 class SymbolsTest: public TestSuite {
 public:

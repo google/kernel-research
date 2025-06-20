@@ -1,9 +1,8 @@
 #include <sstream>
 #include <iomanip>
 
-#include "pivot/PivotFinder.cpp"
-
-#include "PayloadBuilder.h"
+#include "pivot/PivotFinder.hpp"
+#include "PayloadBuilder.hpp"
 
 
 std::string intToHex(uint64_t value) {

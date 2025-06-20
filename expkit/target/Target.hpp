@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <cstring>
-#include "pivot/Pivots.cpp"
+#include "pivot/Pivots.hpp"
 
 enum struct RopActionId: uint32_t {
     MSLEEP = 0x01,

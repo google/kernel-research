@@ -7,7 +7,7 @@
 #include <vector>
 #include "target/BinaryReader.hpp"
 #include "target/Target.hpp"
-#include "pivot/Pivots.cpp"
+#include "pivot/Pivots.hpp"
 
 struct FieldMeta {
     std::string field_name;

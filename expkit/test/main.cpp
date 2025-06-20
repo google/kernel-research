@@ -2,14 +2,14 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "test/TestRunner.cpp"
-#include "test/logging/TapLogger.cpp"
-#include "test/tests/TargetDbTests.cpp"
-#include "test/tests/KpwnTests.cpp"
-#include "test/tests/RopActionTests.cpp"
-#include "test/tests/SymbolsTests.cpp"
-#include "test/tests/PivotTests.cpp"
-#include "util/ArgumentParser.cpp"
+#include "test/TestRunner.hpp"
+#include "test/logging/TapLogger.hpp"
+#include "test/tests/TargetDbTests.hpp"
+#include "test/tests/KpwnTests.hpp"
+#include "test/tests/RopActionTests.hpp"
+#include "test/tests/SymbolsTests.hpp"
+#include "test/tests/PivotTests.hpp"
+#include "util/ArgumentParser.hpp"
 
 // ugly hack to include cpp files into compilation until we make a proper build system
 #include "build_hack.h"

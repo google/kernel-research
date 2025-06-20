@@ -2,8 +2,8 @@
 
 #include <optional>
 #include "target/TargetDb.hpp"
-#include "util/file.cpp"
-#include "util/stdutils.cpp"
+#include "util/file.hpp"
+#include "util/stdutils.hpp"
 
 Target TargetDb::AutoDetectTarget() {
   auto version_bytes = read_file("/proc/version");
