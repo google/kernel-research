@@ -102,7 +102,10 @@ jobs:
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test stability_test
+        run: |
+            for action in "test" "stability_test"; do
+                CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
+            done
 
       - name: Test expkit (local TODO tests only)
         if: ${{ success() || failure() }}
