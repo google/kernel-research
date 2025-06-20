@@ -1,13 +1,18 @@
 TARGET ?= kernelctf lts-6.1.79
 #TARGET ?= kernelctf cos-105-17412.294.34
-
-INCLUDES = -I/usr/include/libnl3 -I../..
+SRCS := $(shell find ../.. -name "*.cpp" ! -path "../../samples/*")
+OBJS := $(SRCS:.cpp=.o)
+CC = g++
+CFLAGS = -static -I/usr/include/libnl3 -I../.. -g
 LIBS = -lnl-nf-3 -lnl-route-3 -lnl-3
 
 build: exp
 
-exp: target_db.kpwn exploit.cpp
-	g++ -o exp exploit.cpp $(INCLUDES) $(LIBS) -static
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+exp: exploit.o $(OBJS) target_db.kpwn
+	$(CC) $(CFLAGS) $(OBJS) $(LIBS) -o exp
 
 prerequisites:
 	sudo apt-get install libnl-nf-3-dev libnl-route-3-dev

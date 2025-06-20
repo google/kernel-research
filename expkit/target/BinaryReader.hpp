@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
+#include "util/str.hpp"
 #include "util/log.hpp"
 
 class BinaryReader {
@@ -122,7 +123,14 @@ public:
     * @param format The format string for the log message.
     */
     template <typename... Args>
-    void DebugLog(const char* format, const Args&... args);
+    void DebugLog(const char* format, const Args&... args) {
+        static const char spaces[] = "                                                                     ";
+        if (log_) {
+            auto str = format_str(format, args...);
+            log_->Log("%.*s%s%.*s[offs=%u]", log_padding, spaces, str.c_str(),
+                    80 - log_padding - str.size(), spaces, offset_);
+        }
+    }
 
     /**
     * @brief Begins parsing a structure. Reads the structure size and pushes the

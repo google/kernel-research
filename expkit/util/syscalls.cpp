@@ -1,5 +1,3 @@
-#pragma once
-
 #include <fcntl.h>
 #include <keyutils.h>
 #include <unistd.h>

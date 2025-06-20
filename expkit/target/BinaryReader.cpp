@@ -1,5 +1,3 @@
-#pragma once
-
 #include "target/BinaryReader.hpp"
 #include <cstdint>
 #include <cstring>
@@ -53,17 +51,6 @@ bool BinaryReader::BeginStruct(int struct_size_len, bool begin_if_empty) {
     log_padding += 2;
   }
   return !empty;
-}
-
-template <typename... Args>
-void BinaryReader::DebugLog(const char* format, const Args&... args) {
-  static const char spaces[] =
-      "                                                                     ";
-  if (log_) {
-    auto str = format_str(format, args...);
-    log_->Log("%.*s%s%.*s[offs=%u]", log_padding, spaces, str.c_str(),
-              80 - log_padding - str.size(), spaces, offset_);
-  }
 }
 
 void BinaryReader::EndSeek() {

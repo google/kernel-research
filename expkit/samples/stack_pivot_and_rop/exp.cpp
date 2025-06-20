@@ -3,21 +3,18 @@
 #include <cassert>
 #include <cerrno>
 #include <target/TargetDb.hpp>
-#include <test/kpwn/Kpwn.cpp>
+#include <test/kpwn/Kpwn.hpp>
 #include <util/incbin.hpp>
-#include <util/syscalls.cpp>
-#include <util/error.cpp>
-#include <util/pwn_utils.cpp>
+#include <util/syscalls.hpp>
+#include <util/error.hpp>
+#include <util/pwn_utils.hpp>
 #include <payloads/Payload.hpp>
 #include <payloads/RopChain.hpp>
-#include <util/HexDump.cpp>
-#include <util/ArgumentParser.cpp>
-#include <rip/RopUtils.cpp>
-#include <pivot/PivotFinder.cpp>
+#include <util/HexDump.hpp>
+#include <util/ArgumentParser.hpp>
+#include <rip/RopUtils.hpp>
+#include <pivot/PivotFinder.hpp>
 #include <payloads/PayloadBuilder.hpp>
-
-// ugly hack to include cpp files into compilation until we make a proper build system
-#include "build_hack.h"
 
 INCBIN(target_db, "target_db.kpwn");
 

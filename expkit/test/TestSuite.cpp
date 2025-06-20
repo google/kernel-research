@@ -1,11 +1,10 @@
-#pragma once
-
 #include <functional>
 #include <string>
 #include <vector>
 #include "test/TestSuite.hpp"
 #include "util/str.hpp"
 #include "util/file.hpp"
+#include "util/error.hpp"
 #include <fstream>
 
 #define TEST_METHOD(name, desc) \

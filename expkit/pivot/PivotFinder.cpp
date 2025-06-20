@@ -1,5 +1,3 @@
-#pragma once
-
 #include <limits>
 #include <optional>
 #include <queue>
@@ -8,6 +6,7 @@
 #include "pivot/PivotFinder.hpp"
 #include "payloads/Payload.hpp"
 #include "payloads/RopChain.hpp"
+#include "util/error.hpp"
 #include "util/stdutils.hpp"
 
 void StackShiftingInfo::Apply(uint64_t kaslr_base, Payload& payload) {

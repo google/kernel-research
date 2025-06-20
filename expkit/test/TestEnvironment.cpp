@@ -1,5 +1,3 @@
-#pragma once
-
 #include "target/TargetDb.hpp"
 #include "test/kpwn/Kpwn.hpp"
 #include "test/TestEnvironment.hpp"

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <stdint.h>
 #include "util/error.hpp"
 #include "util/pwn_utils.hpp"

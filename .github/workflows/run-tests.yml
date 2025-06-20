@@ -82,7 +82,7 @@ jobs:
       - name: Test expkit (local tests only)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: make test
+        run: make -j`nproc` test
 
       - name: Test expkit (QEMU)
         if: ${{ success() || failure() }}
@@ -97,18 +97,18 @@ jobs:
       - name: Build expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: make PREREQ=1 samples
+        run: make -j`nproc` PREREQ=1 samples
 
       - name: Test expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: CUSTOM_MODULES_KEEP=1 timeout 2m make -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test stability_test
+        run: CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" test stability_test
 
       - name: Test expkit (local TODO tests only)
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./expkit
-        run: timeout 2m make bin/test && bin/test --test-suites StaticTests --tests TODO
+        run: timeout 2m make -j`nproc` bin/test && bin/test --test-suites StaticTests --tests TODO
 
       - name: Test expkit (QEMU TODO tests only)
         if: ${{ success() || failure() }}
