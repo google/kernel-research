@@ -1,5 +1,3 @@
-#pragma once
-
 #include "target/Target.hpp"
 #include <cstdint>
 #include <map>

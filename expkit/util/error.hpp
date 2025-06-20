@@ -11,7 +11,7 @@ struct ExpKitError : public std::runtime_error {
      * @param error_msg The error message.
      */
     template <typename... Args>
-    ExpKitError(const char* error_msg);
+    ExpKitError(const char* error_msg): std::runtime_error(error_msg) {}
 
     /**
      * @brief Constructs an ExpKitError with a formatted error message.
@@ -20,7 +20,7 @@ struct ExpKitError : public std::runtime_error {
      * @param args The arguments for the format string.
      */
     template <typename... Args>
-    ExpKitError(const char* format, const Args&... args);
+    ExpKitError(const char* format, const Args&... args): std::runtime_error(format_str(format, args...)) {}
 };
 
 /**

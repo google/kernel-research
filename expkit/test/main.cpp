@@ -11,9 +11,6 @@
 #include "test/tests/PivotTests.hpp"
 #include "util/ArgumentParser.hpp"
 
-// ugly hack to include cpp files into compilation until we make a proper build system
-#include "build_hack.h"
-
 class Main {
     ArgumentParser args_;
     TestRunner runner_;

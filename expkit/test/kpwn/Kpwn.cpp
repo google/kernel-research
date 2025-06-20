@@ -1,5 +1,3 @@
-#pragma once
-
 #include <cstdint>
 #include <cstring>
 #include <map>
@@ -10,6 +8,21 @@
 #include "util/syscalls.hpp"
 #include "util/Register.hpp"
 #include "Kpwn.hpp"
+
+const char* kpwn_cmd_names[] = { "ALLOC_BUFFER", "KFREE", "KASLR_LEAK", "WIN_TARGET",
+    "RIP_CONTROL", "ARB_READ", "ARB_WRITE", "INSTALL_KPROBE", "PRINTK", "SYM_ADDR",
+    "REMOVE_KPROBE", "GET_RIP_CONTROL_RECOVERY", "CHECK_WIN" };
+
+const char* kpwn_errors_names[] = {
+    "ERROR_GENERIC",
+    "ERROR_UNKNOWN_COMMAND",
+    "ERROR_ALLOC",
+    "ERROR_COPY_FROM_USER_STRUCT",
+    "ERROR_COPY_FROM_USER_DATA",
+    "ERROR_COPY_TO_USER_STRUCT",
+    "ERROR_COPY_TO_USER_DATA",
+    "ERROR_UNKNOWN_SYMBOL",
+ };
 
 std::string CallLog::GetSummary() {
   std::string probe_str;

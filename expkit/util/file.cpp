@@ -1,12 +1,10 @@
-#pragma once
-
 #include <cstdint>
 #include <fstream>
 #include <vector>
 #include "util/error.hpp"
 #include "util/file.hpp"
 
-static std::vector<uint8_t> read_file(const char* filename) {
+std::vector<uint8_t> read_file(const char* filename) {
     std::ifstream file(filename, std::ios::binary);
     if (file.fail())
         throw ExpKitError("file not found: %s", filename);

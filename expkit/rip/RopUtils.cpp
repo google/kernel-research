@@ -1,5 +1,3 @@
-#pragma once
-
 #include <sys/mman.h>
 #include <cstring>
 #include "payloads/RopChain.hpp"
