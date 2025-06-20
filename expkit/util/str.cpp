@@ -1,5 +1,3 @@
-#pragma once
-
 #include <algorithm>
 #include <cstdarg>
 #include <string>
@@ -15,14 +13,6 @@ std::string format_str(const char* format, va_list args) {
     std::string result(len, '\0');
     std::vsnprintf(result.data(), len + 1, format, args);
     va_end(args);
-    return result;
-}
-
-template <typename... Args>
-std::string format_str(const char* format, const Args&... args) {
-    int buffer_size = std::snprintf(nullptr, 0, format, args...) + 1; // +1 for null terminator
-    std::string result(buffer_size - 1, '\0');
-    std::snprintf(result.data(), buffer_size, format, args...);
     return result;
 }
 

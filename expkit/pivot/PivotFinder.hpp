@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <limits>
 #include <optional>
 #include "pivot/Pivots.hpp"

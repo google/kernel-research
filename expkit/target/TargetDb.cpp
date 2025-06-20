@@ -1,7 +1,6 @@
-#pragma once
-
 #include <optional>
 #include "target/TargetDb.hpp"
+#include "util/error.hpp"
 #include "util/file.hpp"
 #include "util/stdutils.hpp"
 

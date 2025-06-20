@@ -1,5 +1,8 @@
 SRCS := $(shell find . -name "*.cpp" ! -path "./samples/*")
 SAMPLES := $(shell ls samples)
+OBJS := $(SRCS:.cpp=.o)
+CC = g++
+CFLAGS = -static -I. -g
 
 exp: $(SRCS) target_db.kpwn
 	g++ -static -I. -o exp exp.cpp
@@ -7,9 +10,12 @@ exp: $(SRCS) target_db.kpwn
 test: bin/test
 	bin/test --test-suites StaticTests --tests ^TODO
 
-bin/test: $(SRCS) test/artifacts/target_db_lts-6.1.81.kpwn test/artifacts/kernelctf.kpwn
+bin/test: $(OBJS) test/artifacts/target_db_lts-6.1.81.kpwn test/artifacts/kernelctf.kpwn
 	mkdir -p bin
-	g++ -static -I. -o bin/test test/main.cpp
+	$(CC) $(CFLAGS) $(OBJS) -o bin/test
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 test/artifacts/kernelctf.kpwn:
 	wget -O test/artifacts/kernelctf.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
@@ -17,10 +23,13 @@ test/artifacts/kernelctf.kpwn:
 test/artifacts/target_db_lts-6.1.81.kpwn:
 	../kpwn_db/kpwn_db.py --kernel-image-db-path=../kernel-image-db --release-filter-add lts-6.1.81 -o test/artifacts/target_db_lts-6.1.81.kpwn
 
+clean:
+	rm $(OBJS)
+
 $(SAMPLES):
 ifdef PREREQ
-	if make -C samples/$@ -n prerequisites; then make -C samples/$@ prerequisites; fi
+	if make -j`nproc` -C samples/$@ -n prerequisites; then make -C samples/$@ prerequisites; fi
 endif
-	make -C samples/$@ build
+	make -j`nproc` -C samples/$@ build
 
 samples: $(SAMPLES)

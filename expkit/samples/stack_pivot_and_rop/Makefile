@@ -1,12 +1,19 @@
 TARGET ?= kernelctf lts-6.1.81
+SRCS := $(shell find ../.. -name "*.cpp" ! -path "../../samples/*")
+OBJS := $(SRCS:.cpp=.o)
+CC = g++
+CFLAGS = -static -I../.. -g
 
 build: exp
 
 clean:
 	rm exp
 
-exp: target_db.kpwn exp.cpp
-	g++ -static -I../.. -o exp exp.cpp
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+exp: exp.o $(OBJS) target_db.kpwn
+	$(CC) $(CFLAGS) $(OBJS) -o exp
 
 target_db.kpwn:
 	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn

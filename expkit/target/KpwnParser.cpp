@@ -1,5 +1,3 @@
-#pragma once
-
 #include "target/KpwnParser.hpp"
 #include <cstdint>
 #include <cstring>

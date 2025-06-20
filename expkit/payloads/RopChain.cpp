@@ -1,11 +1,5 @@
-#pragma once
 #include "RopChain.hpp"
 #include "util/error.hpp"
-
-
-/*
-A RopChain is an ordered sequence of rop actionss
-*/
 
 RopChain::RopChain(Target &target, uint64_t kaslr_base) : target_(target), kaslr_base_(kaslr_base) {}
 

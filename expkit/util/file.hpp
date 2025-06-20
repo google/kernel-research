@@ -11,7 +11,7 @@
  * @return A vector of uint8_t containing the file's data.
  * @throws ExpKitError if the file cannot be found or opened.
  */
-static std::vector<uint8_t> read_file(const char* filename);
+std::vector<uint8_t> read_file(const char* filename);
 
 /**
  * @brief Writes a string of data to a file.

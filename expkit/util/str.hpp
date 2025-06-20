@@ -20,7 +20,12 @@ std::string format_str(const char* format, va_list args);
  * @param args The arguments to format.
  */
 template <typename... Args>
-std::string format_str(const char* format, const Args&... args);
+std::string format_str(const char* format, const Args&... args) {
+    int buffer_size = std::snprintf(nullptr, 0, format, args...) + 1; // +1 for null terminator
+    std::string result(buffer_size - 1, '\0');
+    std::snprintf(result.data(), buffer_size, format, args...);
+    return result;
+}
 
 /**
  * @brief Concatenates a vector of strings with a delimiter.

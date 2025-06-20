@@ -16,7 +16,10 @@ struct TestUtils {
      * @param name The name of the value being tested.
      */
     template <class T, class T2>
-    static void eq(T expected, T2 actual, const char* name);
+    static void eq(T expected, T2 actual, const char* name) {
+        if (expected != actual)
+            throw ExpKitError("expected 0x%llx but got 0x%llx for %s", expected, actual, name);
+    }
 
     /**
      * @brief Asserts that two C-style strings are equal.
@@ -34,5 +37,8 @@ struct TestUtils {
      * @param max The maximum expected value.
      */
     template <class T>
-    static void minmax(T min, T max, T actual, const char* name);
+    static void minmax(T min, T max, T actual, const char* name) {
+        if (!(min <= actual && actual <= max))
+            throw ExpKitError("expected %s to be between 0x%llx and 0x%llx, but got 0x%llx", name, min, max, actual);
+    }
 };
