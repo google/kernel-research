@@ -1,6 +1,6 @@
 #TARGET ?= kernelctf lts-6.1.61
 TARGET ?= kernelctf cos-105-17412.226.28
-SRCS := $(shell find ../.. -name "*.cpp" ! -path "../../samples/*")
+SRCS := $(shell find ../.. -name "*.cpp" ! -path "../../samples/*" ! -path "../../test/*")
 OBJS := $(SRCS:.cpp=.o)
 CC = g++
 CFLAGS = -static -I../.. -g
@@ -11,7 +11,7 @@ build: exp
 	$(CC) $(CFLAGS) -c $< -o $@
 
 exp: exploit.o $(OBJS) target_db.kpwn
-	$(CC) $(CFLAGS) $(OBJS) -o exp
+	$(CC) $(CFLAGS) $(OBJS) exploit.o -o exp
 
 target_db.kpwn:
 	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
