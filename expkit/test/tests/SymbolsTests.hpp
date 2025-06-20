@@ -4,7 +4,7 @@
 #include "target/KpwnParser.hpp"
 #include "test/TestSuite.hpp"
 #include "test/TestUtils.hpp"
-#include "test/kpwn/Kpwn.hpp"
+#include "kpwn/Kpwn.hpp"
 #include "util/file.hpp"
 #include "util/str.hpp"
 

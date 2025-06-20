@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sys/wait.h>
-#include "test/kpwn/Kpwn.hpp"
+#include "kpwn/Kpwn.hpp"
 #include "test/TestSuite.hpp"
 #include "test/TestUtils.hpp"
 #include "util/HexDump.hpp"

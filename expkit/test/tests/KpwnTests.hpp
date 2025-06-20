@@ -1,7 +1,7 @@
 #pragma once
 
 #include "test/TestUtils.hpp"
-#include "test/kpwn/Kpwn.hpp"
+#include "kpwn/Kpwn.hpp"
 #include "test/TestSuite.hpp"
 #include "util/error.hpp"
 #include "payloads/Payload.hpp"
