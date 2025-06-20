@@ -28,7 +28,7 @@ clean:
 
 $(SAMPLES):
 ifdef PREREQ
-	if make -j`nproc` -C samples/$@ -n prerequisites; then make -C samples/$@ prerequisites; fi
+	if make -C samples/$@ -n prerequisites; then make -C samples/$@ prerequisites; fi
 endif
 	make -j`nproc` -C samples/$@ build
 
