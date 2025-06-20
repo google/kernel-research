@@ -2,7 +2,7 @@
 
 #include <optional>
 #include "target/TargetDb.hpp"
-#include "test/kpwn/Kpwn.hpp"
+#include "kpwn/Kpwn.hpp"
 
 class TestEnvironment {
     std::string target_db_path_;

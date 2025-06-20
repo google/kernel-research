@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cerrno>
 #include <target/TargetDb.hpp>
-#include <test/kpwn/Kpwn.hpp>
+#include <kpwn/Kpwn.hpp>
 #include <util/incbin.hpp>
 #include <util/syscalls.hpp>
 #include <util/error.hpp>
