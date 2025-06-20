@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#include "util/log.cpp"
+#include "util/log.hpp"
 
 class BinaryReader {
 protected:

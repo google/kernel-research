@@ -1,11 +1,10 @@
 #pragma once
 
-#include "test/TestUtils.cpp"
-#include "test/kpwn/Kpwn.cpp"
-#include "test/TestSuite.cpp"
-#include "test/kpwn/kpwn.h"
-#include "util/error.cpp"
-#include "payloads/Payload.h"
+#include "test/TestUtils.hpp"
+#include "test/kpwn/Kpwn.hpp"
+#include "test/TestSuite.hpp"
+#include "util/error.hpp"
+#include "payloads/Payload.hpp"
 
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;

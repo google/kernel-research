@@ -5,7 +5,7 @@
 #include <map>
 #include <string>
 #include <cstring>
-#include "util/error.cpp"
+#include "util/error.hpp"
 
 std::vector<RopItem> Target::GetItemsForAction(RopActionId id) {
   if (rop_actions.find(id) == rop_actions.end()) {

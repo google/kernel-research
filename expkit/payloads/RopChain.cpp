@@ -1,6 +1,6 @@
 #pragma once
-#include "RopChain.h"
-#include "util/error.cpp"
+#include "RopChain.hpp"
+#include "util/error.hpp"
 
 
 /*
