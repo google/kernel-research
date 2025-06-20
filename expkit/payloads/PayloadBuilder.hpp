@@ -14,9 +14,9 @@
 #include <tuple>     // For std::tuple (used internally in .cpp logic)
 
 // Project-specific includes (assuming these exist and define necessary types)
-#include "Payload.h"         // For Payload class
-#include "util/error.cpp"
-#include "util/math_utils.cpp"  // For align
+#include "Payload.hpp"         // For Payload class
+#include "util/error.hpp"
+#include "util/math_utils.hpp"  // For align
 
 /**
  * @brief Helper struct to encapsulate payload data for the builder.

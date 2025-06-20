@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include "util/Register.cpp"
+#include "util/Register.hpp"
 
 enum class IndirectType { JMP, CALL };
 

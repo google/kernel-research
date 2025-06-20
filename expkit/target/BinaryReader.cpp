@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#include "util/error.cpp"
-#include "util/file.cpp"
-#include "util/log.cpp"
+#include "util/error.hpp"
+#include "util/file.hpp"
+#include "util/log.hpp"
 
 void BinaryReader::SetLog(ILog* log) { log_ = log; }
 

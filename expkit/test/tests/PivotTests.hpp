@@ -1,15 +1,15 @@
 #pragma once
 
 #include <cstdio>
-#include "pivot/PivotFinder.cpp"
+#include "pivot/PivotFinder.hpp"
 #include "target/KpwnParser.hpp"
 #include "target/Target.hpp"
-#include "test/TestSuite.cpp"
-#include "test/TestUtils.cpp"
-#include "util/HexDump.cpp"
-#include "payloads/Payload.h"
-#include "payloads/RopChain.h"
-#include "util/stdutils.cpp"
+#include "test/TestSuite.hpp"
+#include "test/TestUtils.hpp"
+#include "util/HexDump.hpp"
+#include "payloads/Payload.hpp"
+#include "payloads/RopChain.hpp"
+#include "util/stdutils.hpp"
 
 class PivotTests: public TestSuite {
     KpwnParser parser;

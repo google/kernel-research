@@ -10,8 +10,8 @@
 #include <cstring>   // For std::memcpy
 #include <optional>  // For std::optional
 #include <algorithm> // For std::fill_n
-#include "util/error.cpp"
-#include "util/math_utils.cpp"
+#include "util/error.hpp"
+#include "util/math_utils.hpp"
 
 /**
  * @class Payload

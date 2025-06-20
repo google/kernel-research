@@ -1,13 +1,13 @@
 #pragma once
 
 #include <sys/wait.h>
-#include "test/kpwn/Kpwn.cpp"
-#include "test/TestSuite.cpp"
-#include "test/TestUtils.cpp"
-#include "util/HexDump.cpp"
-#include "util/error.cpp"
-#include "payloads/RopChain.h"
-#include "payloads/Payload.h"
+#include "test/kpwn/Kpwn.hpp"
+#include "test/TestSuite.hpp"
+#include "test/TestUtils.hpp"
+#include "util/HexDump.hpp"
+#include "util/error.hpp"
+#include "payloads/RopChain.hpp"
+#include "payloads/Payload.hpp"
 
 class RopActionTests: public TestSuite {
     Kpwn* kpwn_;

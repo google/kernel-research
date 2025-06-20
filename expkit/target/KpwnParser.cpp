@@ -7,9 +7,9 @@
 #include <optional>
 #include <vector>
 #include "target/Target.hpp"
-#include "pivot/Pivots.cpp"
-#include "util/error.cpp"
-#include "util/file.cpp"
+#include "pivot/Pivots.hpp"
+#include "util/error.hpp"
+#include "util/file.hpp"
 
 std::vector<Target> KpwnParser::GetAllTargets() {
   return ParseTargets(std::nullopt, std::nullopt, std::nullopt);

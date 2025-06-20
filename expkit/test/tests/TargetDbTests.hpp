@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cstdio>
-#include "test/TestUtils.cpp"
-#include "test/TestSuite.cpp"
+#include "test/TestUtils.hpp"
+#include "test/TestSuite.hpp"
 #include "target/KpwnParser.hpp"
 #include "target/Target.hpp"
 #include "target/TargetDb.hpp"
-#include "payloads/RopChain.h"
-#include "util/file.cpp"
+#include "payloads/RopChain.hpp"
+#include "util/file.hpp"
 
 struct TargetDbTests: TestSuite {
     std::vector<uint8_t> kpwn_db_lts6181;

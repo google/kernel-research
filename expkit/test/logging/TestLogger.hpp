@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include "test/TestSuite.cpp"
+#include "test/TestSuite.hpp"
 
 class TestLogger {
 public:

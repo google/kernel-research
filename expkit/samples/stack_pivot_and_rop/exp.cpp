@@ -4,17 +4,17 @@
 #include <cerrno>
 #include <target/TargetDb.hpp>
 #include <test/kpwn/Kpwn.cpp>
-#include <util/incbin.cpp>
+#include <util/incbin.hpp>
 #include <util/syscalls.cpp>
 #include <util/error.cpp>
 #include <util/pwn_utils.cpp>
-#include <payloads/Payload.h>
-#include <payloads/RopChain.h>
+#include <payloads/Payload.hpp>
+#include <payloads/RopChain.hpp>
 #include <util/HexDump.cpp>
 #include <util/ArgumentParser.cpp>
 #include <rip/RopUtils.cpp>
 #include <pivot/PivotFinder.cpp>
-#include <payloads/PayloadBuilder.h>
+#include <payloads/PayloadBuilder.hpp>
 
 // ugly hack to include cpp files into compilation until we make a proper build system
 #include "build_hack.h"
