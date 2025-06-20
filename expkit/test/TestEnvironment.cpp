@@ -1,5 +1,5 @@
 #include "target/TargetDb.hpp"
-#include "test/kpwn/Kpwn.hpp"
+#include "kpwn/Kpwn.hpp"
 #include "test/TestEnvironment.hpp"
 #include "util/file.hpp"
 #include "util/error.hpp"
