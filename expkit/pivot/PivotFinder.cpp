@@ -135,7 +135,6 @@ std::optional<StackShiftingInfo> PivotFinder::FindShiftsInternal(
 
   Use a breadth first search with a visited[] vector for each seen SP value
   */
-  uint64_t current_ret_loc = from_offset;
   uint64_t sp_after_prev_inst = from_offset + 8;
 
   q.push({sp_after_prev_inst,
@@ -222,7 +221,7 @@ std::optional<StackShiftingInfo> PivotFinder::GetShiftToOffset(
     shift_info->next_ret_offset = shift_info->to_offset;
   }
   // "clean up" the to_offset to be the same as the next_ret_offset
-  if (shift_info->next_ret_offset = shift_info->to_offset - 8) {
+  if (shift_info->next_ret_offset == shift_info->to_offset - 8) {
     shift_info->to_offset = shift_info->next_ret_offset;
   }
   return shift_info;
