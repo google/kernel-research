@@ -27,7 +27,8 @@ echo_err() {
 download_busybox_if_missing() {
     if [ ! -f $ROOTFS_DIR/busybox ]; then
         echo_err "busybox was not found in the rootfs folder, downloading it..."
-        curl -f https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox -o $ROOTFS_DIR/busybox
+        # source: https://busybox.net/downloads/busybox-1.35.0.tar.bz2, binary: https://busybox.net/downloads/binaries/1.35.0-x86_64-linux-musl/busybox
+        curl -f https://storage.googleapis.com/kernel-research/files/busybox-1.35.0-x86_64-linux-musl -o $ROOTFS_DIR/busybox
         chmod a+rx $ROOTFS_DIR/busybox
     fi
 }
