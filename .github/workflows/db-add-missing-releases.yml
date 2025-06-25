@@ -39,6 +39,7 @@ jobs:
 
   process_release:
     needs: get_missing_releases
+    if: ${{ needs.get_missing_releases.outputs.missing_gcs != '[]' }}
     strategy:
       matrix:
         release: ${{ fromJson(needs.get_missing_releases.outputs.missing_gcs) }}
