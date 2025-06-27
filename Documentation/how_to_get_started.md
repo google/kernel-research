@@ -25,14 +25,14 @@
     INCBIN(target_db, "target_db.kpwn");
     ```
 
-3. Initialize **TargetDb** and detect which target it's being run on.
+3. Initialize **TargetDb**:
 
     ```c++
     TargetDb kpwn_db(target_db, target_db_size);
     ```
 
 4. Already available in database structure and symbol offsets are documented in `kpwn_db/converter/config.py`. 
-They are added for all supported targets.
+They are added for all the supported targets.
 
 5. If the needed symbol is not in database, use `StaticTarget` object to add it. One object per target needed. For example:
 
@@ -56,10 +56,10 @@ They are added for all supported targets.
     kpwn_db.AddStaticTarget(st);
     ```
 
-    > [!NOTE]
+    > **Note**
     > `128` in the example above is a size of the `nft_expr_ops` structure. `{"dump", 64, 8}` field is located at the offset of 64 and as it's a pointer, size would be 8 for 64-bit architecture.
 
-7. Auto-detection of target where exploit is going to be executed:
+7.  Detect which target **TargetDb** is being run on.
 
     ```c++
     auto target = kpwn_db.AutoDetectTarget();
