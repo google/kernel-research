@@ -14,6 +14,10 @@
 # limitations under the License.
 
 echo "=== COMMAND-BEGIN: $@ ==="
+# make sure this is written out fully and not to be mixed with dmesg messages
+# TODO: make this better, e.g. separate the streams altogether
+sleep 0.05
+
 eval $@ > /output 2>/output
 echo "=== COMMAND-END ==="
 
