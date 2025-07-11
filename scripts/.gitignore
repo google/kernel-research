@@ -1,6 +1,6 @@
-build_releases.txt
-db_releases.txt
-kernelctf_releases.txt
-missing_releases*.txt
-db.kpwn
+*_releases*.txt
+*.kpwn
+*.json
+*_config.txt
 rp*
+db/
