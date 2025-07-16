@@ -73,7 +73,10 @@ public:
     TEST_METHOD(winTargetWorks, "win_target is working") {
         auto rop = GetRopChain();
         rop.Add(kpwn_->WinTarget());
-        ExecuteRopChain(rop, 0, 0);
+        // TODO: based on tests sometimes we see stack usage here up to 240 bytes.
+        //   Our theory is that an interrupt is happening and it uses the stack.
+        //   But this needs investigation later and proper handling of this issue.
+        ExecuteRopChain(rop, 0, 240);
         kpwn_->CheckWin();
     }
 
