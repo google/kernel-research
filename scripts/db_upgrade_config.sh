@@ -16,6 +16,10 @@ EXCLUDE_REGEX="^(?!.*/($REGEX_FILE_LIST)$).*"
 echo "Files to download: $FILES_TO_DOWNLOAD (regex: $EXCLUDE_REGEX)"
 
 gcloud storage rsync --recursive "gs://kernel-research/kernel-image-db/releases/" "$IMAGE_DB_DIR/releases/" -x "$EXCLUDE_REGEX"
-$KPWN_DB_DIR/kpwn_db.py -i kernelctf.kpwn --kernel-image-db-path $IMAGE_DB_DIR --partial-sync --output-file kernelctf_new.kpwn
+"$KPWN_DB_DIR/kpwn_db.py" -i kernelctf.kpwn --kernel-image-db-path $IMAGE_DB_DIR --partial-sync --output-file kernelctf_new.kpwn
+"$KPWN_DB_DIR/kpwn_db.py" -i kernelctf_new.kpwn -o kernelctf_new.json
 
-gcloud storage cp -Z -a publicRead kernelctf_new.kpwn gs://kernel-research/pwnkit/db/kernelctf.kpwn
+echo "Uploading new db"
+for EXT in kpwn json; do
+    gcloud storage cp -Z -a publicRead kernelctf_new.$EXT gs://kernel-research/pwnkit/db/kernelctf.$EXT
+done
