@@ -131,6 +131,13 @@ void PayloadBuilder::PrintDebugInfo() const {
     }
 }
 
+StackPivot PayloadBuilder::GetStackPivot()
+{
+    if (!chosen_pivot_)
+        throw ExpKitError("GetStackPivot can only be called after build");
+    return *chosen_pivot_;
+}
+
 bool PayloadBuilder::TryPayloadPivot(Payload& payload, StackPivot pivot) {
     auto snapshot = payload.Snapshot();
     pivot.ApplyToPayload(payload, kaslr_base_);
