@@ -122,6 +122,13 @@ public:
      */
     void PrintDebugInfo() const;
 
+    /**
+     * @brief Returns the chosen stack pivot
+     *
+     * This function may be called after Build() to get the stack pivot gadget that was chosen.
+     */
+    StackPivot GetStackPivot();
+
 private:
     /**
      * @brief Attempts to apply a given stack pivot to a payload and integrate ROP actions.
