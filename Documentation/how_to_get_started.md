@@ -17,6 +17,8 @@
     #include <util/ArgumentParser.cpp>
     #include <pivot/PivotFinder.cpp>
     #include <pivot/StackPivot.cpp>
+    #include <payloads/PayloadBuilder.h>
+    #include <payloads/PayloadBuilder.cpp>
     ```
 
 2. Include the **target_db** in the exploit. `INCBIN` creates a read-only section in the binary with the file contents.
@@ -57,9 +59,17 @@ They are added for all the supported targets.
     ```
 
     > **Note**
-    > `128` in the example above is a size of the `nft_expr_ops` structure. `{"dump", 64, 8}` field is located at the offset of 64 and as it's a pointer, size would be 8 for 64-bit architecture.
+    > `128` in the example above is a size of the `nft_expr_ops` structure. `{"dump", 64, 8}` field is located at the offset of 64 and as is a pointer, size would be 8 for 64-bit architecture.
 
-7.  Detect which target **TargetDb** is being run on.
+7. Access pre-defined or added (via `StaticTarget`) structures and symbols using following calls:
+
+    ```c++
+    auto offset = structs.at("nft_expr_ops").size + structs.at("nft_expr_ops").fields.at("type").offset; // get the size and offset of type field in nft_expr_ops structure   
+
+    *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
+    ``` 
+
+8.  Detect which target **TargetDb** is being run on.
 
     ```c++
     auto target = kpwn_db.AutoDetectTarget();
@@ -76,13 +86,25 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
     Payload payload(1024);
     ```
 
-2. Create the `RopChain`. This object is initialized with target-specific information and the KASLR base. You can then add predefined actions to it. The `Ret2Usr` utility helps in gracefully returning execution to a user-mode function after the kernel operations are complete.
+2. If the payload contains constants / areas that should not be overwritten by `PayloadBuilder`, mark them as reserved:
+
+   ```c++
+   payload.Reserve(0, 8);
+   ```
+   
+   > **Note**
+   > Reserves 8 bytes at offset 0.   
+
+3. Create the `RopChain`. This object is initialized with target-specific information and the KASLR base. You can then add predefined actions to it. The `Ret2Usr` utility helps in gracefully returning execution to a user-mode function after the kernel operations are complete.
 
     ```c++
     RopChain rop(target, kaslr_base);
     rop.AddRopAction(RopActionId::COMMIT_KERNEL_CREDS);
     RopUtils::Ret2Usr(rop, (void*)win);
     ```
+
+    > **Note**
+    > Available ROP actions could be found in `kpwn_db/converter/config.py`. 
 
 ### Assembling the Final Payload with PayloadBuilder
 
@@ -101,6 +123,22 @@ The `PayloadBuilder` automates the process of finding a suitable pivot gadget an
     builder.AddPayload(payload, Register::RSI, rip_off);
     ```
 
+    In the situation when multiple registers contain a pointer to the payload, it's worth informing `PayloadBuilder` about it:
+    ```c++
+    uint64_t rip_off = fake_ops_offs + release_offs; // Calculated offset for RIP control
+    builder.AddPayload(payload, {Register::RSI, Register::RAX}, rip_off);
+    ```
+
+    `PayloadBuilder` is capable of handling multiple buffers (and use them if needed to accomodate ROP chain actions). To inform `PayloadBuilder` about such a setup use:
+    ```c++
+    Payload payload1(payload_size_1);
+    Payload payload2(payload_size_2);
+    PayloadBuilder builder(target.pivots, kernel_base); // create builder
+
+    builder.AddPayload(payload1, std::nullopt, std::nullopt);
+    builder.AddPayload(payload2, Register::RSI, rip_off); // add payload, with register, and rip_offset     
+    ```
+
 3. Add the `RopChain` to the builder.
 
     ```c++
@@ -114,4 +152,10 @@ The `PayloadBuilder` automates the process of finding a suitable pivot gadget an
         exit(-1); 
     ```
 
-Once built, the `payload` object contains the complete, ready-to-use exploit payload.
+    Once built, the `payload` object contains the complete, ready-to-use exploit payload.
+
+5. In cases when pointer to pivot gadget should be part of some other buffer or passed as a parameter it could be obtained in the following way after building the final payload:
+   
+   ```c++
+    *(uint64_t *)&some_buffer[offset] = kernel_base + builder.GetStackPivot().GetGadgetOffset(); 
+   ```
