@@ -1,10 +1,15 @@
 #pragma once
 
+#include <map>
+#include <memory>
 #include <optional>
-#include "target/KpwnParser.hpp"
+#include <vector>
+#include <kernelXDK/target/Target.hpp>
+
+class KpwnParser;
 
 class TargetDb {
-    std::optional<KpwnParser> parser_;
+    std::unique_ptr<KpwnParser> parser_;
 
     std::vector<Target> static_targets_;
     std::map<std::string, size_t> by_version_;
@@ -28,11 +33,15 @@ class TargetDb {
                      std::optional<size_t> static_idx);
 
    public:
+    // declare destructor
+    ~TargetDb();
+    TargetDb() = default;
+
     /**
      * @brief Constructs a TargetDb object.
-     * @param parser An optional KpwnParser object to read target data from a Kpwn file.
+     * @param filename A database file to read from.
      */
-    TargetDb(std::optional<KpwnParser> parser = std::nullopt);
+    TargetDb(const std::string &filename);
 
     /**
      * @brief Constructs a TargetDb object from a byte buffer.

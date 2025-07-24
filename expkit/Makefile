@@ -2,7 +2,7 @@ SRCS := $(shell find . -name "*.cpp" ! -path "./samples/*")
 SAMPLES := $(shell ls samples)
 OBJS := $(SRCS:.cpp=.o)
 CC = g++
-CFLAGS = -static -I. -g
+CFLAGS = -I. -g
 
 exp: $(SRCS) target_db.kpwn
 	g++ -static -I. -o exp exp.cpp

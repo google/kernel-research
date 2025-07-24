@@ -4,9 +4,9 @@
 #include "test/TestUtils.hpp"
 #include "test/TestSuite.hpp"
 #include "target/KpwnParser.hpp"
-#include "target/Target.hpp"
-#include "target/TargetDb.hpp"
-#include "payloads/RopChain.hpp"
+#include <kernelXDK/target/Target.hpp>
+#include <kernelXDK/target/TargetDb.hpp>
+#include <kernelXDK/payloads/RopChain.hpp>
 #include "util/file.hpp"
 
 struct TargetDbTests: TestSuite {
@@ -144,7 +144,7 @@ struct TargetDbTests: TestSuite {
     }
 
     TEST_METHOD(targetDbMergingWorks, "TargetDb can merge db with static targets") {
-        TargetDb db(getParser());
+        TargetDb db(kpwn_db_lts6181.data(), kpwn_db_lts6181.size());
 
         StaticTarget st("kernelctf", "lts-6.1.81");
         st.AddSymbol("new_symbol", 0x1234);

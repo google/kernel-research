@@ -3,8 +3,8 @@
 #include <cstdint>
 #include <map>
 #include <string>
-#include <cstring>
-#include "pivot/Pivots.hpp"
+#include <vector>
+#include <kernelXDK/pivot/Pivots.hpp>
 
 enum struct RopActionId: uint32_t {
     MSLEEP = 0x01,

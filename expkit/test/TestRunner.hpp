@@ -8,7 +8,6 @@
 #include "test/TestEnvironment.hpp"
 #include "test/logging/TestLogger.hpp"
 #include "test/logging/PrintfLogger.hpp"
-#include "util/str.hpp"
 
 using namespace std;
 

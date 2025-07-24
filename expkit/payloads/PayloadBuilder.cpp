@@ -1,8 +1,11 @@
-#include <sstream>
+#include <algorithm>
 #include <iomanip>
+#include <sstream>
 
-#include "pivot/PivotFinder.hpp"
-#include "PayloadBuilder.hpp"
+
+#include <kernelXDK/pivot/PivotFinder.hpp>
+#include <kernelXDK/payloads/PayloadBuilder.hpp>
+#include <kernelXDK/util/error.hpp>
 
 
 std::string intToHex(uint64_t value) {

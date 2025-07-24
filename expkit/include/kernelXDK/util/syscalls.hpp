@@ -8,7 +8,6 @@
 #include <sys/mman.h>
 #include <sys/msg.h>
 #include <sys/socket.h>
-#include "util/error.hpp"
 
 typedef int fd;
 

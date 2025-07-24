@@ -3,8 +3,8 @@
 #include "test/TestUtils.hpp"
 #include "kpwn/Kpwn.hpp"
 #include "test/TestSuite.hpp"
-#include "util/error.hpp"
-#include "payloads/Payload.hpp"
+#include <kernelXDK/util/error.hpp>
+#include <kernelXDK/payloads/Payload.hpp>
 
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;

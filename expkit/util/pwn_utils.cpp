@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include "util/error.hpp"
-#include "util/pwn_utils.hpp"
+#include <kernelXDK/util/error.hpp>
+#include <kernelXDK/util/pwn_utils.hpp>
 
 bool is_kaslr_base(uint64_t kbase_addr) {
     if ((kbase_addr & 0xFFFF0000000FFFFF) != 0xFFFF000000000000)

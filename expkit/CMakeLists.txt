@@ -6,7 +6,7 @@ project(kernelXDK
 )
 
 # --- Compiler Configuration ---
-set(CMAKE_CXX_STANDARD 17) # Or 20, or whatever C++ standard you use
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -18,7 +18,7 @@ else()
 endif()
 
 # --- Source File Collection for the Library ---
-# List of directories containing your C++ source files
+# This remains the same, as your .cpp files are still in these directories.
 set(LIBRARY_SOURCE_ROOT_DIRS
     kpwn
     rip
@@ -28,7 +28,6 @@ set(LIBRARY_SOURCE_ROOT_DIRS
     payloads
 )
 
-# Collect all .cpp files from these directories
 set(KERNELXDK_SRCS "")
 foreach(DIR ${LIBRARY_SOURCE_ROOT_DIRS})
     file(GLOB_RECURSE CURRENT_DIR_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${DIR}/*.cpp")
@@ -37,104 +36,46 @@ endforeach()
 
 add_library(${PROJECT_NAME} STATIC ${KERNELXDK_SRCS})
 
+# --- Define Include Directories ---
+target_include_directories(kernelXDK
+    # PUBLIC: For consumers of the library.
+    # They will find public headers in <kernelXDK/...>
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
 
-# --- Define Public Headers for Installation ---
-# THIS IS THE MOST IMPORTANT PART FOR YOUR SCENARIO.
-# You MUST explicitly list all header files that you want to be part of your
-# publicly consumable API. These are the files users will #include.
-#
-# IMPORTANT: For each header, you specify its source path and its *desired*
-# installation path relative to the 'include' directory (e.g., install/include/).
-#
-# The goal is that users can then do:
-# #include <kernelXDK/kpwn/kpwn.h>
-# #include <kernelXDK/rip/RopUtils.hpp> (if RopUtils.hpp is public)
-# ...etc.
-
-set(KERNELXDK_PUBLIC_HEADERS
-    "kpwn/include/kpwn.h" # This header is in 'kpwn/include', but should install under 'kernelxdk/kpwn'
-    "rip/RopUtils.hpp"
-    "target/Target.hpp"
-    "target/TargetDb.hpp"
-    "target/KpwnParser.hpp"
-    "target/BinaryReader.hpp"
-    "util/log.hpp"
-    "util/error.hpp"
-    "util/file.hpp"
-    "util/math_utils.hpp"
-    "util/pwn_utils.hpp"
-    "util/str.hpp"
-    "util/syscalls.hpp"
-    "util/stdutils.hpp"
-    "util/incbin.hpp"
-    "util/ArgumentParser.hpp"
-    "util/HexDump.hpp"
-    "util/Register.hpp"
-    "pivot/Pivots.hpp"
-    "pivot/PivotFinder.hpp"
-    "pivot/StackPivot.hpp"
-    "payloads/Payload.hpp"
-    "payloads/PayloadBuilder.hpp"
-    "payloads/RopChain.hpp"
-    # Add any other public headers here
+    # PRIVATE: For building the library itself.
+    # This allows your internal .cpp files to find private headers
+    # like "util/str.hpp" that are in the source tree.
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-foreach(HEADER_PATH ${KERNELXDK_PUBLIC_HEADERS})
-    set(MODULE_NAME "")
-    # Find which root module directory this header belongs to
-    foreach(MODULE_ROOT_DIR ${LIBRARY_SOURCE_ROOT_DIRS})
-        if("${HEADER_PATH}" MATCHES "^${MODULE_ROOT_DIR}/")
-            set(MODULE_NAME "${MODULE_ROOT_DIR}")
-            break() # Found it, exit inner loop
-        endif()
-    endforeach()
-
-    if(NOT MODULE_NAME)
-        # This error means a header in KERNELXDK_PUBLIC_HEADERS doesn't start with
-        # one of the defined LIBRARY_SOURCE_ROOT_DIRS. Adjust the list or the header path.
-        message(FATAL_ERROR "Could not determine module for public header: '${HEADER_PATH}'. Please verify KERNELXDK_PUBLIC_HEADERS or LIBRARY_SOURCE_ROOT_DIRS.")
-    endif()
-
-    # Construct the destination subdirectory: e.g., kernelxdk/rip
-    set(DEST_SUBDIR "kernelxdk/${MODULE_NAME}")
-
-    # --- Debugging (remove these once confirmed fixed) ---
-    message(STATUS "--- Debugging Public Headers ---")
-    message(STATUS "HEADER_PATH: \"${HEADER_PATH}\"")
-    message(STATUS "MODULE_NAME: \"${MODULE_NAME}\"")
-    message(STATUS "DEST_SUBDIR: \"${DEST_SUBDIR}\"")
-    message(STATUS "Full path for install: \"${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_PATH}\"")
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_PATH}")
-        message(FATAL_ERROR "ERROR: Header file does not exist: '${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_PATH}'")
-    endif()
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_PATH}")
-        message(FATAL_ERROR "ERROR: HEADER_PATH '${HEADER_PATH}' evaluates to a directory, not a file! Full path: '${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_PATH}'")
-    endif()
-    # --- END Debugging ---
-
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${HEADER_PATH}"
-            DESTINATION include/${DEST_SUBDIR}
-    )
-endforeach()
+# --- Simplified Public Header Installation ---
+# This replaces the entire KERNELXDK_PUBLIC_HEADERS list and the complex loop.
+# It tells CMake to take the 'kernelXDK' directory from inside your local 'include'
+# directory and install it to the destination 'include' directory.
+# This preserves the entire subdirectory structure (e.g., kernelXDK/target, kernelXDK/util).
+install(DIRECTORY include/kernelXDK
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+)
 
 # --- Installation for the Library Itself (static .lib/.a file) ---
 install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}Targets # For find_package()
-    ARCHIVE DESTINATION lib       # Where to install the .lib/.a file
+    EXPORT ${PROJECT_NAME}Targets
+    ARCHIVE DESTINATION lib
 )
 
-# --- Define the INTERFACE_INCLUDE_DIRECTORIES for Consumers ---
-# This tells CMake how targets linking to kernelXDK should find its headers.
-# We are telling them that after installation, they need to look in 'INSTALL_PREFIX/include'.
-# Then, since we installed headers to `include/kernelXDK/...`, they can include `<kernelXDK/module/header.h>`.
-target_include_directories(${PROJECT_NAME} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:include> # This is a conceptual path that CMake resolves
+# --- Installation of cmake components ---
+install(EXPORT ${PROJECT_NAME}Targets
+  FILE        ${PROJECT_NAME}Targets.cmake
+  NAMESPACE   ${PROJECT_NAME}::
+  DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
-
 
 # --- Generate CMake Package Configuration Files ---
-# This allows users to find your library using find_package(kernelXDK CONFIG REQUIRED)
+# This part remains the same.
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
@@ -143,16 +84,17 @@ write_basic_package_version_file(
     COMPATIBILITY AnyNewerVersion
 )
 
+# Assuming you have this file in a 'cmake' subdirectory
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in"
+    "cmake/${PROJECT_NAME}Config.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
-    INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}"
+    INSTALL_DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
 
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}"
+    DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
 
 # --- Add Subdirectories for Tests and Samples ---

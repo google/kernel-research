@@ -1,8 +1,8 @@
-#include "target/TargetDb.hpp"
+#include <kernelXDK/target/TargetDb.hpp>
 #include "kpwn/Kpwn.hpp"
 #include "test/TestEnvironment.hpp"
 #include "util/file.hpp"
-#include "util/error.hpp"
+#include <kernelXDK/util/error.hpp>
 
 void TestEnvironment::SetTargetDbPath(const std::string& target_db_path) {
   target_db_path_ = target_db_path;
@@ -23,7 +23,7 @@ TargetDb& TestEnvironment::GetTargetDb() {
         "the target db path was not specified in the environment");
 
   if (!target_db_)
-    target_db_ = TargetDb(KpwnParser(read_file(target_db_path_.c_str())));
+    target_db_.emplace(target_db_path_);
   return target_db_.value();
 }
 

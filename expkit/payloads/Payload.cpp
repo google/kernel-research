@@ -1,4 +1,7 @@
-#include "Payload.hpp"
+#include <kernelXDK/payloads/Payload.hpp>
+#include <kernelXDK/util/error.hpp>
+#include "util/math_utils.hpp"
+#include <cstring>
 #include <stdexcept>
 
 Payload::Payload(int size): data_(size), used_bytes_(size, 0), used_size_(0) { }

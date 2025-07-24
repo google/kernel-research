@@ -1,18 +1,20 @@
-TARGET ?= kernelctf lts-6.1.79
-#TARGET ?= kernelctf cos-105-17412.294.34
-SRCS := $(shell find ../.. -name "*.cpp" ! -path "../../samples/*" ! -path "../../test/*")
-OBJS := $(SRCS:.cpp=.o)
-CC = g++
-CFLAGS = -static -I/usr/include/libnl3 -I../.. -g
-LIBS = -lnl-nf-3 -lnl-route-3 -lnl-3
+# ADJUST THIS PATH if KernelXDK is installed elsewhere (e.g., /opt/my_libs)
+KERNELXDK_INSTALL_PREFIX ?= /usr/local
 
-build: exp
+KERNELXDK_INCLUDE_DIR := $(KERNELXDK_INSTALL_PREFIX)/include/
+KERNELXDK_LIB_DIR := $(KERNELXDK_INSTALL_PREFIX)/lib
+
+TARGET ?= kernelctf lts-6.1.79
+CC = g++
+CFLAGS := -I. -I$(KERNELXDK_INCLUDE_DIR) -I/usr/include/libnl3 -static -g
+LDFLAGS := -L$(KERNELXDK_LIB_DIR) -lkernelXDK -lnl-nf-3 -lnl-route-3 -lnl-3
+
+
+exp: exploit.o $(OBJS) target_db.kpwn
+	$(CC) $(CFLAGS) exploit.o $(LDFLAGS) -o exp
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
-
-exp: exploit.o $(OBJS) target_db.kpwn
-	$(CC) $(CFLAGS) $(OBJS) exploit.o $(LIBS) -o exp
 
 prerequisites:
 	sudo apt-get install libnl-nf-3-dev libnl-route-3-dev
@@ -20,10 +22,8 @@ prerequisites:
 target_db.kpwn:
 	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
 
-run: build
-#run:
+run: exp
 	cp exp* ../../../kernel-image-runner/rootfs/
-	#../../../kernel-image-runner/run.sh $(TARGET) --gdb --dbgsym --nokaslr -- /exp.sh | tee output.txt
 	../../../kernel-image-runner/run.sh $(TARGET) -- /exp.sh | tee output.txt
 
 test: run
@@ -31,3 +31,6 @@ test: run
 
 echo:
 	echo $(TARGET)
+
+clean:
+	rm -f exploit.o exp output.txt dmesg.txt target_db.kpwn

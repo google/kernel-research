@@ -1,5 +1,7 @@
-#include "RopChain.hpp"
-#include "util/error.hpp"
+#include <kernelXDK/payloads/RopChain.hpp>
+#include <kernelXDK/util/error.hpp>
+
+#include <cstring>
 
 RopChain::RopChain(Target &target, uint64_t kaslr_base) : target_(target), kaslr_base_(kaslr_base) {}
 

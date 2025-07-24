@@ -1,8 +1,11 @@
+#include "test/logging/TestLogger.hpp"
+#include "test/TestRunner.hpp"
+
+#include <kernelXDK/util/str.hpp>
+
 #include <memory>
 #include <optional>
 #include <vector>
-#include "test/logging/TestLogger.hpp"
-#include "test/TestRunner.hpp"
 
 void ConditionMatcher::SetFilter(const optional<string>& filter_expression) {
   filter_.clear();

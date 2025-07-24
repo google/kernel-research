@@ -1,14 +1,14 @@
 #pragma once
 
 #include <cstdio>
-#include "pivot/PivotFinder.hpp"
+#include <kernelXDK/pivot/PivotFinder.hpp>
 #include "target/KpwnParser.hpp"
-#include "target/Target.hpp"
+#include <kernelXDK/target/Target.hpp>
 #include "test/TestSuite.hpp"
 #include "test/TestUtils.hpp"
-#include "util/HexDump.hpp"
-#include "payloads/Payload.hpp"
-#include "payloads/RopChain.hpp"
+#include <kernelXDK/util/HexDump.hpp>
+#include <kernelXDK/payloads/Payload.hpp>
+#include <kernelXDK/payloads/RopChain.hpp>
 #include "util/stdutils.hpp"
 
 class PivotTests: public TestSuite {

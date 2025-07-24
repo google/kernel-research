@@ -2,16 +2,11 @@
  * @file Payload.h
  * @brief Defines the Payload class for managing a contiguous block of memory.
  */
-
 #pragma once
 
-#include <cstdint>   // For uint8_t, uint32_t, uint64_t
-#include <vector>    // For std::vector
-#include <cstring>   // For std::memcpy
-#include <optional>  // For std::optional
-#include <algorithm> // For std::fill_n
-#include "util/error.hpp"
-#include "util/math_utils.hpp"
+#include <cstdint>
+#include <vector>
+#include <optional>
 
 /**
  * @class Payload

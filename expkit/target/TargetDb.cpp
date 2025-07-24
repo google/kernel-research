@@ -1,6 +1,8 @@
+#include <memory>
 #include <optional>
-#include "target/TargetDb.hpp"
-#include "util/error.hpp"
+#include <kernelXDK/target/TargetDb.hpp>
+#include <kernelXDK/util/error.hpp>
+#include "target/KpwnParser.hpp"
 #include "util/file.hpp"
 #include "util/stdutils.hpp"
 
@@ -12,7 +14,7 @@ Target TargetDb::AutoDetectTarget() {
 
 Target TargetDb::GetTarget(const std::string& version) {
   auto target =
-      parser_.has_value() ? parser_.value().GetTarget(version) : std::nullopt;
+      parser_ ? parser_->GetTarget(version) : std::nullopt;
   auto static_idx = find_opt(by_version_, version);
 
   if (!static_idx.has_value() && !target.has_value())
@@ -25,10 +27,13 @@ Target TargetDb::GetTarget(const std::string& version) {
   return GetTarget(target, static_idx);
 }
 
+// define destructor here so it has access to KpwnParser.h
+TargetDb::~TargetDb() = default;
+
 Target TargetDb::GetTarget(const std::string& distro,
                            const std::string& release_name) {
-  auto target = parser_.has_value()
-                    ? parser_.value().GetTarget(distro, release_name)
+  auto target = parser_
+                    ? parser_->GetTarget(distro, release_name)
                     : std::nullopt;
   auto static_idx = find_opt(by_distro_release_, distro + "/" + release_name);
 
@@ -53,10 +58,12 @@ void TargetDb::AddStaticTarget(const StaticTarget& target) {
   static_targets_.push_back(target);
 }
 
-TargetDb::TargetDb(const uint8_t* buffer, size_t size)
-    : parser_(KpwnParser(buffer, size)) {}
+TargetDb::TargetDb(const std::string &filename) {
+  parser_ = std::make_unique<KpwnParser>(KpwnParser::FromFile(filename));
+}
 
-TargetDb::TargetDb(std::optional<KpwnParser> parser) : parser_(parser) {}
+TargetDb::TargetDb(const uint8_t* buffer, size_t size)
+    : parser_(std::make_unique<KpwnParser>(buffer, size)) {}
 
 Target TargetDb::GetTarget(std::optional<Target> target_opt,
                            std::optional<size_t> static_idx) {
