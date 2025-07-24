@@ -4,9 +4,9 @@
 #include <map>
 #include <optional>
 #include <vector>
-#include "target/Target.hpp"
-#include "pivot/Pivots.hpp"
-#include "util/error.hpp"
+#include <kernelXDK/target/Target.hpp>
+#include <kernelXDK/pivot/Pivots.hpp>
+#include <kernelXDK/util/error.hpp>
 #include "util/file.hpp"
 
 std::vector<Target> KpwnParser::GetAllTargets() {
@@ -54,7 +54,7 @@ void KpwnParser::ParseHeader(bool parse_known_metadata) {
 
 void KpwnParser::SetLog(ILog* log) { log_ = log; }
 
-KpwnParser KpwnParser::FromFile(const char* filename) {
+KpwnParser KpwnParser::FromFile(const std::string &filename) {
   return KpwnParser(read_file(filename));
 }
 

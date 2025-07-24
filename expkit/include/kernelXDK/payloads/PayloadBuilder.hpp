@@ -3,20 +3,18 @@
  * @brief Defines the PayloadBuilder class for constructing complex exploit payloads.
  */
 #pragma once
-#ifndef PAYLOAD_BUILDER_H
-#define PAYLOAD_BUILDER_H
 
-#include <cstdint>   // For uint64_t, size_t
-#include <string>    // For std::string
-#include <vector>    // For std::vector
-#include <optional>  // For std::optional
-#include <functional>// For std::reference_wrapper (used internally in .cpp logic)
-#include <tuple>     // For std::tuple (used internally in .cpp logic)
+#include <cstdint>
+#include <string>
+#include <vector>
+#include <optional>
 
-// Project-specific includes (assuming these exist and define necessary types)
-#include "Payload.hpp"         // For Payload class
-#include "util/error.hpp"
-#include "util/math_utils.hpp"  // For align
+// Project-specific includes
+#include <kernelXDK/pivot/Pivots.hpp>
+#include <kernelXDK/pivot/StackPivot.hpp>
+#include <kernelXDK/pivot/StackShiftInfo.h>
+#include <kernelXDK/payloads/RopChain.hpp>
+#include <kernelXDK/payloads/Payload.hpp>
 
 /**
  * @brief Helper struct to encapsulate payload data for the builder.
@@ -158,5 +156,3 @@ private:
     std::optional<Payload> chosen_payload_;            ///< @brief The final constructed payload.
     std::vector<StackShiftingInfo> chosen_shifts_;     ///< @brief Information about stack shifts performed during the build.
 };
-
-#endif // PAYLOAD_BUILDER_H

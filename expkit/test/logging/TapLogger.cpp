@@ -1,9 +1,12 @@
-#include <iostream>
-#include <memory>
-#include <vector>
 #include "test/logging/TestLogger.hpp"
 #include "test/logging/TapLogger.hpp"
 #include "test/TestSuite.hpp"
+
+#include <kernelXDK/util/str.hpp>
+
+#include <iostream>
+#include <memory>
+#include <vector>
 
 using namespace std;
 

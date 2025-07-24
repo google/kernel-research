@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cstdint>
-#include <cstring>
+#include <string>
 #include <map>
 #include <optional>
 #include <vector>
 #include "target/BinaryReader.hpp"
-#include "target/Target.hpp"
-#include "pivot/Pivots.hpp"
+#include <kernelXDK/target/Target.hpp>
+#include <kernelXDK/pivot/Pivots.hpp>
 
 struct FieldMeta {
     std::string field_name;
@@ -155,7 +155,7 @@ protected:
      * @return A KpwnParser object initialized with the file's content.
      * @throws ExpKitError if the file cannot be read.
      */
-    static KpwnParser FromFile(const char* filename);
+    static KpwnParser FromFile(const std::string &filename);
 
     /**
      * @param log The logger instance to use.

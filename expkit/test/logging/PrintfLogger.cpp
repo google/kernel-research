@@ -1,8 +1,11 @@
+#include "test/logging/PrintfLogger.hpp"
+
+#include <kernelXDK/util/str.hpp>
+
 #include <memory>
 #include <vector>
 #include <string>
 #include <iostream>
-#include "test/logging/PrintfLogger.hpp"
 
 #define RED(s)    "\033[1;31m" << s << "\033[0;0m"
 #define GREEN(s)  "\033[1;32m" << s << "\033[0;0m"

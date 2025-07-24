@@ -3,7 +3,8 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#include "util/str.hpp"
+
+#include <kernelXDK/util/str.hpp>
 #include "util/log.hpp"
 
 class BinaryReader {
