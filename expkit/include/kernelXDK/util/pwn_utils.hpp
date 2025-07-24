@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "util/error.hpp"
 
 /**
  * @brief Checks if the provided address is a valid KASLR base address.

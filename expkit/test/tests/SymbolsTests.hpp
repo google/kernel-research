@@ -6,7 +6,6 @@
 #include "test/TestUtils.hpp"
 #include "kpwn/Kpwn.hpp"
 #include "util/file.hpp"
-#include "util/str.hpp"
 
 class SymbolsTest: public TestSuite {
 public:

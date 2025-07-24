@@ -1,19 +1,13 @@
 #include <limits>
 #include <optional>
 #include <queue>
-#include "pivot/Pivots.hpp"
-#include "pivot/StackPivot.hpp"
-#include "pivot/PivotFinder.hpp"
-#include "payloads/Payload.hpp"
-#include "payloads/RopChain.hpp"
-#include "util/error.hpp"
+#include <kernelXDK/pivot/Pivots.hpp>
+#include <kernelXDK/pivot/StackPivot.hpp>
+#include <kernelXDK/pivot/PivotFinder.hpp>
+#include <kernelXDK/payloads/Payload.hpp>
+#include <kernelXDK/payloads/RopChain.hpp>
+#include <kernelXDK/util/error.hpp>
 #include "util/stdutils.hpp"
-
-void StackShiftingInfo::Apply(uint64_t kaslr_base, Payload& payload) {
-  for (auto& shift : stack_shifts) {
-    payload.Set(shift.ret_offset, kaslr_base + shift.pivot.address);
-  }
-}
 
 void RopPivotInfo::PrintDebugInfo() const {
   printf("[+] Selected stack pivot: %s\n", pivot.GetDescription().c_str());

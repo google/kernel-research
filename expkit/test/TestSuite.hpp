@@ -5,7 +5,6 @@
 #include <vector>
 #include "test/TestEnvironment.hpp"
 #include "util/log.hpp"
-#include "util/str.hpp"
 
 #define TEST_METHOD(name, desc) \
     Test _test_ ## name = RegisterTest(Test(#name, desc, [this]() { name(); })); \

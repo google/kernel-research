@@ -4,10 +4,10 @@
 #include "kpwn/Kpwn.hpp"
 #include "test/TestSuite.hpp"
 #include "test/TestUtils.hpp"
-#include "util/HexDump.hpp"
-#include "util/error.hpp"
-#include "payloads/RopChain.hpp"
-#include "payloads/Payload.hpp"
+#include <kernelXDK/util/HexDump.hpp>
+#include <kernelXDK/util/error.hpp>
+#include <kernelXDK/payloads/RopChain.hpp>
+#include <kernelXDK/payloads/Payload.hpp>
 
 class RopActionTests: public TestSuite {
     Kpwn* kpwn_;

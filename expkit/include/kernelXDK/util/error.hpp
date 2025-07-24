@@ -3,7 +3,8 @@
 #include <system_error>
 #include <stdexcept>
 #include <cstdarg>
-#include "util/str.hpp"
+
+#include <kernelXDK/util/str.hpp>
 
 struct ExpKitError : public std::runtime_error {
     /**
