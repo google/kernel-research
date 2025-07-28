@@ -1,19 +1,24 @@
+# ADJUST THIS PATH if KernelXDK is installed elsewhere (e.g., /opt/my_libs)
+KERNELXDK_INSTALL_PREFIX ?= /usr/local
+
+KERNELXDK_INCLUDE_DIR := $(KERNELXDK_INSTALL_PREFIX)/include/
+KERNELXDK_LIB_DIR := $(KERNELXDK_INSTALL_PREFIX)/lib
+
 TARGET ?= kernelctf lts-6.1.81
-SRCS := $(shell find ../.. -name "*.cpp" ! -path "../../samples/*" ! -path "../../test/*")
-OBJS := $(SRCS:.cpp=.o)
 CC = g++
-CFLAGS = -static -I../.. -g
+CFLAGS = -static -I../.. -I$(KERNELXDK_INCLUDE_DIR) -g
+LDFLAGS := -L$(KERNELXDK_LIB_DIR) -lkernelXDK
 
 build: exp
 
 clean:
-	rm exp
+	rm exp *.o
+
+exp: exploit.o $(OBJS) target_db.kpwn
+	$(CC) $(CFLAGS) exploit.o $(LDFLAGS) -o exp
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
-
-exp: exp.o $(OBJS) target_db.kpwn
-	$(CC) $(CFLAGS) $(OBJS) exp.o -o exp
 
 target_db.kpwn:
 	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn

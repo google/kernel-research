@@ -1,6 +1,4 @@
-#include "Kpwn.hpp"
-#include "./include/kpwn.h"
-
+#include <kernelXDK/kpwn/Kpwn.hpp>
 #include <kernelXDK/util/error.hpp>
 #include <kernelXDK/util/syscalls.hpp>
 #include <kernelXDK/util/Register.hpp>
