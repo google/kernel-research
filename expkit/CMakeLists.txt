@@ -98,5 +98,6 @@ install(FILES
 )
 
 # --- Add Subdirectories for Tests and Samples ---
+enable_testing()
 add_subdirectory(test)
 add_subdirectory(samples)

@@ -11,6 +11,10 @@ set(TEST_SRCS
     logging/TapLogger.cpp
 )
 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+set(KPWN_DOWNLOAD_URL "https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn")
+set(KPWN_OUTPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/artifacts/kernelctf.kpwn")
+
 add_executable(${PROJECT_NAME} ${TEST_SRCS}) # ${PROJECT_NAME} here is kernelXDKTests
 
 # Link the test executable to your main library
@@ -28,6 +32,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../pivot
     ${CMAKE_CURRENT_SOURCE_DIR}/../payloads
 )
+
+if(NOT EXISTS "${KPWN_OUTPUT_FILE}")
+    message(STATUS "Downloading ${KPWN_DOWNLOAD_URL} to ${KPWN_OUTPUT_FILE}...")
+    file(DOWNLOAD "${KPWN_DOWNLOAD_URL}" "${KPWN_OUTPUT_FILE}" TLS_VERIFY TRUE)
+endif()
 
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD

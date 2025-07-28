@@ -10,8 +10,8 @@ TEST_RUNNER_ARGS="${@:4}"
 
 RELEASE_DIR="$SCRIPT_DIR/../kernel-image-db/releases/$DISTRO/$RELEASE_NAME"
 
-make bin/test
-cp bin/test ../kernel-image-runner/rootfs/test_runner
+./build.sh
+cp build/test/kernelXDKTests ../kernel-image-runner/rootfs/test_runner
 
 mkdir -p ../kernel-image-runner/rootfs/test/
 cp -r test/artifacts ../kernel-image-runner/rootfs/test/
