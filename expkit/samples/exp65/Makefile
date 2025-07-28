@@ -1,19 +1,23 @@
+# ADJUST THIS PATH if KernelXDK is installed elsewhere (e.g., /opt/my_libs)
+KERNELXDK_INSTALL_PREFIX ?= /usr/local
+
+KERNELXDK_INCLUDE_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/include/
+KERNELXDK_LIB_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/lib
+
 TARGET ?= kernelctf lts-6.1.36
 #TARGET ?= kernelctf cos-101-17162.210.48
 #TARGET ?= kernelctf mitigation-6.1-v2
-SRCS := $(shell find ../.. -name "*.cpp" ! -path "../../samples/*" ! -path "../../test/*")
-OBJS := $(SRCS:.cpp=.o)
 CC = g++
-CFLAGS = -static -I/usr/include/libnl3 -I../.. -g
-LIBS = -pthread -lnl-cli-3 -lnl-route-3 -lnl-3 -ldl
+CFLAGS := -I. -I$(KERNELXDK_INCLUDE_DIR) -I/usr/include/libnl3 -static -g
+LDFLAGS := -L$(KERNELXDK_LIB_DIR) -lkernelXDK -pthread -lnl-cli-3 -lnl-route-3 -lnl-3 -ldl
 
 build: exp
 
+exp: exploit.o $(OBJS) target_db.kpwn
+	$(CC) $(CFLAGS) exploit.o $(LDFLAGS) -o exp
+
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
-
-exp: exploit.o $(OBJS) target_db.kpwn
-	$(CC) $(CFLAGS) $(OBJS) exploit.o $(LIBS) -fomit-frame-pointer -o exp
 
 prerequisites:
 	sudo apt-get install libnl-cli-3-dev libnl-route-3-dev

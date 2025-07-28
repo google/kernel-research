@@ -1,14 +1,15 @@
 # ADJUST THIS PATH if KernelXDK is installed elsewhere (e.g., /opt/my_libs)
 KERNELXDK_INSTALL_PREFIX ?= /usr/local
 
-KERNELXDK_INCLUDE_DIR := $(KERNELXDK_INSTALL_PREFIX)/include/
-KERNELXDK_LIB_DIR := $(KERNELXDK_INSTALL_PREFIX)/lib
+KERNELXDK_INCLUDE_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/include/
+KERNELXDK_LIB_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/lib
 
 TARGET ?= kernelctf lts-6.1.79
 CC = g++
 CFLAGS := -I. -I$(KERNELXDK_INCLUDE_DIR) -I/usr/include/libnl3 -static -g
 LDFLAGS := -L$(KERNELXDK_LIB_DIR) -lkernelXDK -lnl-nf-3 -lnl-route-3 -lnl-3
 
+build: exp
 
 exp: exploit.o $(OBJS) target_db.kpwn
 	$(CC) $(CFLAGS) exploit.o $(LDFLAGS) -o exp
