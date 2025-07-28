@@ -109,7 +109,7 @@ jobs:
         working-directory: ./expkit
         run: |
             for action in "test" "stability_test"; do
-                KERNELXDK_INSTALL_PREFIX=$PWD CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
+                KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
             done
 
       - name: Test expkit (local TODO tests only)
