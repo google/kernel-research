@@ -79,6 +79,11 @@ jobs:
         working-directory: ./kpwn_db
         run: ./test.sh
 
+      - name: Build expkit
+        if: ${{ success() || failure() }}
+        working-directory: ./expkit
+        run: ./build.sh
+
       - name: Test expkit (local tests only)
         if: ${{ success() || failure() }}
         working-directory: ./expkit
