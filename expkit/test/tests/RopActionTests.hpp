@@ -1,9 +1,9 @@
 #pragma once
 
 #include <sys/wait.h>
-#include "kpwn/Kpwn.hpp"
 #include "test/TestSuite.hpp"
 #include "test/TestUtils.hpp"
+#include <kernelXDK/kpwn/Kpwn.hpp>
 #include <kernelXDK/util/HexDump.hpp>
 #include <kernelXDK/util/error.hpp>
 #include <kernelXDK/payloads/RopChain.hpp>

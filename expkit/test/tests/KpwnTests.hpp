@@ -1,8 +1,8 @@
 #pragma once
 
 #include "test/TestUtils.hpp"
-#include "kpwn/Kpwn.hpp"
 #include "test/TestSuite.hpp"
+#include <kernelXDK/kpwn/Kpwn.hpp>
 #include <kernelXDK/util/error.hpp>
 #include <kernelXDK/payloads/Payload.hpp>
 

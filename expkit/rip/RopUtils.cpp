@@ -1,7 +1,7 @@
 #include <sys/mman.h>
 #include <cstring>
 #include <kernelXDK/payloads/RopChain.hpp>
-#include "rip/RopUtils.hpp"
+#include <kernelXDK/rip/RopUtils.hpp>
 
 void RopUtils::Ret2Usr(RopChain& rop, void* after_lpe_func, size_t stack_size,
                        size_t redzone_size) {

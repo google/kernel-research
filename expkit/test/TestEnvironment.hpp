@@ -2,7 +2,7 @@
 
 #include <optional>
 #include <kernelXDK/target/TargetDb.hpp>
-#include "kpwn/Kpwn.hpp"
+#include <kernelXDK/kpwn/Kpwn.hpp>
 
 class TestEnvironment {
     std::string target_db_path_;

@@ -104,12 +104,12 @@ jobs:
         working-directory: ./expkit
         run: make PREREQ=1 samples
 
-      - name: Test expkit samples
+      - name: Test expkit's stack_pivot_and_rop sample
         if: ${{ success() || failure() }}
         working-directory: ./expkit
         run: |
             for action in "test" "stability_test"; do
-                CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
+                KERNELXDK_INSTALL_PREFIX=$PWD CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
             done
 
       - name: Test expkit (local TODO tests only)
