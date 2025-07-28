@@ -102,7 +102,7 @@ jobs:
       - name: Build expkit samples
         if: ${{ success() || failure() }}
         working-directory: ./expkit
-        run: ./build_samples.sh
+        run: PREREQ=1 ./build_samples.sh
 
       - name: Test expkit's stack_pivot_and_rop sample
         if: ${{ success() || failure() }}
