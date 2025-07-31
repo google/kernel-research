@@ -31,7 +31,8 @@ jobs:
           TAG_NAME: ${{ github.ref_name }}
         run: |
             if [[ -z "$LIB_VER" ]]; then
-                echo "LIB_VER=$(echo "$TAG_NAME" | sed 's|^.*/||')" >> $GITHUB_ENV
+                LIB_VER=$(echo "$TAG_NAME" | sed 's|^.*/||')
+                echo "LIB_VER=$LIB_VER" >> $GITHUB_ENV
             fi
             echo "LIB_VER=$LIB_VER" >> "$GITHUB_OUTPUT"
 
@@ -41,15 +42,6 @@ jobs:
           docker run --detach --name build_env -v $(pwd):/workspace -w /workspace ubuntu:20.04 /bin/bash -c "sleep infinity"
           docker exec build_env bash -c "apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq --no-install-recommends build-essential cmake libkeyutils-dev"
           echo "DOCKER_CMD=docker exec --user "$(id -u):$(id -g)" build_env bash -c" >> $GITHUB_ENV
-
-      - name: Print out environment
-        run: |
-          echo "on host:"
-          pwd; find .
-          echo "in Docker:"
-          ${{ env.DOCKER_CMD }} "pwd; find ."
-          echo "cmake version:"
-          ${{ env.DOCKER_CMD }} "cmake --version"
 
       - name: Configure CMake
         run: ${{ env.DOCKER_CMD }} "cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
