@@ -9,11 +9,13 @@ on:
         description: 'Version number (e.g. "v1.0.0")'
         type: string
         required: true
+permissions: {}
 env:
   LIB_VER: ${{ inputs.version }}
 jobs:
-  build_and_release:
+  build:
     runs-on: ubuntu-latest
+    permissions: {}
     defaults:
       run:
         working-directory: ./expkit
@@ -63,10 +65,27 @@ jobs:
 
           tar -czvf "libxdk-$LIB_VER.tar.gz" "$PACKAGE_DIR/"
 
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: "libxdk-${{ env.LIB_VER }}.tar.gz"
+          path: ./expkit/libxdk-${{ env.LIB_VER }}.tar.gz
+
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: build
+    steps:
+      - name: Download release package
+        uses: actions/download-artifact@v4
+        with:
+          name: "libxdk-${{ env.LIB_VER }}.tar.gz"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: "expkit/libxdk-${{ env.LIB_VER }}.tar.gz"
+          files: "libxdk-${{ env.LIB_VER }}.tar.gz"
           name: "Release ${{ env.LIB_VER }}" # e.g. "Release v1.0.0"
           tag_name: "libxdk/${{ env.LIB_VER }}" # Associate with the pushed tag
           draft: true
