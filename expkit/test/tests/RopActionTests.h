@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unistd.h>
 #include <sys/wait.h>
 #include "test/TestSuite.h"
 #include "test/TestUtils.h"
