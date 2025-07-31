@@ -4,6 +4,8 @@ tap_results.txt
 output.txt
 actual_results/*
 samples/**/exp
+samples/**/exploit
 samples/**/*.kpwn
 test_results/
 build/
+*.o
