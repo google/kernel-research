@@ -3,50 +3,66 @@ on:
   push:
     tags:
       - 'libxdk/v*.*.*' # Trigger on tags like libxdk/v1.0.0, libxdk/v1.2.3, libxdk/v1.0.0-beta, etc but not for xdk_dev/v1.0.0
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. "v1.0.0")'
+        type: string
+        required: true
+env:
+  LIB_VER: ${{ inputs.version }}
 jobs:
   build_and_release:
-    runs-on: ubuntu-18.04 # For older ABI compatibility
+    runs-on: ubuntu-latest
     steps:
+      - name: Fix input variables
+        id: vars
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+            if [[ -z "$LIB_VER" ]]; then
+                echo "LIB_VER=$(echo "$TAG_NAME" | sed 's|^.*/||')" >> $GITHUB_ENV
+            fi
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install C++ compiler (GCC 11 for compatibility)
+      # Mount PWD as /workspace (writable) and build in the /workspace/build directory.
+      - name: Set up C++ build environment (to use older GCC/G++ 9.4.0 via Docker)
         run: |
-          sudo apt-get update
-          sudo apt-get install -yq --no-install-recommends g++-11 cmake
-          # Set default compiler to GCC 11 for this job
-          echo "CC=/usr/bin/gcc-11" >> $GITHUB_ENV
-          echo "CXX=/usr/bin/g++-11" >> $GITHUB_ENV
+          docker run --detach --name build_env -v $(pwd):/workspace -w /workspace ubuntu:20.04 /bin/bash -c "sleep infinity"
+          docker exec build_env bash -c "apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq --no-install-recommends build-essential cmake libkeyutils-dev"
+          echo "DOCKER_CMD=docker exec build_env --user "$(id -u):$(id -g)" bash -c" >> $GITHUB_ENV
 
-      - name: Configure CMake for static build
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF
+      - name: Configure CMake
+        run: ${{ env.DOCKER_CMD }} "cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
 
-      - name: Build the libxdk library
-        run: cmake --build build -j$(nproc)
+      - name: Build Static Library (.a)
+        run: ${{ env.DOCKER_CMD }} "cmake --build build -j$(nproc)"
 
       - name: Package artifacts
         run: |
-          PACKAGE_DIR="libxdk-${{ github.ref_name }}"
+          PACKAGE_DIR="libxdk-$LIB_VER"
           mkdir -p "$PACKAGE_DIR/lib"
           mkdir -p "$PACKAGE_DIR/include/xdk"
 
           cp build/libkernelXDK.a "$PACKAGE_DIR/lib/libxdk.a"
           cp -R include/kernelXDK/. "$PACKAGE_DIR/include/xdk/"
 
-          tar -czvf "libxdk-${{ github.ref_name }}.tar.gz" "$PACKAGE_DIR/"
+          tar -czvf "libxdk-$LIB_VER.tar.gz" "$PACKAGE_DIR/"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: "libxdk-${{ github.ref_name }}.tar.gz"
-          name: Release ${{ github.ref_name }} # e.g. "Release v1.0.0"
-          tag_name: ${{ github.ref_name }} # Associate with the pushed tag
+          files: "libxdk-${{ env.LIB_VER }}.tar.gz"
+          name: Release ${{ env.LIB_VER }} # e.g. "Release v1.0.0"
+          tag_name: ${{ env.LIB_VER }} # Associate with the pushed tag
           draft: true
           prerelease: true
           body: |
-            Automated build for libxdk version ${{ github.ref_name }}
+            Automated build for libxdk version ${{ env.LIB_VER }}
 
-            This release provides the `libxdk.a` static library and public headers for Linux, built with GCC 11 on Ubuntu 18.04.
+            This release provides the `libxdk.a` static library and public headers for Linux, built with GCC 9.4.0 on Ubuntu 20.04.
 
             **Contents:**
             - `lib/libxdk.a`: The static library.
