@@ -1,6 +1,6 @@
-#include <kernelXDK/payloads/Payload.hpp>
-#include <kernelXDK/util/error.hpp>
-#include "util/math_utils.hpp"
+#include <kernelXDK/payloads/Payload.h>
+#include <kernelXDK/util/error.h>
+#include "util/math_utils.h"
 #include <cstring>
 #include <stdexcept>
 

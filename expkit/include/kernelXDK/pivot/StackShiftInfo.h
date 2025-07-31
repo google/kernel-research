@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <vector>
-#include <kernelXDK/pivot/StackPivot.hpp>
-#include <kernelXDK/payloads/Payload.hpp>
+#include <kernelXDK/pivot/StackPivot.h>
+#include <kernelXDK/payloads/Payload.h>
 
 /**
  * @brief Represents information about a single stack shifting gadget within a chain.

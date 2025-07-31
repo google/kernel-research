@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <kernelXDK/pivot/Pivots.hpp>
+#include <kernelXDK/pivot/Pivots.h>
 
 enum struct RopActionId: uint32_t {
     MSLEEP = 0x01,

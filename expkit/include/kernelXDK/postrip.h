@@ -1,4 +1,4 @@
-#include <kernelXDK/payloads/PayloadBuilder.hpp>
-#include <kernelXDK/pivot/StackPivot.hpp>
-#include <kernelXDK/payloads/RopChain.hpp>
-#include <kernelXDK/pivot/PivotFinder.hpp>
+#include <kernelXDK/payloads/PayloadBuilder.h>
+#include <kernelXDK/pivot/StackPivot.h>
+#include <kernelXDK/payloads/RopChain.h>
+#include <kernelXDK/pivot/PivotFinder.h>

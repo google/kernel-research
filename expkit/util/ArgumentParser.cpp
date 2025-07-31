@@ -2,8 +2,8 @@
 #include <vector>
 #include <map>
 #include <optional>
-#include "util/ArgumentParser.hpp"
-#include <kernelXDK/util/str.hpp>
+#include "util/ArgumentParser.h"
+#include <kernelXDK/util/str.h>
 
 using namespace std;
 

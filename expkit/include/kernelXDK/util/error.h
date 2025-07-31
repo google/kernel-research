@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <cstdarg>
 
-#include <kernelXDK/util/str.hpp>
+#include <kernelXDK/util/str.h>
 
 struct ExpKitError : public std::runtime_error {
     /**

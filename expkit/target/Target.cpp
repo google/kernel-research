@@ -1,9 +1,9 @@
-#include <kernelXDK/target/Target.hpp>
+#include <kernelXDK/target/Target.h>
 #include <cstdint>
 #include <map>
 #include <string>
 #include <cstring>
-#include <kernelXDK/util/error.hpp>
+#include <kernelXDK/util/error.h>
 
 std::vector<RopItem> Target::GetItemsForAction(RopActionId id) {
   if (rop_actions.find(id) == rop_actions.end()) {

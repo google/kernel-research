@@ -1,11 +1,11 @@
 #pragma once
 
 #include <cstdio>
-#include <kernelXDK/kpwn/Kpwn.hpp>
-#include "target/KpwnParser.hpp"
-#include "test/TestSuite.hpp"
-#include "test/TestUtils.hpp"
-#include "util/file.hpp"
+#include <kernelXDK/kpwn/Kpwn.h>
+#include "target/KpwnParser.h"
+#include "test/TestSuite.h"
+#include "test/TestUtils.h"
+#include "util/file.h"
 
 class SymbolsTest: public TestSuite {
 public:

@@ -2,8 +2,8 @@
 
 #include <optional>
 #include <string>
-#include <kernelXDK/pivot/Pivots.hpp>
-#include <kernelXDK/payloads/Payload.hpp>
+#include <kernelXDK/pivot/Pivots.h>
+#include <kernelXDK/payloads/Payload.h>
 
 /**
  * @brief Represents a potential stack pivot gadget or sequence of gadgets.

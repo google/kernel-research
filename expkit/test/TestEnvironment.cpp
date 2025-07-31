@@ -1,7 +1,7 @@
-#include <kernelXDK/kpwn/Kpwn.hpp>
-#include <kernelXDK/target/TargetDb.hpp>
-#include <kernelXDK/util/error.hpp>
-#include "test/TestEnvironment.hpp"
+#include <kernelXDK/kpwn/Kpwn.h>
+#include <kernelXDK/target/TargetDb.h>
+#include <kernelXDK/util/error.h>
+#include "test/TestEnvironment.h"
 
 void TestEnvironment::SetTargetDbPath(const std::string& target_db_path) {
   target_db_path_ = target_db_path;

@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "test/TestSuite.hpp"
-#include "test/logging/TestLogger.hpp"
+#include "test/TestSuite.h"
+#include "test/logging/TestLogger.h"
 
 using namespace std;
 

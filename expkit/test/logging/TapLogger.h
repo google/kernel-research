@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include "test/logging/TestLogger.hpp"
+#include "test/logging/TestLogger.h"
 
 using namespace std;
 

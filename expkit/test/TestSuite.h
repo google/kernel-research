@@ -3,8 +3,8 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include "test/TestEnvironment.hpp"
-#include "util/log.hpp"
+#include "test/TestEnvironment.h"
+#include "util/log.h"
 
 #define TEST_METHOD(name, desc) \
     Test _test_ ## name = RegisterTest(Test(#name, desc, [this]() { name(); })); \

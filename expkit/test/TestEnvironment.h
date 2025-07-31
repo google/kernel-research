@@ -1,8 +1,8 @@
 #pragma once
 
 #include <optional>
-#include <kernelXDK/target/TargetDb.hpp>
-#include <kernelXDK/kpwn/Kpwn.hpp>
+#include <kernelXDK/target/TargetDb.h>
+#include <kernelXDK/kpwn/Kpwn.h>
 
 class TestEnvironment {
     std::string target_db_path_;

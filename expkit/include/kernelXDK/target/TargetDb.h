@@ -4,7 +4,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
-#include <kernelXDK/target/Target.hpp>
+#include <kernelXDK/target/Target.h>
 
 class KpwnParser;
 

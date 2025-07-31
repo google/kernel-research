@@ -4,10 +4,10 @@
 #include <optional>
 #include <vector>
 #include <string>
-#include "test/TestSuite.hpp"
-#include "test/TestEnvironment.hpp"
-#include "test/logging/TestLogger.hpp"
-#include "test/logging/PrintfLogger.hpp"
+#include "test/TestSuite.h"
+#include "test/TestEnvironment.h"
+#include "test/logging/TestLogger.h"
+#include "test/logging/PrintfLogger.h"
 
 using namespace std;
 

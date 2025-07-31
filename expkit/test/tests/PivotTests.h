@@ -1,15 +1,15 @@
 #pragma once
 
 #include <cstdio>
-#include <kernelXDK/pivot/PivotFinder.hpp>
-#include "target/KpwnParser.hpp"
-#include <kernelXDK/target/Target.hpp>
-#include "test/TestSuite.hpp"
-#include "test/TestUtils.hpp"
-#include <kernelXDK/util/HexDump.hpp>
-#include <kernelXDK/payloads/Payload.hpp>
-#include <kernelXDK/payloads/RopChain.hpp>
-#include "util/stdutils.hpp"
+#include <kernelXDK/pivot/PivotFinder.h>
+#include "target/KpwnParser.h"
+#include <kernelXDK/target/Target.h>
+#include "test/TestSuite.h"
+#include "test/TestUtils.h"
+#include <kernelXDK/util/HexDump.h>
+#include <kernelXDK/payloads/Payload.h>
+#include <kernelXDK/payloads/RopChain.h>
+#include "util/stdutils.h"
 
 class PivotTests: public TestSuite {
     KpwnParser parser;

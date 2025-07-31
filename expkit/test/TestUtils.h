@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstring>
-#include  <kernelXDK/util/error.hpp>
+#include  <kernelXDK/util/error.h>
 
 #define ASSERT_EQ(expected, actual) TestUtils::eq(expected, actual, #actual)
 #define ASSERT_MINMAX(min, max, actual) TestUtils::minmax(min, max, actual, #actual)

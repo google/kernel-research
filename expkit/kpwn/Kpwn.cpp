@@ -1,7 +1,7 @@
-#include <kernelXDK/kpwn/Kpwn.hpp>
-#include <kernelXDK/util/error.hpp>
-#include <kernelXDK/util/syscalls.hpp>
-#include <kernelXDK/util/Register.hpp>
+#include <kernelXDK/kpwn/Kpwn.h>
+#include <kernelXDK/util/error.h>
+#include <kernelXDK/util/syscalls.h>
+#include <kernelXDK/util/Register.h>
 
 #include <cstdint>
 #include <cstring>

@@ -8,8 +8,8 @@
 #include <optional>
 #include <string>
 #include <set>
-#include <kernelXDK/pivot/Pivots.hpp>
-#include <kernelXDK/payloads/Payload.hpp>
+#include <kernelXDK/pivot/Pivots.h>
+#include <kernelXDK/payloads/Payload.h>
 
 // Forward declarations if `Pivots.h` doesn't include full definitions,
 // or if these are defined in separate headers.

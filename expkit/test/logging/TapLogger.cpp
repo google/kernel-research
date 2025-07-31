@@ -1,8 +1,8 @@
-#include "test/logging/TestLogger.hpp"
-#include "test/logging/TapLogger.hpp"
-#include "test/TestSuite.hpp"
+#include "test/logging/TestLogger.h"
+#include "test/logging/TapLogger.h"
+#include "test/TestSuite.h"
 
-#include <kernelXDK/util/str.hpp>
+#include <kernelXDK/util/str.h>
 
 #include <iostream>
 #include <memory>

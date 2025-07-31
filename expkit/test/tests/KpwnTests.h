@@ -1,10 +1,10 @@
 #pragma once
 
-#include "test/TestUtils.hpp"
-#include "test/TestSuite.hpp"
-#include <kernelXDK/kpwn/Kpwn.hpp>
-#include <kernelXDK/util/error.hpp>
-#include <kernelXDK/payloads/Payload.hpp>
+#include "test/TestUtils.h"
+#include "test/TestSuite.h"
+#include <kernelXDK/kpwn/Kpwn.h>
+#include <kernelXDK/util/error.h>
+#include <kernelXDK/payloads/Payload.h>
 
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;

@@ -1,10 +1,10 @@
-#include "target/BinaryReader.hpp"
+#include "target/BinaryReader.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#include <kernelXDK/util/error.hpp>
-#include "util/file.hpp"
-#include "util/log.hpp"
+#include <kernelXDK/util/error.h>
+#include "util/file.h"
+#include "util/log.h"
 
 void BinaryReader::SetLog(ILog* log) { log_ = log; }
 
