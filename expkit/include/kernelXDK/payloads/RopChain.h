@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <kernelXDK/target/Target.hpp>
+#include <kernelXDK/target/Target.h>
 
 // Forward declarations for types used in the header if their full definitions
 // are not strictly needed (e.g., if only pointers/references are used),

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <sys/wait.h>
-#include "test/TestSuite.hpp"
-#include "test/TestUtils.hpp"
-#include <kernelXDK/kpwn/Kpwn.hpp>
-#include <kernelXDK/util/HexDump.hpp>
-#include <kernelXDK/util/error.hpp>
-#include <kernelXDK/payloads/RopChain.hpp>
-#include <kernelXDK/payloads/Payload.hpp>
+#include "test/TestSuite.h"
+#include "test/TestUtils.h"
+#include <kernelXDK/kpwn/Kpwn.h>
+#include <kernelXDK/util/HexDump.h>
+#include <kernelXDK/util/error.h>
+#include <kernelXDK/payloads/RopChain.h>
+#include <kernelXDK/payloads/Payload.h>
 
 class RopActionTests: public TestSuite {
     Kpwn* kpwn_;

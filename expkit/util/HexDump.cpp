@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
-#include <kernelXDK/util/HexDump.hpp>
+#include <kernelXDK/util/HexDump.h>
 
 void HexDump::Dump(char* dst, const uint8_t* buf, int len) {
   char text[17] = {};

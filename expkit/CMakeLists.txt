@@ -46,7 +46,7 @@ target_include_directories(kernelXDK
 
     # PRIVATE: For building the library itself.
     # This allows your internal .cpp files to find private headers
-    # like "util/str.hpp" that are in the source tree.
+    # like "util/str.h" that are in the source tree.
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
@@ -58,7 +58,7 @@ target_include_directories(kernelXDK
 # This preserves the entire subdirectory structure (e.g., kernelXDK/target, kernelXDK/util).
 install(DIRECTORY include/kernelXDK
     DESTINATION include
-    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    FILES_MATCHING PATTERN "*.h"
 )
 
 # --- Installation for the Library Itself (static .lib/.a file) ---

@@ -1,13 +1,13 @@
 #include <limits>
 #include <optional>
 #include <queue>
-#include <kernelXDK/pivot/Pivots.hpp>
-#include <kernelXDK/pivot/StackPivot.hpp>
-#include <kernelXDK/pivot/PivotFinder.hpp>
-#include <kernelXDK/payloads/Payload.hpp>
-#include <kernelXDK/payloads/RopChain.hpp>
-#include <kernelXDK/util/error.hpp>
-#include "util/stdutils.hpp"
+#include <kernelXDK/pivot/Pivots.h>
+#include <kernelXDK/pivot/StackPivot.h>
+#include <kernelXDK/pivot/PivotFinder.h>
+#include <kernelXDK/payloads/Payload.h>
+#include <kernelXDK/payloads/RopChain.h>
+#include <kernelXDK/util/error.h>
+#include "util/stdutils.h"
 
 void RopPivotInfo::PrintDebugInfo() const {
   printf("[+] Selected stack pivot: %s\n", pivot.GetDescription().c_str());

@@ -2,14 +2,14 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "test/TestRunner.hpp"
-#include "test/logging/TapLogger.hpp"
-#include "test/tests/TargetDbTests.hpp"
-#include "test/tests/KpwnTests.hpp"
-#include "test/tests/RopActionTests.hpp"
-#include "test/tests/SymbolsTests.hpp"
-#include "test/tests/PivotTests.hpp"
-#include "util/ArgumentParser.hpp"
+#include "test/TestRunner.h"
+#include "test/logging/TapLogger.h"
+#include "test/tests/TargetDbTests.h"
+#include "test/tests/KpwnTests.h"
+#include "test/tests/RopActionTests.h"
+#include "test/tests/SymbolsTests.h"
+#include "test/tests/PivotTests.h"
+#include "util/ArgumentParser.h"
 
 class Main {
     ArgumentParser args_;

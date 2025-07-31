@@ -1,6 +1,6 @@
-#include "test/logging/PrintfLogger.hpp"
+#include "test/logging/PrintfLogger.h"
 
-#include <kernelXDK/util/str.hpp>
+#include <kernelXDK/util/str.h>
 
 #include <memory>
 #include <vector>

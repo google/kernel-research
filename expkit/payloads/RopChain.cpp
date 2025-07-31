@@ -1,5 +1,5 @@
-#include <kernelXDK/payloads/RopChain.hpp>
-#include <kernelXDK/util/error.hpp>
+#include <kernelXDK/payloads/RopChain.h>
+#include <kernelXDK/util/error.h>
 
 #include <cstring>
 

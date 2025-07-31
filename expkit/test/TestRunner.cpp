@@ -1,7 +1,7 @@
-#include "test/logging/TestLogger.hpp"
-#include "test/TestRunner.hpp"
+#include "test/logging/TestLogger.h"
+#include "test/TestRunner.h"
 
-#include <kernelXDK/util/str.hpp>
+#include <kernelXDK/util/str.h>
 
 #include <memory>
 #include <optional>

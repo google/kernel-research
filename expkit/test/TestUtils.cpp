@@ -1,5 +1,5 @@
 #include <cstring>
-#include "test/TestUtils.hpp"
+#include "test/TestUtils.h"
 
 void TestUtils::eq(const char* expected, const char* actual, const char* name) {
   if (strcmp(expected, actual))

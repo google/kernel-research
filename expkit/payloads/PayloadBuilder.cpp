@@ -3,9 +3,9 @@
 #include <sstream>
 
 
-#include <kernelXDK/pivot/PivotFinder.hpp>
-#include <kernelXDK/payloads/PayloadBuilder.hpp>
-#include <kernelXDK/util/error.hpp>
+#include <kernelXDK/pivot/PivotFinder.h>
+#include <kernelXDK/payloads/PayloadBuilder.h>
+#include <kernelXDK/util/error.h>
 
 
 std::string intToHex(uint64_t value) {

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <kernelXDK/util/Register.hpp>
+#include <kernelXDK/util/Register.h>
 
 enum class IndirectType { JMP, CALL };
 

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "./include/kpwn.h"
-#include <kernelXDK/util/Register.hpp>
+#include <kernelXDK/util/Register.h>
 
 #define DEVICE_PATH "/dev/kpwn"
 

@@ -3,11 +3,11 @@
 #include <set>
 #include <limits>
 #include <optional>
-#include <kernelXDK/pivot/Pivots.hpp>
-#include <kernelXDK/pivot/StackPivot.hpp>
+#include <kernelXDK/pivot/Pivots.h>
+#include <kernelXDK/pivot/StackPivot.h>
 #include <kernelXDK/pivot/StackShiftInfo.h>
-#include <kernelXDK/payloads/Payload.hpp>
-#include <kernelXDK/payloads/RopChain.hpp>
+#include <kernelXDK/payloads/Payload.h>
+#include <kernelXDK/payloads/RopChain.h>
 
 
 /**

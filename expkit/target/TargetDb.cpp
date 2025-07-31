@@ -1,10 +1,10 @@
 #include <memory>
 #include <optional>
-#include <kernelXDK/target/TargetDb.hpp>
-#include <kernelXDK/util/error.hpp>
-#include "target/KpwnParser.hpp"
-#include "util/file.hpp"
-#include "util/stdutils.hpp"
+#include <kernelXDK/target/TargetDb.h>
+#include <kernelXDK/util/error.h>
+#include "target/KpwnParser.h"
+#include "util/file.h"
+#include "util/stdutils.h"
 
 Target TargetDb::AutoDetectTarget() {
   auto version_bytes = read_file("/proc/version");

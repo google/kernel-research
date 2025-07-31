@@ -1,13 +1,13 @@
-#include "target/KpwnParser.hpp"
+#include "target/KpwnParser.h"
 #include <cstdint>
 #include <cstring>
 #include <map>
 #include <optional>
 #include <vector>
-#include <kernelXDK/target/Target.hpp>
-#include <kernelXDK/pivot/Pivots.hpp>
-#include <kernelXDK/util/error.hpp>
-#include "util/file.hpp"
+#include <kernelXDK/target/Target.h>
+#include <kernelXDK/pivot/Pivots.h>
+#include <kernelXDK/util/error.h>
+#include "util/file.h"
 
 std::vector<Target> KpwnParser::GetAllTargets() {
   return ParseTargets(std::nullopt, std::nullopt, std::nullopt);
