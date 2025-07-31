@@ -83,7 +83,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: "libxdk-${{ env.LIB_VER }}.tar.gz"
-          name: "Release ${{ env.LIB_VER }}" # e.g. "Release v1.0.0"
+          name: "libxdk ${{ env.LIB_VER }}" # e.g. "Release v1.0.0"
           tag_name: "libxdk/${{ env.LIB_VER }}" # Associate with the pushed tag
           body: |
             Automated build for libxdk version ${{ env.LIB_VER }}
