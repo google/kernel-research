@@ -32,7 +32,7 @@ jobs:
         run: |
           docker run --detach --name build_env -v $(pwd):/workspace -w /workspace ubuntu:20.04 /bin/bash -c "sleep infinity"
           docker exec build_env bash -c "apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq --no-install-recommends build-essential cmake libkeyutils-dev"
-          echo "DOCKER_CMD=docker exec build_env --user "$(id -u):$(id -g)" bash -c" >> $GITHUB_ENV
+          echo "DOCKER_CMD=docker exec --user "$(id -u):$(id -g)" build_env bash -c" >> $GITHUB_ENV
 
       - name: Configure CMake
         run: ${{ env.DOCKER_CMD }} "cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
