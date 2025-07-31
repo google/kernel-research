@@ -14,7 +14,13 @@ env:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./expkit
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Fix input variables
         id: vars
         env:
@@ -24,15 +30,21 @@ jobs:
                 echo "LIB_VER=$(echo "$TAG_NAME" | sed 's|^.*/||')" >> $GITHUB_ENV
             fi
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       # Mount PWD as /workspace (writable) and build in the /workspace/build directory.
       - name: Set up C++ build environment (to use older GCC/G++ 9.4.0 via Docker)
         run: |
           docker run --detach --name build_env -v $(pwd):/workspace -w /workspace ubuntu:20.04 /bin/bash -c "sleep infinity"
           docker exec build_env bash -c "apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -yq --no-install-recommends build-essential cmake libkeyutils-dev"
           echo "DOCKER_CMD=docker exec --user "$(id -u):$(id -g)" build_env bash -c" >> $GITHUB_ENV
+
+      - name: Print out environment
+        run: |
+          echo "on host:"
+          pwd; find .
+          echo "in Docker:"
+          ${{ env.DOCKER_CMD }} "pwd; find ."
+          echo "cmake version:"
+          ${{ env.DOCKER_CMD }} "cmake --version"
 
       - name: Configure CMake
         run: ${{ env.DOCKER_CMD }} "cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
@@ -54,9 +66,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: "libxdk-${{ env.LIB_VER }}.tar.gz"
-          name: Release ${{ env.LIB_VER }} # e.g. "Release v1.0.0"
-          tag_name: ${{ env.LIB_VER }} # Associate with the pushed tag
+          files: "expkit/libxdk-${{ env.LIB_VER }}.tar.gz"
+          name: "Release ${{ env.LIB_VER }}" # e.g. "Release v1.0.0"
+          tag_name: "libxdk/${{ env.LIB_VER }}" # Associate with the pushed tag
           draft: true
           prerelease: true
           body: |
