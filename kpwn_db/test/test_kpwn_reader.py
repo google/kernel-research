@@ -11,7 +11,7 @@ class KpwnReaderTests(unittest.TestCase):
   """Tests for the KpwnReader class."""
 
   def run_db_test(self, fn):
-    db = KpwnReader().read_from_file(f"{ARTIFACTS_DIR}/{fn}.kpwn")
+    db = KpwnReader().read_from_file(f"{ARTIFACTS_DIR}/{fn}.kxdb")
     db_json = to_json(db, indent=4)
     with expect_file(f"{fn}.json") as f:
       f.write(db_json.encode("utf-8"))

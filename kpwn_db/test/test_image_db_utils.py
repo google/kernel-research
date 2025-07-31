@@ -21,10 +21,10 @@ class ImageDbUtilsTests(unittest.TestCase):
       KpwnWriter(db).write_to_file(f.name)
 
   def test_generate_lts_6_1_36_db(self):
-    self.expect_db(MOCK_DB_DIR, "kernelctf/lts-6.1.36", "lts_6_1_36_db.kpwn")
+    self.expect_db(MOCK_DB_DIR, "kernelctf/lts-6.1.36", "lts_6_1_36_db.kxdb")
 
   def test_generate_lts_6_1_38_db(self):
-    self.expect_db(MOCK_DB_DIR, "kernelctf/lts-6.1.38", "lts_6_1_38_db.kpwn")
+    self.expect_db(MOCK_DB_DIR, "kernelctf/lts-6.1.38", "lts_6_1_38_db.kxdb")
 
   def test_missing_files(self):
     targets = collect_image_db_targets(RELEASES_DIR, "bad/missing_files")

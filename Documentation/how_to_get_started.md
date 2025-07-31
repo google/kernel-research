@@ -24,7 +24,7 @@
 2. Include the **target_db** in the exploit. `INCBIN` creates a read-only section in the binary with the file contents.
 
     ```c++
-    INCBIN(target_db, "target_db.kpwn");
+    INCBIN(target_db, "target_db.kxdb");
     ```
 
 3. Initialize **TargetDb**:

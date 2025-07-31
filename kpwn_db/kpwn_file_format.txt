@@ -1,4 +1,4 @@
-# .kpwn file format structure
+# .kxdb file format structure
 
 magic = KPWN (u4)
 version_major = 0x1 (u2) - file with newer version_major

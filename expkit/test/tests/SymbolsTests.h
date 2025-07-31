@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdio>
-#include <kernelXDK/kpwn/Kpwn.h>
+#include <kernelXDK/xdk_device/xdk_device.h>
 #include "target/KpwnParser.h"
 #include "test/TestSuite.h"
 #include "test/TestUtils.h"

@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include "test/TestSuite.h"
 #include "test/TestUtils.h"
-#include <kernelXDK/kpwn/Kpwn.h>
+#include <kernelXDK/xdk_device/xdk_device.h>
 #include <kernelXDK/util/HexDump.h>
 #include <kernelXDK/util/error.h>
 #include <kernelXDK/payloads/RopChain.h>

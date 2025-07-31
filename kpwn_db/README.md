@@ -1,6 +1,6 @@
 A database builder which contains exploitation information (symbol addresses, ROP gadgets, stack pivots, structure field offsets) for multiple kernel targets and consumed by the exploit kit to customize exploits for targets.
 
-The recommended extension for the target db file: `.kpwn`.
+The recommended extension for the target db file: `.kxdb`.
 
 # Prerequisites
 
@@ -34,21 +34,21 @@ If you specify `input-file` then the configuration will be reused from that file
 
 ## Example usages
 
-Processes all downloaded releases from the `../kernel-image-db` folder and extends the `target_db.kpwn` database with these new releases:
+Processes all downloaded releases from the `../kernel-image-db` folder and extends the `target_db.kxdb` database with these new releases:
 
-    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db -i target_db.kpwn -o  target_db.kpwn
+    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db -i target_db.kxdb -o  target_db.kxdb
 
-Processes only the `kernelctf/lts-6.1.81` release from the `../kernel-image-db/releases` folder and save the resulting database to the `../expkit/test/artifacts/target_db_lts-6.1.81.kpwn` file:
+Processes only the `kernelctf/lts-6.1.81` release from the `../kernel-image-db/releases` folder and save the resulting database to the `../expkit/test/artifacts/target_db_lts-6.1.81.kxdb` file:
 
-    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output-path ../expkit/test/artifacts/target_db_lts-6.1.81.kpwn
+    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output-path ../expkit/test/artifacts/target_db_lts-6.1.81.kxdb
 
 
-Processes all downloaded releases from `../kernel-image-db` and save the resulting database to `target_db.kpwn`:
+Processes all downloaded releases from `../kernel-image-db` and save the resulting database to `target_db.kxdb`:
 
-    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db -o target_db.kpwn
+    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db -o target_db.kxdb
 
-Converts the database from a binary format (`.kpwn`) to JSON:
+Converts the database from a binary format (`.kxdb`) to JSON:
 
-    ./kpwn_db.py -i target_db.kpwn -o target_db.json
+    ./kpwn_db.py -i target_db.kxdb -o target_db.json
 
 

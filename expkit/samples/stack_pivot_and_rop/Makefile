@@ -14,14 +14,14 @@ build: exp
 clean:
 	rm exp *.o
 
-exp: exploit.o $(OBJS) target_db.kpwn
+exp: exploit.o $(OBJS) target_db.kxdb
 	$(CC) $(CFLAGS) exploit.o $(LDFLAGS) -o exp
 
 %.o: %.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
-target_db.kpwn:
-	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
+target_db.kxdb:
+	wget -O target_db.kxdb https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb
 
 run: build
 	cp exp* ../../../kernel-image-runner/rootfs/

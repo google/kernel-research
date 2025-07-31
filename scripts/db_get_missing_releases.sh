@@ -17,7 +17,7 @@ set -eo pipefail
 if [ "$1" == "--rebuild" ]; then
     echo -n > gcs_releases.txt
 else
-    gcloud storage ls gs://kernel-research/pwnkit/db/kernelctf/*.kpwn |sed -E "s/.*kernelctf\/(.*)\.kpwn/\\1/" > gcs_releases.txt
+    gcloud storage ls gs://kernel-research/pwnkit/db/kernelctf/*.kxdb |sed -E "s/.*kernelctf\/(.*)\.kxdb/\\1/" > gcs_releases.txt
 fi
 
 # gcloud storage ls gs://kernelctf-build/releases | sed "s/.*releases\/\(.*\)\//\1/" > build_releases.txt
