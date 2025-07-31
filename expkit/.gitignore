@@ -5,7 +5,7 @@ output.txt
 actual_results/*
 samples/**/exp
 samples/**/exploit
-samples/**/*.kpwn
+samples/**/*.kxdb
 test_results/
 build/
 *.o

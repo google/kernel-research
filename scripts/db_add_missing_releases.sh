@@ -36,8 +36,8 @@ while IFS= read -r RELEASE <&3; do
     "$IMAGE_DB_DIR/collect_runtime_data.sh" || continue
 
     echo "Adding $RELEASE to the database"
-    "$KPWN_DB_DIR/kpwn_db.py" -i db.kpwn -o db.kpwn --kernel-image-db-path "$IMAGE_DB_DIR"
+    "$KPWN_DB_DIR/kpwn_db.py" -i db.kxdb -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR"
 
     echo "Uploading new db"
-    gcloud storage cp -Z -a publicRead db.kpwn gs://kernel-research/pwnkit/db/kernelctf.kpwn
+    gcloud storage cp -Z -a publicRead db.kxdb gs://kernel-research/pwnkit/db/kernelctf.kxdb
 done 3< missing_releases.txt

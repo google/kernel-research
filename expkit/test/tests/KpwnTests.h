@@ -2,9 +2,9 @@
 
 #include "test/TestUtils.h"
 #include "test/TestSuite.h"
-#include <kernelXDK/kpwn/Kpwn.h>
 #include <kernelXDK/util/error.h>
 #include <kernelXDK/payloads/Payload.h>
+#include <kernelXDK/xdk_device/xdk_device.h>
 
 class KpwnTests: public TestSuite {
     Kpwn* kpwn_;

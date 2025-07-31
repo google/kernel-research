@@ -19,7 +19,7 @@ from converter.kpwn_file import read_kpwn_db, write_kpwn_db
 from converter.partial_sync import PartialSync
 
 def main():
-  parser = argparse.ArgumentParser(description=".kpwn database builder and converter")
+  parser = argparse.ArgumentParser(description=".kxdb database builder and converter")
   parser.add_argument("--kernel-image-db-path",
                       help="Path to the kernel-image-db tool to add targets from")
   parser.add_argument("--release-filter", default=None,

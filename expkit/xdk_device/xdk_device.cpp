@@ -1,4 +1,4 @@
-#include <kernelXDK/kpwn/Kpwn.h>
+#include <kernelXDK/xdk_device/xdk_device.h>
 #include <kernelXDK/util/error.h>
 #include <kernelXDK/util/syscalls.h>
 #include <kernelXDK/util/Register.h>

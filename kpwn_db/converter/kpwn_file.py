@@ -16,7 +16,7 @@ def dump_yaml(data, f):
 def read_kpwn_db(fn):
   _, ext = os.path.splitext(fn)
   match ext:
-    case ".kpwn":
+    case ".kxdb":
       return KpwnReader().read_from_file(fn)
     case ".json":
       with open(fn, "rt") as f:
@@ -27,12 +27,12 @@ def read_kpwn_db(fn):
         obj = yaml.safe_load(f)
         return TypeAdapter(Db).validate_python(obj)
     case _:
-      raise Exception(f"Unsupported file extension '{ext}'. Only .kpwn, .json and .yaml are supported.")
+      raise Exception(f"Unsupported file extension '{ext}'. Only .kxdb, .json and .yaml are supported.")
 
 def write_kpwn_db(fn, db, indent=None, minimal=False):
   _, ext = os.path.splitext(fn)
   match ext:
-    case ".kpwn":
+    case ".kxdb":
       KpwnWriter(db).write_to_file(fn, minimal)
     case ".json":
       with open(fn, "wt") as f:
@@ -42,4 +42,4 @@ def write_kpwn_db(fn, db, indent=None, minimal=False):
       with open(fn, "wt") as f:
         dump_yaml(data, f)
     case _:
-      raise Exception(f"Unsupported file extension '{ext}'. Only .kpwn, .json and .yaml are supported.")
+      raise Exception(f"Unsupported file extension '{ext}'. Only .kxdb, .json and .yaml are supported.")

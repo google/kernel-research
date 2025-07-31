@@ -19,7 +19,7 @@ public:
     PivotTests(): TestSuite("PivotStaticTests", "stack pivot static tests"), parser({}) { }
 
     void init() {
-        parser = KpwnParser::FromFile("test/artifacts/kernelctf.kpwn");
+        parser = KpwnParser::FromFile("test/artifacts/kernelctf.kxdb");
         lts6181 = parser.GetTarget("kernelctf", "lts-6.1.81", true).value();
     }
 

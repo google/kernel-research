@@ -11,7 +11,7 @@ LDFLAGS := -L$(KERNELXDK_LIB_DIR) -lkernelXDK -lnl-nf-3 -lnl-route-3 -lnl-3
 
 build: exp
 
-exp: exploit.o $(OBJS) target_db.kpwn
+exp: exploit.o $(OBJS) target_db.kxdb
 	$(CC) $(CFLAGS) exploit.o $(LDFLAGS) -o exp
 
 %.o: %.cpp
@@ -20,8 +20,8 @@ exp: exploit.o $(OBJS) target_db.kpwn
 prerequisites:
 	sudo apt-get install libnl-nf-3-dev libnl-route-3-dev
 
-target_db.kpwn:
-	wget -O target_db.kpwn https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn
+target_db.kxdb:
+	wget -O target_db.kxdb https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb
 
 run: exp
 	cp exp* ../../../kernel-image-runner/rootfs/
@@ -34,4 +34,4 @@ echo:
 	echo $(TARGET)
 
 clean:
-	rm -f exploit.o exp output.txt dmesg.txt target_db.kpwn
+	rm -f exploit.o exp output.txt dmesg.txt target_db.kxdb

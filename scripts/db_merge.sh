@@ -24,11 +24,11 @@ rm -rf db/*
 if [ "$1" == "--rebuild" ]; then
     echo -n > db_releases.txt
 else
-    gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kpwn db/_original.kpwn; echo
-    "$KPWN_DB_DIR/kpwn_db.py" -i db/_original.kpwn --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
+    gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kxdb db/_original.kxdb; echo
+    "$KPWN_DB_DIR/kpwn_db.py" -i db/_original.kxdb --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
 fi
 
-gcloud storage ls gs://kernel-research/pwnkit/db/kernelctf/*.kpwn > gcs_releases.txt
+gcloud storage ls gs://kernel-research/pwnkit/db/kernelctf/*.kxdb > gcs_releases.txt
 cat gcs_releases.txt | grep -v -f db_releases.txt > missing_db_releases.txt || true
 
 if [[ ! -s "missing_db_releases.txt" ]]; then echo "Nothing is missing from DB, exiting..."; exit 0; fi
@@ -39,8 +39,8 @@ echo
 
 cat missing_db_releases.txt | gsutil -m cp -I ./db
 
-"$KPWN_DB_DIR/kpwn_db.py" -i "db/*.kpwn" -o kernelctf.kpwn
-"$KPWN_DB_DIR/kpwn_db.py" -i kernelctf.kpwn -o kernelctf.json
+"$KPWN_DB_DIR/kpwn_db.py" -i "db/*.kxdb" -o kernelctf.kxdb
+"$KPWN_DB_DIR/kpwn_db.py" -i kernelctf.kxdb -o kernelctf.json
 
 echo "Uploading new db"
 for EXT in kpwn json; do

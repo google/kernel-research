@@ -20,7 +20,7 @@ endif()
 # --- Source File Collection for the Library ---
 # This remains the same, as your .cpp files are still in these directories.
 set(LIBRARY_SOURCE_ROOT_DIRS
-    kpwn
+    xdk_device
     rip
     target
     util

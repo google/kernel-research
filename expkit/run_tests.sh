@@ -32,7 +32,7 @@ rm test_results/round_* test_results/dmesg_* 2>/dev/null || true
 
 echo "Running tests..."
 for i in $(seq 1 $TIMES); do
-    $SCRIPT_DIR/../kernel-image-runner/run.sh "$DISTRO" "$RELEASE_NAME" --custom-modules=keep --only-command-output --no-rootfs-update --dmesg=test_results/dmesg_$i.txt -- /test_runner --target-db test/artifacts/kernelctf.kpwn $TEST_RUNNER_ARGS > test_results/round_$i.txt &
+    $SCRIPT_DIR/../kernel-image-runner/run.sh "$DISTRO" "$RELEASE_NAME" --custom-modules=keep --only-command-output --no-rootfs-update --dmesg=test_results/dmesg_$i.txt -- /test_runner --target-db test/artifacts/kernelctf.kxdb $TEST_RUNNER_ARGS > test_results/round_$i.txt &
 done
 
 wait

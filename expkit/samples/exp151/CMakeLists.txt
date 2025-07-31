@@ -28,10 +28,10 @@ target_include_directories(exp151 PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# --- 6. Handle sample-specific data files (target_db.kpwn) ---
-# Download target_db.kpwn directly to this sample's binary directory.
+# --- 6. Handle sample-specific data files (target_db.kxdb) ---
+# Download target_db.kxdb directly to this sample's binary directory.
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/target_db.kpwn
-    COMMAND wget -O ${CMAKE_CURRENT_BINARY_DIR}/target_db.kpwn "https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kpwn"
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/target_db.kxdb
+    COMMAND wget -O ${CMAKE_CURRENT_BINARY_DIR}/target_db.kxdb "https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb"
     VERBATIM
 )
