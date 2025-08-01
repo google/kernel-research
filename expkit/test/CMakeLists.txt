@@ -33,9 +33,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../payloads
 )
 
-if(NOT EXISTS "${KPWN_OUTPUT_FILE}")
-    message(STATUS "Downloading ${KPWN_DOWNLOAD_URL} to ${KPWN_OUTPUT_FILE}...")
-    file(DOWNLOAD "${KPWN_DOWNLOAD_URL}" "${KPWN_OUTPUT_FILE}" TLS_VERIFY TRUE)
+if(NOT EXISTS "${KXDB_OUTPUT_FILE}")
+    message(STATUS "Downloading ${KXDB_DOWNLOAD_URL} to ${KXDB_OUTPUT_FILE}...")
+    file(DOWNLOAD "${KXDB_DOWNLOAD_URL}" "${KXDB_OUTPUT_FILE}" TLS_VERIFY TRUE)
 endif()
 
 add_custom_command(
