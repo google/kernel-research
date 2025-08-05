@@ -36,7 +36,7 @@ struct CallLog {
     std::string GetSummary();
 };
 
-class Kpwn;
+class XdkDevice;
 
 /**
  * @brief Class representing a Kprobe in the kernel.
@@ -76,13 +76,13 @@ public:
      */
     ~Kprobe();
 
-    friend class Kpwn;
+    friend class XdkDevice;
 };
 
 /**
  * @brief Class representing the interface to the kpwn kernel module.
  */
-class Kpwn {
+class XdkDevice {
     /** @brief File descriptor for the kpwn kernel module. */
     int fd_;
 
@@ -92,7 +92,7 @@ class Kpwn {
     /**
      * @brief A set of pointers to the Kprobe objects that have been successfully installed
      * in the kernel. This is used to keep track of probes that need to be removed
-     * when the Kpwn object is closed or destroyed.
+     * when the XdkDevice object is closed or destroyed.
      */
     std::set<Kprobe*> installed_probes_;
 
@@ -123,10 +123,10 @@ class Kpwn {
     static bool IsAvailable();
 
     /**
-     * @brief Constructor for the Kpwn class.
+     * @brief Constructor for the XdkDevice class.
      * @throws ExpKitError if the kpwn device cannot be opened.
      */
-    Kpwn();
+    XdkDevice();
 
     /**
      * @brief Calls a kpwn command and checks the error code.
@@ -300,5 +300,5 @@ class Kpwn {
      */
     void Close();
 
-    ~Kpwn();
+    ~XdkDevice();
 };

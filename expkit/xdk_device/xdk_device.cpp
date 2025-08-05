@@ -96,7 +96,7 @@ Kprobe::~Kprobe() {
   if (args_.logs) munmap(args_.logs, args_.logs->struct_size);
 }
 
-rip_control_args Kpwn::ConvertRipArgs(
+rip_control_args XdkDevice::ConvertRipArgs(
     RipAction action, const std::map<Register, uint64_t>& regs) {
   rip_control_args args = {0};
   args.action = (uint64_t)action;
@@ -109,7 +109,7 @@ rip_control_args Kpwn::ConvertRipArgs(
   return args;
 }
 
-kpwn_error Kpwn::CallRaw(enum kpwn_cmd cmd, void* arg) const {
+kpwn_error XdkDevice::CallRaw(enum kpwn_cmd cmd, void* arg) const {
   kpwn_error error_code = (kpwn_error) - ::ioctl(fd_, cmd, arg);
   if (error_code == SUCCESS ||
       ERROR_GENERIC <= error_code && error_code <= ERROR_UNKNOWN_SYMBOL)
@@ -117,11 +117,11 @@ kpwn_error Kpwn::CallRaw(enum kpwn_cmd cmd, void* arg) const {
   throw ExpKitError("kpwn command %s failed with unknown error code 0x%x");
 }
 
-bool Kpwn::IsAvailable() { return access(DEVICE_PATH, F_OK) != -1; }
+bool XdkDevice::IsAvailable() { return access(DEVICE_PATH, F_OK) != -1; }
 
-Kpwn::Kpwn() { fd_ = Syscalls::open("/dev/kpwn", O_RDWR); }
+XdkDevice::XdkDevice() { fd_ = Syscalls::open("/dev/kpwn", O_RDWR); }
 
-kpwn_error Kpwn::Call(enum kpwn_cmd cmd, void* arg,
+kpwn_error XdkDevice::Call(enum kpwn_cmd cmd, void* arg,
                       kpwn_error expected_error) const {
   auto error = CallRaw(cmd, arg);
   if (error != SUCCESS && error != expected_error)
@@ -131,15 +131,15 @@ kpwn_error Kpwn::Call(enum kpwn_cmd cmd, void* arg,
   return error;
 }
 
-void Kpwn::Call(enum kpwn_cmd cmd, void* arg) const { Call(cmd, arg, SUCCESS); }
+void XdkDevice::Call(enum kpwn_cmd cmd, void* arg) const { Call(cmd, arg, SUCCESS); }
 
-uint64_t Kpwn::AllocBuffer(uint64_t size, bool gfp_account) const {
+uint64_t XdkDevice::AllocBuffer(uint64_t size, bool gfp_account) const {
   kpwn_message msg = {.length = size, .gfp_account = gfp_account};
   Call(ALLOC_BUFFER, &msg);
   return msg.kernel_addr;
 }
 
-uint64_t Kpwn::AllocBuffer(const std::vector<uint8_t>& data,
+uint64_t XdkDevice::AllocBuffer(const std::vector<uint8_t>& data,
                            bool gfp_account) const {
   kpwn_message msg = {.length = data.size(),
                       .data = (uint8_t*)data.data(),
@@ -148,7 +148,7 @@ uint64_t Kpwn::AllocBuffer(const std::vector<uint8_t>& data,
   return msg.kernel_addr;
 }
 
-std::vector<uint8_t> Kpwn::Read(uint64_t ptr, uint64_t size) const {
+std::vector<uint8_t> XdkDevice::Read(uint64_t ptr, uint64_t size) const {
   std::vector<uint8_t> result(size);
   std::memset(result.data(), 0, size);
   kpwn_message msg{.length = size, .data = result.data(), .kernel_addr = ptr};
@@ -156,67 +156,67 @@ std::vector<uint8_t> Kpwn::Read(uint64_t ptr, uint64_t size) const {
   return result;
 }
 
-void Kpwn::Write(uint64_t ptr, const std::vector<uint8_t>& data) const {
+void XdkDevice::Write(uint64_t ptr, const std::vector<uint8_t>& data) const {
   kpwn_message msg{
       .length = data.size(), .data = (uint8_t*)data.data(), .kernel_addr = ptr};
   Call(ARB_WRITE, &msg);
 }
 
-void Kpwn::Kfree(uint64_t ptr) const { Call(KFREE, (void*)ptr); }
+void XdkDevice::Kfree(uint64_t ptr) const { Call(KFREE, (void*)ptr); }
 
-void Kpwn::Printk(const char* msg) const { Call(PRINTK, (void*)msg); }
+void XdkDevice::Printk(const char* msg) const { Call(PRINTK, (void*)msg); }
 
-uint64_t Kpwn::KaslrLeak() {
+uint64_t XdkDevice::KaslrLeak() {
   uint64_t kaslr_base;
   Call(KASLR_LEAK, &kaslr_base);
   return kaslr_base;
 }
 
-uint64_t Kpwn::WinTarget() {
+uint64_t XdkDevice::WinTarget() {
   uint64_t win_target_addr;
 
   Call(WIN_TARGET, &win_target_addr);
   return win_target_addr;
 }
 
-std::optional<uint64_t> Kpwn::SymAddrOpt(const char* name) {
+std::optional<uint64_t> XdkDevice::SymAddrOpt(const char* name) {
   sym_addr sym_addr;
   strncpy(sym_addr.symbol_name, name, sizeof(sym_addr.symbol_name));
   auto error = Call(SYM_ADDR, &sym_addr, ERROR_UNKNOWN_SYMBOL);
   return error == SUCCESS ? std::optional(sym_addr.symbol_addr) : std::nullopt;
 }
 
-uint64_t Kpwn::SymAddr(const char* name) {
+uint64_t XdkDevice::SymAddr(const char* name) {
   auto addr = SymAddrOpt(name);
   if (!addr.has_value())
     throw ExpKitError("symbol '%s' was not found in the kernel", name);
   return addr.value();
 }
 
-void Kpwn::RipControl(const rip_control_args& args) {
+void XdkDevice::RipControl(const rip_control_args& args) {
   Call(RIP_CONTROL, (void*)&args);
 }
 
-void Kpwn::RipControl(RipAction action,
+void XdkDevice::RipControl(RipAction action,
                       const std::map<Register, uint64_t>& regs) {
   auto args = ConvertRipArgs(action, regs);
   RipControl(args);
 }
 
-void Kpwn::CallAddr(uint64_t addr, const std::map<Register, uint64_t>& regs) {
+void XdkDevice::CallAddr(uint64_t addr, const std::map<Register, uint64_t>& regs) {
   auto args = ConvertRipArgs(RipAction::Call, regs);
 
   args.rip = addr;
   RipControl(args);
 }
 
-void Kpwn::JumpToAddr(uint64_t addr, const std::map<Register, uint64_t>& regs) {
+void XdkDevice::JumpToAddr(uint64_t addr, const std::map<Register, uint64_t>& regs) {
   auto args = ConvertRipArgs(RipAction::Jmp, regs);
   args.rip = addr;
   RipControl(args);
 }
 
-void Kpwn::SetRspAndRet(uint64_t new_rsp,
+void XdkDevice::SetRspAndRet(uint64_t new_rsp,
                         const std::map<Register, uint64_t>& regs) {
   auto args = ConvertRipArgs(RipAction::Ret, regs);
   args.rsp = new_rsp;
@@ -224,13 +224,13 @@ void Kpwn::SetRspAndRet(uint64_t new_rsp,
   RipControl(args);
 }
 
-uint64_t Kpwn::GetRipControlRecoveryAddr() {
+uint64_t XdkDevice::GetRipControlRecoveryAddr() {
   uint64_t addr;
   Call(GET_RIP_CONTROL_RECOVERY, &addr);
   return addr;
 }
 
-Kprobe* Kpwn::InstallKprobe(const char* function_name, uint8_t arg_count,
+Kprobe* XdkDevice::InstallKprobe(const char* function_name, uint8_t arg_count,
                             enum kprobe_log_mode log_mode,
                             const char* log_call_stack_filter) {
   auto* kprobe =
@@ -242,22 +242,22 @@ Kprobe* Kpwn::InstallKprobe(const char* function_name, uint8_t arg_count,
   return kprobe;
 }
 
-void Kpwn::RemoveKprobe(Kprobe* probe) {
+void XdkDevice::RemoveKprobe(Kprobe* probe) {
   Call(REMOVE_KPROBE, probe->args_.installed_kprobe);
   installed_probes_.erase(probe);
   delete probe;
 }
 
-void Kpwn::PrintAllCallLog(bool clear_log) {
+void XdkDevice::PrintAllCallLog(bool clear_log) {
   for (auto probe : installed_probes_) probe->PrintCallLog(clear_log);
 }
 
-void Kpwn::CheckWin() {
+void XdkDevice::CheckWin() {
   if (Syscalls::ioctl(fd_, CHECK_WIN, nullptr) != SUCCESS)
     throw ExpKitError("exploit failed, the win_target was not called :(");
 }
 
-void Kpwn::Close() {
+void XdkDevice::Close() {
   for (auto probe : std::set(installed_probes_)) RemoveKprobe(probe);
 
   if (fd_ != -1) {
@@ -266,4 +266,4 @@ void Kpwn::Close() {
   }
 }
 
-Kpwn::~Kpwn() { Close(); }
+XdkDevice::~XdkDevice() { Close(); }

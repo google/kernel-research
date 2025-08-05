@@ -3,7 +3,7 @@
 #include <cstdio>
 #include "test/TestUtils.h"
 #include "test/TestSuite.h"
-#include "target/KpwnParser.h"
+#include "target/XdkDeviceParser.h"
 #include <kernelXDK/target/Target.h>
 #include <kernelXDK/target/TargetDb.h>
 #include <kernelXDK/payloads/RopChain.h>
@@ -20,8 +20,8 @@ struct TargetDbTests: TestSuite {
         kpwn_db_lts6181 = read_file("test/artifacts/target_db_lts-6.1.81.kxdb");
     }
 
-    KpwnParser getParser() {
-        auto parser = KpwnParser(kpwn_db_lts6181);
+    XdkDeviceParser getParser() {
+        auto parser = XdkDeviceParser(kpwn_db_lts6181);
         parser.SetLog(this);
         return parser;
     }

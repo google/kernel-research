@@ -6,7 +6,7 @@
 
 class TestEnvironment {
     std::string target_db_path_;
-    std::optional<Kpwn> kpwn_;
+    std::optional<XdkDevice> kpwn_;
     std::optional<TargetDb> target_db_;
     std::optional<Target> target_;
 
@@ -18,11 +18,11 @@ public:
     void SetTargetDbPath(const std::string& target_db_path);
 
     /**
-     * @brief Gets the Kpwn instance.
-     * @return A reference to the Kpwn instance.
+     * @brief Gets the XdkDevice instance.
+     * @return A reference to the XdkDevice instance.
      * @throws ExpKitError if the kpwn kernel module is not available.
      */
-    Kpwn& GetKpwn();
+    XdkDevice& GetXdkDevice();
 
     /**
      * @brief Gets the Target database instance (which contains all the information
