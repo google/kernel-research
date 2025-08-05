@@ -11,12 +11,12 @@
 #include <kernelXDK/payloads/Payload.h>
 
 class RopActionTests: public TestSuite {
-    Kpwn* kpwn_;
+    XdkDevice* kpwn_;
 public:
     RopActionTests(): TestSuite("RopActionRuntimeTests", "RopAction runtime tests") { }
 
     void init() {
-        kpwn_ = &env->GetKpwn();
+        kpwn_ = &env->GetXdkDevice();
     }
 
     RopChain GetRopChain() {

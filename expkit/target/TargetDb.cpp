@@ -2,7 +2,7 @@
 #include <optional>
 #include <kernelXDK/target/TargetDb.h>
 #include <kernelXDK/util/error.h>
-#include "target/KpwnParser.h"
+#include "target/XdkDeviceParser.h"
 #include "util/file.h"
 #include "util/stdutils.h"
 
@@ -27,7 +27,7 @@ Target TargetDb::GetTarget(const std::string& version) {
   return GetTarget(target, static_idx);
 }
 
-// define destructor here so it has access to KpwnParser.h
+// define destructor here so it has access to XdkDeviceParser.h
 TargetDb::~TargetDb() = default;
 
 Target TargetDb::GetTarget(const std::string& distro,
@@ -59,11 +59,11 @@ void TargetDb::AddStaticTarget(const StaticTarget& target) {
 }
 
 TargetDb::TargetDb(const std::string &filename) {
-  parser_ = std::make_unique<KpwnParser>(KpwnParser::FromFile(filename));
+  parser_ = std::make_unique<XdkDeviceParser>(XdkDeviceParser::FromFile(filename));
 }
 
 TargetDb::TargetDb(const uint8_t* buffer, size_t size)
-    : parser_(std::make_unique<KpwnParser>(buffer, size)) {}
+    : parser_(std::make_unique<XdkDeviceParser>(buffer, size)) {}
 
 Target TargetDb::GetTarget(std::optional<Target> target_opt,
                            std::optional<size_t> static_idx) {

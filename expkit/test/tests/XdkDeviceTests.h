@@ -6,13 +6,13 @@
 #include <kernelXDK/payloads/Payload.h>
 #include <kernelXDK/xdk_device/xdk_device.h>
 
-class KpwnTests: public TestSuite {
-    Kpwn* kpwn_;
+class XdkDeviceTests: public TestSuite {
+    XdkDevice* kpwn_;
 public:
-    KpwnTests(): TestSuite("KpwnRuntimeTests", "kpwn kernel module tests") { }
+    XdkDeviceTests(): TestSuite("XdkDeviceRuntimeTests", "kpwn kernel module tests") { }
 
     void init() {
-        kpwn_ = &env->GetKpwn();
+        kpwn_ = &env->GetXdkDevice();
     }
 
     TEST_METHOD(kaslrLeak, "can leak kASLR address") {

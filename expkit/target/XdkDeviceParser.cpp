@@ -1,4 +1,4 @@
-#include "target/KpwnParser.h"
+#include "target/XdkDeviceParser.h"
 #include <cstdint>
 #include <cstring>
 #include <map>
@@ -9,22 +9,22 @@
 #include <kernelXDK/util/error.h>
 #include "util/file.h"
 
-std::vector<Target> KpwnParser::GetAllTargets() {
+std::vector<Target> XdkDeviceParser::GetAllTargets() {
   return ParseTargets(std::nullopt, std::nullopt, std::nullopt);
 }
 
-std::optional<Target> KpwnParser::GetTarget(const std::string& version,
+std::optional<Target> XdkDeviceParser::GetTarget(const std::string& version,
                                             bool throw_on_missing) {
   return ParseTarget(std::nullopt, std::nullopt, version, throw_on_missing);
 }
 
-std::optional<Target> KpwnParser::GetTarget(const std::string& distro,
+std::optional<Target> XdkDeviceParser::GetTarget(const std::string& distro,
                                             const std::string& release_name,
                                             bool throw_on_missing) {
   return ParseTarget(distro, release_name, std::nullopt, throw_on_missing);
 }
 
-void KpwnParser::ParseHeader(bool parse_known_metadata) {
+void XdkDeviceParser::ParseHeader(bool parse_known_metadata) {
   if (offset_ != 0)
     throw ExpKitError(
         "header can only be parsed from offset 0, current offset is 0x%llx",
@@ -52,19 +52,19 @@ void KpwnParser::ParseHeader(bool parse_known_metadata) {
   offset_targets_ = offset_;
 }
 
-void KpwnParser::SetLog(ILog* log) { log_ = log; }
+void XdkDeviceParser::SetLog(ILog* log) { log_ = log; }
 
-KpwnParser KpwnParser::FromFile(const std::string &filename) {
-  return KpwnParser(read_file(filename));
+XdkDeviceParser XdkDeviceParser::FromFile(const std::string &filename) {
+  return XdkDeviceParser(read_file(filename));
 }
 
-KpwnParser::KpwnParser(const std::vector<uint8_t> data)
+XdkDeviceParser::XdkDeviceParser(const std::vector<uint8_t> data)
     : BinaryReader(data.data(), data.size()) {}
 
-KpwnParser::KpwnParser(const uint8_t* buffer, size_t size)
+XdkDeviceParser::XdkDeviceParser(const uint8_t* buffer, size_t size)
     : BinaryReader(buffer, size) {}
 
-std::optional<Target> KpwnParser::ParseTarget(
+std::optional<Target> XdkDeviceParser::ParseTarget(
     std::optional<const std::string> distro,
     std::optional<const std::string> release_name,
     std::optional<const std::string> version, bool throw_on_missing) {
@@ -83,7 +83,7 @@ std::optional<Target> KpwnParser::ParseTarget(
                       release_name->c_str());
 }
 
-std::vector<Target> KpwnParser::ParseTargets(
+std::vector<Target> XdkDeviceParser::ParseTargets(
     std::optional<const std::string> distro,
     std::optional<const std::string> release_name,
     std::optional<const std::string> version) {
@@ -137,7 +137,7 @@ std::vector<Target> KpwnParser::ParseTargets(
   return result;
 }
 
-void KpwnParser::ParseStructs(Target& target) {
+void XdkDeviceParser::ParseStructs(Target& target) {
   if (!has_structs_data_) return;
   DebugLog("ParseStructs(): count=%u", structs_meta_.size());
 
@@ -152,13 +152,13 @@ void KpwnParser::ParseStructs(Target& target) {
   }
 }
 
-Struct& KpwnParser::GetStructLayout(uint64_t layout_idx) {
+Struct& XdkDeviceParser::GetStructLayout(uint64_t layout_idx) {
   auto str = struct_layouts_.find(layout_idx);
   if (str != struct_layouts_.end()) return str->second;
   return ParseStructLayout(layout_idx);
 }
 
-Struct& KpwnParser::ParseStructLayout(uint64_t layout_idx) {
+Struct& XdkDeviceParser::ParseStructLayout(uint64_t layout_idx) {
   DebugLog("ParseStructLayout(): layout_idx=%u", layout_idx);
   SeekToItem(offset_struct_layouts_, layout_idx);
 
@@ -189,7 +189,7 @@ Struct& KpwnParser::ParseStructLayout(uint64_t layout_idx) {
   return struct_layouts_[layout_idx];
 }
 
-void KpwnParser::ParseStructsHeader() {
+void XdkDeviceParser::ParseStructsHeader() {
   if (!has_structs_data_) return;
   DebugLog("ParseStructsHeader()");
 
@@ -214,7 +214,7 @@ void KpwnParser::ParseStructsHeader() {
   offset_struct_layouts_ = ReadU32();
 }
 
-void KpwnParser::ParsePivots(Target& target) {
+void XdkDeviceParser::ParsePivots(Target& target) {
   DebugLog("ParsePivots()");
   if (!BeginStruct(2, false)) return;
 
@@ -267,7 +267,7 @@ void KpwnParser::ParsePivots(Target& target) {
   EndStruct();
 }
 
-RegisterUsage KpwnParser::ReadRegisterUsage() {
+RegisterUsage XdkDeviceParser::ReadRegisterUsage() {
   RegisterUsage reg_usage;
   reg_usage.reg = (Register)ReadUInt();
   auto count = ReadUInt();
@@ -275,7 +275,7 @@ RegisterUsage KpwnParser::ReadRegisterUsage() {
   return reg_usage;
 }
 
-void KpwnParser::ParseRopActions(Target& target) {
+void XdkDeviceParser::ParseRopActions(Target& target) {
   DebugLog("ParseRopActions (num=%u)", rop_action_ids_.size());
   for (int i_action = 0; i_action < rop_action_ids_.size();
        i_action++, EndStruct()) {
@@ -295,7 +295,7 @@ void KpwnParser::ParseRopActions(Target& target) {
   }
 }
 
-void KpwnParser::ParseRopActionsHeader(bool parse_known_metadata) {
+void XdkDeviceParser::ParseRopActionsHeader(bool parse_known_metadata) {
   auto num_rop_actions = ReadU32();
   DebugLog("num_rop_actions = %d", num_rop_actions);
   for (int i = 0; i < num_rop_actions; i++, EndStruct()) {
@@ -323,7 +323,7 @@ void KpwnParser::ParseRopActionsHeader(bool parse_known_metadata) {
   }
 }
 
-void KpwnParser::ParseSymbols(Target& target) {
+void XdkDeviceParser::ParseSymbols(Target& target) {
   DebugLog("ParseSymbols (num=%u)", symbol_names_.size());
   for (auto& name : symbol_names_) {
     auto value = ReadU32();
@@ -332,7 +332,7 @@ void KpwnParser::ParseSymbols(Target& target) {
   }
 }
 
-void KpwnParser::ParseSymbolsHeader() {
+void XdkDeviceParser::ParseSymbolsHeader() {
   auto num_symbols = ReadU32();
   DebugLog("num_symbols = %d", num_symbols);
   for (int i = 0; i < num_symbols; i++, EndStruct()) {

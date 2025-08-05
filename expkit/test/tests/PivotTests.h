@@ -2,7 +2,7 @@
 
 #include <cstdio>
 #include <kernelXDK/pivot/PivotFinder.h>
-#include "target/KpwnParser.h"
+#include "target/XdkDeviceParser.h"
 #include <kernelXDK/target/Target.h>
 #include "test/TestSuite.h"
 #include "test/TestUtils.h"
@@ -12,14 +12,14 @@
 #include "util/stdutils.h"
 
 class PivotTests: public TestSuite {
-    KpwnParser parser;
+    XdkDeviceParser parser;
     Target lts6181;
 
 public:
     PivotTests(): TestSuite("PivotStaticTests", "stack pivot static tests"), parser({}) { }
 
     void init() {
-        parser = KpwnParser::FromFile("test/artifacts/kernelctf.kxdb");
+        parser = XdkDeviceParser::FromFile("test/artifacts/kernelctf.kxdb");
         lts6181 = parser.GetTarget("kernelctf", "lts-6.1.81", true).value();
     }
 
@@ -100,9 +100,9 @@ public:
     }
 };
 
-class PivotKpwnTests: public TestSuite {
+class PivotXdkDeviceTests: public TestSuite {
 public:
-    PivotKpwnTests(): TestSuite("PivotRuntimeTests", "stack pivot runtime tests") { }
+    PivotXdkDeviceTests(): TestSuite("PivotRuntimeTests", "stack pivot runtime tests") { }
 
     TEST_METHOD(pivotWinTargetTest, "call win_target via stack pivot") {
         Payload p(128);
@@ -112,7 +112,7 @@ public:
         auto pivot = finder.Find(8);
         Log("selected pivot: %s", pivot->GetDescription().c_str());
 
-        auto& kpwn = env->GetKpwn();
+        auto& kpwn = env->GetXdkDevice();
         auto kaslr = kpwn.KaslrLeak();
         pivot->ApplyToPayload(p, kaslr);
 

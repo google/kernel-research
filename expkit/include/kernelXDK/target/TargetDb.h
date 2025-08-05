@@ -6,10 +6,10 @@
 #include <vector>
 #include <kernelXDK/target/Target.h>
 
-class KpwnParser;
+class XdkDeviceParser;
 
 class TargetDb {
-    std::unique_ptr<KpwnParser> parser_;
+    std::unique_ptr<XdkDeviceParser> parser_;
 
     std::vector<Target> static_targets_;
     std::map<std::string, size_t> by_version_;
@@ -23,8 +23,8 @@ class TargetDb {
     void MergeTargets(Target& dst, const Target& src);
 
     /**
-     * @brief Retrieves a Target object, merging data from a KpwnParser target and a static target if available.
-     * @param target_opt An optional Target object parsed from a Kpwn file.
+     * @brief Retrieves a Target object, merging data from a XdkDeviceParser target and a static target if available.
+     * @param target_opt An optional Target object parsed from a XdkDevice file.
      * @param static_idx An optional index of a static target to merge.
      * @return The merged Target object.
      * @throws ExpKitError if both target_opt and static_idx are not provided.
@@ -45,7 +45,7 @@ class TargetDb {
 
     /**
      * @brief Constructs a TargetDb object from a byte buffer.
-     * @param buffer The buffer containing the Kpwn file data.
+     * @param buffer The buffer containing the XdkDevice file data.
      * @param size The size of the buffer.
      */
     TargetDb(const uint8_t* buffer, size_t size);
