@@ -1,15 +1,15 @@
-# kpwn kernel module
+# xdk kernel module
 
-The kpwn kernel module helps simulating vulnerabilities in the kernel, tracking function calls and testing exploitation primitives.
+The xdk kernel module helps simulating vulnerabilities in the kernel, tracking function calls and testing exploitation primitives.
 
 # Usage
 
-  1. Include the [kpwn.h](./kpwn.h) header file, so the structures used by the API will be available in the program.
+  1. Include the [xdk_device.h](./xdk_device.h) header file, so the structures used by the API will be available in the program.
 
-  2. Open the `/dev/kpwn` device for read and write:
+  2. Open the `/dev/xdk` device for read and write:
 
   ```c
-    int fd = open("/dev/kpwn", O_RDWR);
+    int fd = open("/dev/xdk", O_RDWR);
   ```
 
   3. Send commands to the module via `ioctl`:

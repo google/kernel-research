@@ -119,7 +119,7 @@ kpwn_error XdkDevice::CallRaw(enum kpwn_cmd cmd, void* arg) const {
 
 bool XdkDevice::IsAvailable() { return access(DEVICE_PATH, F_OK) != -1; }
 
-XdkDevice::XdkDevice() { fd_ = Syscalls::open("/dev/kpwn", O_RDWR); }
+XdkDevice::XdkDevice() { fd_ = Syscalls::open("/dev/xdk", O_RDWR); }
 
 kpwn_error XdkDevice::Call(enum kpwn_cmd cmd, void* arg,
                       kpwn_error expected_error) const {

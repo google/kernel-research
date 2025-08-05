@@ -10,7 +10,7 @@
 #include "./include/xdk_device.h"
 #include <kernelXDK/util/Register.h>
 
-#define DEVICE_PATH "/dev/kpwn"
+#define DEVICE_PATH "/dev/xdk"
 
 /**
  * @brief Enum representing the possible actions for RIP control.

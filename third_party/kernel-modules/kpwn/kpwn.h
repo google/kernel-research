@@ -15,7 +15,7 @@
 
 #include <linux/types.h>
 
-#define DEVICE_NAME "kpwn"
+#define DEVICE_NAME "xdk"
 typedef struct kpwn_message {
     uint64_t length;
     uint8_t* data;

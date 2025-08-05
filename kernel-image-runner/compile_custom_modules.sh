@@ -24,7 +24,7 @@ CUSTOM_MODULES_DIR="$RELEASE_DIR/custom_modules"
 CUSTOM_MODULES_BUILD_DIR="$RELEASE_DIR/.custom_modules_build"
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name> <helloworld|kpwn>";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> <helloworld|xdk>";
     exit 1;
 }
 

@@ -232,7 +232,7 @@ int main(int argc, const char** argv) {
     void (*test_func)() = rip_control_test;
 
     printf("kpwn_test: opening device...\n");
-    kpwn_fd = CHECK(open("/dev/kpwn", O_RDWR));
+    kpwn_fd = CHECK(open("/dev/" DEVICE_NAME, O_RDWR));
     wait();
 
     for (int i = 0; i < argc; i++)

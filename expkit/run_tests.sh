@@ -22,9 +22,9 @@ echo "Updating rootfs..."
 $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz"
 
 if [[ "$CUSTOM_MODULES" != "keep" && ( -z "$CUSTOM_MODULES_KEEP" || ! -f "$RELEASE_DIR/custom_modules.tar") ]]; then
-    echo "Building kpwn kernel module..."
+    echo "Building xdk kernel module..."
     $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "modules"
-    $SCRIPT_DIR/../kernel-image-runner/compile_custom_modules.sh "$DISTRO" "$RELEASE_NAME" kpwn
+    $SCRIPT_DIR/../kernel-image-runner/compile_custom_modules.sh "$DISTRO" "$RELEASE_NAME" xdk
 fi
 
 mkdir -p test_results
