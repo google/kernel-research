@@ -25,14 +25,15 @@
 #include <linux/buffer_head.h>
 #include <linux/version.h>
 #include <asm/setup.h>
-#include "kpwn.h"
+#include "xdk_device.h"
 #include "utils.h"
 #include "rip_control.h"
 #include <linux/kprobes.h>
 
 MODULE_LICENSE("GPL");
 
-#define DEVICE_NAME "kpwn"
+// TODO remove
+// #define DEVICE_NAME "xdk"
 
 unsigned long (*_kallsyms_lookup_name)(const char *name) = 0;
 int (*_sprint_backtrace)(char *buffer, unsigned long address) = 0;

@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#define DEVICE_NAME "kpwn"
+#define DEVICE_NAME "xdk"
 
 typedef struct kpwn_message {
     uint64_t length;
