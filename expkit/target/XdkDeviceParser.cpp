@@ -31,7 +31,7 @@ void XdkDeviceParser::ParseHeader(bool parse_known_metadata) {
         offset_);
 
   auto magic = ReadU32();
-  if (magic != *(uint32_t*)"KPWN")
+  if (magic != *(uint32_t*)"XDK")
     throw ExpKitError("invalid magic: %llx", magic);
 
   auto version_major = ReadU16();

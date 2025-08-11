@@ -9,11 +9,11 @@
 #include <optional>
 #include <set>
 
-const char* kpwn_cmd_names[] = { "ALLOC_BUFFER", "KFREE", "KASLR_LEAK", "WIN_TARGET",
+const char* xdk_cmd_names[] = { "ALLOC_BUFFER", "KFREE", "KASLR_LEAK", "WIN_TARGET",
     "RIP_CONTROL", "ARB_READ", "ARB_WRITE", "INSTALL_KPROBE", "PRINTK", "SYM_ADDR",
     "REMOVE_KPROBE", "GET_RIP_CONTROL_RECOVERY", "CHECK_WIN" };
 
-const char* kpwn_errors_names[] = {
+const char* xdk_errors_names[] = {
     "ERROR_GENERIC",
     "ERROR_UNKNOWN_COMMAND",
     "ERROR_ALLOC",
@@ -109,39 +109,39 @@ rip_control_args XdkDevice::ConvertRipArgs(
   return args;
 }
 
-kpwn_error XdkDevice::CallRaw(enum kpwn_cmd cmd, void* arg) const {
-  kpwn_error error_code = (kpwn_error) - ::ioctl(fd_, cmd, arg);
+xdk_error XdkDevice::CallRaw(enum xdk_cmd cmd, void* arg) const {
+  xdk_error error_code = (xdk_error) - ::ioctl(fd_, cmd, arg);
   if (error_code == SUCCESS ||
       ERROR_GENERIC <= error_code && error_code <= ERROR_UNKNOWN_SYMBOL)
     return error_code;
-  throw ExpKitError("kpwn command %s failed with unknown error code 0x%x");
+  throw ExpKitError("xdk command %s failed with unknown error code 0x%x");
 }
 
 bool XdkDevice::IsAvailable() { return access(DEVICE_PATH, F_OK) != -1; }
 
 XdkDevice::XdkDevice() { fd_ = Syscalls::open("/dev/xdk", O_RDWR); }
 
-kpwn_error XdkDevice::Call(enum kpwn_cmd cmd, void* arg,
-                      kpwn_error expected_error) const {
+xdk_error XdkDevice::Call(enum xdk_cmd cmd, void* arg,
+                      xdk_error expected_error) const {
   auto error = CallRaw(cmd, arg);
   if (error != SUCCESS && error != expected_error)
-    throw ExpKitError("kpwn command %s failed with error code 0x%x (%s)",
-                      kpwn_cmd_names[cmd - 0x1000], error,
-                      kpwn_errors_names[error - ERROR_GENERIC]);
+    throw ExpKitError("xdk command %s failed with error code 0x%x (%s)",
+                      xdk_cmd_names[cmd - 0x1000], error,
+                      xdk_errors_names[error - ERROR_GENERIC]);
   return error;
 }
 
-void XdkDevice::Call(enum kpwn_cmd cmd, void* arg) const { Call(cmd, arg, SUCCESS); }
+void XdkDevice::Call(enum xdk_cmd cmd, void* arg) const { Call(cmd, arg, SUCCESS); }
 
 uint64_t XdkDevice::AllocBuffer(uint64_t size, bool gfp_account) const {
-  kpwn_message msg = {.length = size, .gfp_account = gfp_account};
+  xdk_message msg = {.length = size, .gfp_account = gfp_account};
   Call(ALLOC_BUFFER, &msg);
   return msg.kernel_addr;
 }
 
 uint64_t XdkDevice::AllocBuffer(const std::vector<uint8_t>& data,
                            bool gfp_account) const {
-  kpwn_message msg = {.length = data.size(),
+  xdk_message msg = {.length = data.size(),
                       .data = (uint8_t*)data.data(),
                       .gfp_account = gfp_account};
   Call(ALLOC_BUFFER, &msg);
@@ -151,13 +151,13 @@ uint64_t XdkDevice::AllocBuffer(const std::vector<uint8_t>& data,
 std::vector<uint8_t> XdkDevice::Read(uint64_t ptr, uint64_t size) const {
   std::vector<uint8_t> result(size);
   std::memset(result.data(), 0, size);
-  kpwn_message msg{.length = size, .data = result.data(), .kernel_addr = ptr};
+  xdk_message msg{.length = size, .data = result.data(), .kernel_addr = ptr};
   Call(ARB_READ, &msg);
   return result;
 }
 
 void XdkDevice::Write(uint64_t ptr, const std::vector<uint8_t>& data) const {
-  kpwn_message msg{
+  xdk_message msg{
       .length = data.size(), .data = (uint8_t*)data.data(), .kernel_addr = ptr};
   Call(ARB_WRITE, &msg);
 }
