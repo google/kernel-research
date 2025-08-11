@@ -18,7 +18,7 @@
 
 #define DEVICE_NAME "xdk"
 
-typedef struct kpwn_message {
+typedef struct xdk_message {
     uint64_t length;
     uint8_t* data;
     union {
@@ -26,11 +26,11 @@ typedef struct kpwn_message {
         void* kernel_ptr;
     };
     uint8_t gfp_account;
-} kpwn_message;
+} xdk_message;
 
-enum kpwn_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE, GET_RIP_CONTROL_RECOVERY, CHECK_WIN };
+enum xdk_cmd { ALLOC_BUFFER = 0x1000, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE, GET_RIP_CONTROL_RECOVERY, CHECK_WIN };
 
-enum kpwn_error {
+enum xdk_error {
     SUCCESS = 0,
     ERROR_GENERIC = 0x1000,
     ERROR_UNKNOWN_COMMAND = 0x1001,

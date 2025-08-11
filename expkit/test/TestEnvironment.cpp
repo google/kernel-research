@@ -9,11 +9,11 @@ void TestEnvironment::SetTargetDbPath(const std::string& target_db_path) {
 
 XdkDevice& TestEnvironment::GetXdkDevice() {
   if (!XdkDevice::IsAvailable())
-    throw ExpKitError("the kpwn kernel module is not available");
+    throw ExpKitError("the xdk kernel module is not available");
 
-  if (!kpwn_.has_value()) kpwn_.emplace();
+  if (!xdk_.has_value()) xdk_.emplace();
 
-  return kpwn_.value();
+  return xdk_.value();
 }
 
 TargetDb& TestEnvironment::GetTargetDb() {

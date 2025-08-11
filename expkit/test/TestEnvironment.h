@@ -6,7 +6,7 @@
 
 class TestEnvironment {
     std::string target_db_path_;
-    std::optional<XdkDevice> kpwn_;
+    std::optional<XdkDevice> xdk_;
     std::optional<TargetDb> target_db_;
     std::optional<Target> target_;
 
@@ -20,7 +20,7 @@ public:
     /**
      * @brief Gets the XdkDevice instance.
      * @return A reference to the XdkDevice instance.
-     * @throws ExpKitError if the kpwn kernel module is not available.
+     * @throws ExpKitError if the xdk kernel module is not available.
      */
     XdkDevice& GetXdkDevice();
 

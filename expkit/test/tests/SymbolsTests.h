@@ -9,7 +9,7 @@
 
 class SymbolsTest: public TestSuite {
 public:
-    SymbolsTest(): TestSuite("SymbolsRuntimeTests", "kpwn db symbols tests") { }
+    SymbolsTest(): TestSuite("SymbolsRuntimeTests", "xdk db symbols tests") { }
 
     TEST_METHOD(symbolsCheck, "check if the database contains the correct symbols") {
         auto kaslr_base = env->GetXdkDevice().KaslrLeak();

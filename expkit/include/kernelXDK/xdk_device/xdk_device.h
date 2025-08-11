@@ -80,10 +80,10 @@ public:
 };
 
 /**
- * @brief Class representing the interface to the kpwn kernel module.
+ * @brief Class representing the interface to the xdk kernel module.
  */
 class XdkDevice {
-    /** @brief File descriptor for the kpwn kernel module. */
+    /** @brief File descriptor for the xdk kernel module. */
     int fd_;
 
     /** @brief The default logging mode for Kprobes. */
@@ -107,29 +107,29 @@ class XdkDevice {
         RipAction action, const std::map<Register, uint64_t>& regs = {});
 
     /**
-     * @brief Calls a raw ioctl command on the kpwn device.
+     * @brief Calls a raw ioctl command on the xdk device.
      * @param cmd The command to call.
      * @param arg The argument to the command.
      * @return The error code returned by the ioctl.
      * @throws ExpKitError if the ioctl returns an unknown error code.
      */
-    kpwn_error CallRaw(enum kpwn_cmd cmd, void* arg) const;
+    xdk_error CallRaw(enum xdk_cmd cmd, void* arg) const;
 
    public:
     /**
-     * @brief Checks if the kpwn device is available.
+     * @brief Checks if the xdk device is available.
      * @return True if the device exists, false otherwise.
      */
     static bool IsAvailable();
 
     /**
      * @brief Constructor for the XdkDevice class.
-     * @throws ExpKitError if the kpwn device cannot be opened.
+     * @throws ExpKitError if the xdk device cannot be opened.
      */
     XdkDevice();
 
     /**
-     * @brief Calls a kpwn command and checks the error code.
+     * @brief Calls a xdk command and checks the error code.
      * @param cmd The command to call.
      * @param arg The argument to the command.
      * @param expected_error The expected error code if the command is not
@@ -137,15 +137,15 @@ class XdkDevice {
      * @throws ExpKitError if the command was not successful and did not return
      * with expected_error.
      */
-    kpwn_error Call(enum kpwn_cmd cmd, void* arg, kpwn_error expected_error) const;
+    xdk_error Call(enum xdk_cmd cmd, void* arg, xdk_error expected_error) const;
 
     /**
-     * @brief Calls a kpwn command expecting success.
+     * @brief Calls a xdk command expecting success.
      * @param cmd The command to call.
      * @param arg The argument to the command.
      * @throws ExpKitError if the command was not successful.
      */
-    void Call(enum kpwn_cmd cmd, void* arg) const;
+    void Call(enum xdk_cmd cmd, void* arg) const;
 
     /**
      * @brief Allocates a buffer in kernel space.
@@ -295,7 +295,7 @@ class XdkDevice {
     void CheckWin();
 
     /**
-     * @brief Closes the connection to the kpwn device and removes all installed
+     * @brief Closes the connection to the xdk device and removes all installed
      * Kprobes.
      */
     void Close();
