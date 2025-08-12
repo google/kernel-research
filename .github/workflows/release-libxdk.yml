@@ -18,7 +18,7 @@ jobs:
     permissions: {}
     defaults:
       run:
-        working-directory: ./expkit
+        working-directory: ./libxdk
     outputs:
       LIB_VER: ${{ steps.vars.outputs.LIB_VER }}
     steps:
@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "libxdk-${{ env.LIB_VER }}.tar.gz"
-          path: ./expkit/libxdk-${{ env.LIB_VER }}.tar.gz
+          path: ./libxdk/libxdk-${{ env.LIB_VER }}.tar.gz
 
   release:
     runs-on: ubuntu-latest

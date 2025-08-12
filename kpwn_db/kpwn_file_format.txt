@@ -1,6 +1,6 @@
 # .kxdb file format structure
 
-magic = KPWN (u4)
+magic = KXDB (u4)
 version_major = 0x1 (u2) - file with newer version_major
                            is not compatible with older readers
 version_minor = 0x1 (u2) - file with newer version_minor
