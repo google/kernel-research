@@ -92,7 +92,7 @@ jobs:
       - name: Test libxdk (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
+        run: timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
@@ -109,7 +109,7 @@ jobs:
         working-directory: ./libxdk
         run: |
             for action in "test" "stability_test"; do
-                KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
+                KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
             done
 
       - name: Test libxdk (local TODO tests only)
@@ -122,7 +122,7 @@ jobs:
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
+        run: timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}

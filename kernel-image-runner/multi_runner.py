@@ -150,7 +150,7 @@ class ReleaseRunner:
       self.run(f"../kernel-image-db/download_release.sh '{self.distro}' '{self.release_name}' 'vmlinuz,modules'", True)
 
       self.update_status("compiling custom modules...")
-      self.run(f"./compile_custom_modules.sh '{self.distro}' '{self.release_name}' 'xdk'", True)
+      self.run(f"./compile_custom_modules.sh '{self.distro}' '{self.release_name}' 'xdk_device'", True)
 
       self.update_status("running kpwn_test...")
       while True:

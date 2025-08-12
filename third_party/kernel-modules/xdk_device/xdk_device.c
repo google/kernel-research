@@ -32,9 +32,6 @@
 
 MODULE_LICENSE("GPL");
 
-// TODO remove
-// #define DEVICE_NAME "xdk"
-
 unsigned long (*_kallsyms_lookup_name)(const char *name) = 0;
 int (*_sprint_backtrace)(char *buffer, unsigned long address) = 0;
 int (*_stack_trace_save_tsk_reliable)(struct task_struct *tsk, unsigned long *store, unsigned int size) = 0;

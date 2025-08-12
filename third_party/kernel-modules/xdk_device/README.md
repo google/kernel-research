@@ -251,15 +251,15 @@ Which results in a crash like (ROP chain item is executed):
 
 ## Automatically with kernel-image-runner
 
-If you run `./run.sh` with `--custom-modules=kpwn`, the module will be compiled and loaded automatically.
+If you run `./run.sh` with `--custom-modules=xkd_device`, the module will be compiled and loaded automatically.
 
 ## Manually for kernel-image-runner targets
 
-Run `./compile_custom_modules.sh (kernelctf|ubuntu) <release-name> kpwn` and after the compilation process, the compiled module can be found at `rootfs/custom_modules/kpwn.ko`.
+Run `./compile_custom_modules.sh (kernelctf|ubuntu) <release-name> xkd_device` and after the compilation process, the compiled module can be found at `rootfs/custom_modules/xkd_device.ko`.
 
 ## Manually for custom kernels
 
 Compile your kernel normally and then execute the following command from the same directory where you compiled your kernel (replace `<kernel-image-runner-dir>` with the root directory of the kernel-image-runner):
 
-`make M=<kernel-image-runner-dir>/../third_party/kernel-modules/kpwn modules`
+`make M=<kernel-image-runner-dir>/../third_party/kernel-modules/xkd_device modules`
 
