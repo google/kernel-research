@@ -38,9 +38,9 @@ Processes all downloaded releases from the `../kernel-image-db` folder and exten
 
     ./kpwn_db.py --kernel-image-db-path ../kernel-image-db -i target_db.kxdb -o  target_db.kxdb
 
-Processes only the `kernelctf/lts-6.1.81` release from the `../kernel-image-db/releases` folder and save the resulting database to the `../expkit/test/artifacts/target_db_lts-6.1.81.kxdb` file:
+Processes only the `kernelctf/lts-6.1.81` release from the `../kernel-image-db/releases` folder and save the resulting database to the `../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb` file:
 
-    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output-path ../expkit/test/artifacts/target_db_lts-6.1.81.kxdb
+    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output-path ../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb
 
 
 Processes all downloaded releases from `../kernel-image-db` and save the resulting database to `target_db.kxdb`:

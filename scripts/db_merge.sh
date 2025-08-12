@@ -16,7 +16,7 @@ set -ex
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
-KPWN_DB_DIR="$SCRIPT_DIR/../kpwn_db"
+KXDB_DIR="$SCRIPT_DIR/../kpwn_db"
 
 mkdir -p db
 rm -rf db/*
@@ -25,7 +25,7 @@ if [ "$1" == "--rebuild" ]; then
     echo -n > db_releases.txt
 else
     gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kxdb db/_original.kxdb; echo
-    "$KPWN_DB_DIR/kpwn_db.py" -i db/_original.kxdb --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
+    "$KXDB_DIR/kpwn_db.py" -i db/_original.kxdb --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
 fi
 
 gcloud storage ls gs://kernel-research/pwnkit/db/kernelctf/*.kxdb > gcs_releases.txt
@@ -39,8 +39,8 @@ echo
 
 cat missing_db_releases.txt | gsutil -m cp -I ./db
 
-"$KPWN_DB_DIR/kpwn_db.py" -i "db/*.kxdb" -o kernelctf.kxdb
-"$KPWN_DB_DIR/kpwn_db.py" -i kernelctf.kxdb -o kernelctf.json
+"$KXDB_DIR/kpwn_db.py" -i "db/*.kxdb" -o kernelctf.kxdb
+"$KXDB_DIR/kpwn_db.py" -i kernelctf.kxdb -o kernelctf.json
 
 echo "Uploading new db"
 for EXT in kpwn json; do

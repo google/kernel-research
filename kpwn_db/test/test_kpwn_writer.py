@@ -56,7 +56,7 @@ class SymbolWriterTests(unittest.TestCase):
 class KpwnWriterTests(unittest.TestCase):
   """Tests for the KpwnWriter class."""
 
-  EXPECTED_HDR = b"KPWN" + b"\x01\x00" + b"\x01\x00"  # v1.1
+  EXPECTED_HDR = b"KXDB" + b"\x01\x00" + b"\x01\x00"  # v1.1
 
   def expect(self, expected, symbols_desc={}, actions_desc={}, targets=[]):
     meta = MetaConfig.from_desc(symbols_desc, actions_desc)

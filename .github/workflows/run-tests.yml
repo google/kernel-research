@@ -3,7 +3,7 @@ on:
   push:
     paths:
      - 'kpwn_db/**'
-     - 'expkit/**'
+     - 'libxdk/**'
   pull_request:
   workflow_dispatch:
     inputs:
@@ -79,54 +79,54 @@ jobs:
         working-directory: ./kpwn_db
         run: ./test.sh
 
-      - name: Build expkit
+      - name: Build libxdk
         if: ${{ success() || failure() }}
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: ./build.sh
 
-      - name: Test expkit (local tests only)
+      - name: Test libxdk (local tests only)
         if: ${{ success() || failure() }}
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: ./run_local_tests.sh
 
-      - name: Test expkit (QEMU)
+      - name: Test libxdk (QEMU)
         if: ${{ success() || failure() }}
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: mv test_results test_results_prod
 
-      - name: Build expkit samples
+      - name: Build libxdk samples
         if: ${{ success() || failure() }}
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: PREREQ=1 ./build_samples.sh
 
-      - name: Test expkit's stack_pivot_and_rop sample
+      - name: Test libxdk's stack_pivot_and_rop sample
         if: ${{ success() || failure() }}
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: |
             for action in "test" "stability_test"; do
                 KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
             done
 
-      - name: Test expkit (local TODO tests only)
+      - name: Test libxdk (local TODO tests only)
         if: ${{ success() || failure() }}
         continue-on-error: true
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: timeout 2m ./build.sh && build/test/kernelXDKTests --test-suites StaticTests --tests TODO
 
-      - name: Test expkit (QEMU TODO tests only)
+      - name: Test libxdk (QEMU TODO tests only)
         if: ${{ success() || failure() }}
         continue-on-error: true
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
-        working-directory: ./expkit
+        working-directory: ./libxdk
         run: mv test_results test_results_todo
 
       - name: Upload artifacts
@@ -135,9 +135,9 @@ jobs:
         with:
           name: logs_${{ steps.vars.outputs.logfn }}
           path: |
-            expkit/samples/**/exp
-            expkit/bin/test
-            expkit/test_results*
+            libxdk/samples/**/exp
+            libxdk/bin/test
+            libxdk/test_results*
             kernel-image-db/releases/**/custom_modules.tar
             kernel-image-runner/test/stability_test_outputs
 

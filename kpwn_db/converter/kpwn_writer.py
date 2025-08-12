@@ -7,7 +7,7 @@ from converter.rop_actions import RopActionWriter
 from converter.stack_pivots import StackPivotWriter
 from converter.structs import StructWriter
 
-MAGIC = "KPWN"
+MAGIC = "KXDB"
 VERSION_MAJOR = 1
 VERSION_MINOR = 1
 
