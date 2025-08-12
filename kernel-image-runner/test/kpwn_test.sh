@@ -34,4 +34,4 @@ if [ -z "$DISTRO" ] && [ -z "$RELEASE_NAME"]; then
 fi
 
 gcc -static -Werror -o ../rootfs/kpwn_test kpwn_test.c
-../run.sh "$DISTRO" "$RELEASE_NAME" --custom-modules=xdk -- /kpwn_test ${@:3}
+../run.sh "$DISTRO" "$RELEASE_NAME" --custom-modules=xdk_device -- /kpwn_test ${@:3}

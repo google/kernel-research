@@ -16,8 +16,8 @@ echo "Updating rootfs..."
 (cd $RUNNER_DIR; ./update_rootfs_image.sh)
 
 if [[ ( ! -v CUSTOM_MODULES_KEEP || ! -f "$RELEASE_DIR/custom_modules.tar") ]]; then
-    echo "Compiling xdk module..."
-    (cd $RUNNER_DIR; ./compile_custom_modules.sh "$DISTRO" "$RELEASE" xdk) || (echo "failed: $?..." && exit 1)
+    echo "Compiling xdk_device module..."
+    (cd $RUNNER_DIR; ./compile_custom_modules.sh "$DISTRO" "$RELEASE" xdk_device) || (echo "failed: $?..." && exit 1)
 fi
 
 mkdir -p $LOG_DIR || true
