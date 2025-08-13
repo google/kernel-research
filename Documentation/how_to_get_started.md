@@ -1,3 +1,6 @@
+---
+liquid: false
+---
 # How to get started
 
 ### Creating a Database
