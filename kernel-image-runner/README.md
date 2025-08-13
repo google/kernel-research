@@ -51,9 +51,9 @@ A non-root `user` user is available within the VM. You can use `su user` to spaw
 ./run.sh kernelctf mitigation-v3-6.1.55 -- cat /proc/slabinfo
 ```
 
-* Same, but only shows the output of the `slabinfo` and no kernel messages if you use ` --only-script-output`:
+* Same, but only shows the output of the `slabinfo` and no kernel messages if you use ` --only-command-output`:
 ```
-./run.sh kernelctf mitigation-v3-6.1.55 --only-script-output -- cat /proc/slabinfo
+./run.sh kernelctf mitigation-v3-6.1.55 --only-command-output -- cat /proc/slabinfo
 ```
 
 * Same, but instead of exiting, spawns a shell too:
