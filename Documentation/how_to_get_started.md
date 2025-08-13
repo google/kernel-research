@@ -1,6 +1,3 @@
----
-liquid: false
----
 # How to get started
 
 ### Creating a Database
@@ -54,9 +51,9 @@ They are added for all the supported targets.
     ```c++
     StaticTarget st("kernelctf", "cos-105-17412.294.34");
 
-    st.AddStruct("nft_expr_ops", 128,
-                {{"dump", 64, 8},
-                {"type", 120, 8}});
+    st.AddStruct("nft_expr_ops", 128, { 
+        {"dump", 64, 8},
+        {"type", 120, 8} });
 
     kpwn_db.AddStaticTarget(st);
     ```
