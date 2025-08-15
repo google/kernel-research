@@ -30,7 +30,7 @@ protected:
     std::map<uint64_t, Struct> struct_layouts_;
 
     /**
-     * @brief Parses the symbols header section of the XdkDevice file.
+     * @brief Parses the symbols header section of the KXDB file.
      * @details Reads the number of symbols and their metadata, storing the symbol names.
      * @throws ExpKitError if there's an error reading the binary data.
      */
@@ -45,7 +45,7 @@ protected:
     void ParseSymbols(Target& target);
 
     /**
-     * @brief Parses the ROP actions header section of the XdkDevice file.
+     * @brief Parses the ROP actions header section of the KXDB file.
      * @details Reads the number of ROP actions and their metadata, storing the ROP action IDs and optionally parsing detailed metadata.
      * @param parse_known_metadata If true, parses the description and arguments for each ROP action.
      * @throws ExpKitError if there's an error reading the binary data.
@@ -76,7 +76,7 @@ protected:
     void ParsePivots(Target& target);
 
     /**
-     * @brief Parses the structs header section of the XdkDevice file.
+     * @brief Parses the structs header section of the KXDB file.
      * @details Reads the metadata for each struct, including its name and fields, and stores it. Also reads the offset to the struct layouts.
      * @throws ExpKitError if there's an error reading the binary data.
      */
@@ -107,7 +107,7 @@ protected:
     void ParseStructs(Target& target);
 
     /**
-     * @brief Parses targets from the XdkDevice file that match the optional filter criteria.
+     * @brief Parses targets from the KXDB file that match the optional filter criteria.
      * @param distro Optional filter for the distribution name.
      * @param release_name Optional filter for the release name.
      * @param version Optional filter for the version string.
@@ -138,20 +138,20 @@ protected:
 
     /**
      * @brief Constructs a KxdbParser from a buffer.
-     * @param buffer The buffer containing the XdkDevice data.
+     * @param buffer The buffer containing the KXDB data.
      * @param size The size of the buffer.
      */
     KxdbParser(const uint8_t* buffer, size_t size);
 
     /**
      * @brief Constructs a KxdbParser from a vector of bytes.
-     * @param data The vector containing the XdkDevice data.
+     * @param data The vector containing the KXDB data.
      */
     KxdbParser(const std::vector<uint8_t> data);
 
     /**
      * @brief Constructs a KxdbParser by reading data from a file.
-     * @param filename The path to the XdkDevice file.
+     * @param filename The path to the KXDB file.
      * @return A KxdbParser object initialized with the file's content.
      * @throws ExpKitError if the file cannot be read.
      */
@@ -163,7 +163,7 @@ protected:
     void SetLog(ILog* log);
 
     /**
-     * @brief Parses the header section of the XdkDevice file.
+     * @brief Parses the header section of the KXDB file.
      * @details Reads the magic number, version, and the offsets to the different data sections (symbols, ROP actions, structs, targets). Optionally parses known metadata.
      * @param parse_known_metadata If true, parses detailed metadata for ROP actions.
      * @throws ExpKitError if the magic number is invalid, the version is unsupported, or there's an error reading the binary data.
@@ -193,7 +193,7 @@ protected:
                                     bool throw_on_missing = false);
 
     /**
-     * @brief Retrieves all targets available in the XdkDevice file.
+     * @brief Retrieves all targets available in the KXDB file.
      * @return A vector of all Target objects found in the file.
      */
     std::vector<Target> GetAllTargets();
