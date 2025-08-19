@@ -7,8 +7,8 @@ import sys
 import re
 import pprint
 
-KPWN_DB_DIR = os.path.abspath(f"{__file__}/..")
-sys.path.append(KPWN_DB_DIR)
+KXDB_DIR = os.path.abspath(f"{__file__}/..")
+sys.path.append(KXDB_DIR)
 
 from data_model.db import Db
 from data_model.meta import MetaConfig

@@ -16,7 +16,7 @@ set -eo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
-KPWN_DB_DIR="$SCRIPT_DIR/../kpwn_db"
+KXDB_DIR="$SCRIPT_DIR/../kpwn_db"
 DISTRO="$1"
 RELEASE="$2"
 
@@ -30,8 +30,8 @@ echo "Collecting runtime data..."
 "$IMAGE_DB_DIR/collect_runtime_data.sh"
 
 echo "Creating db for release $DISTRO $RELEASE"
-"$KPWN_DB_DIR/kpwn_db.py" -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
-"$KPWN_DB_DIR/kpwn_db.py" -i db.kxdb -o db.json --indent 4
+"$KXDB_DIR/kpwn_db.py" -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
+"$KXDB_DIR/kpwn_db.py" -i db.kxdb -o db.json --indent 4
 
 if [[ "$3" == "--upload" ]]; then
     echo "Uploading dbs"
