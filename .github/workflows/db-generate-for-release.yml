@@ -23,8 +23,8 @@ jobs:
         with:
           credentials_json: '${{ secrets.DB_GCS_SA_KEY }}'
 
-      - name: Install kpwn_db prerequisites
-        working-directory: kpwn_db
+      - name: Install kxdb_tool prerequisites
+        working-directory: kxdb_tool
         run: pip install -r requirements.txt
 
       - name: Enable KVM group perms

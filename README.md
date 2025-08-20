@@ -17,8 +17,8 @@ This repository contains useful tools for Linux kernel security research:
 * **libxdk**: a work-in-progress Linux Kernel exploitation kit, which contains (will contain) the necessary building blocks for building exploits for the Linux kernel which can target various kernel versions.
    * For more details, read the [libxdk/README.md](libxdk/README.md) file.
 
-* **kpwn_db**: a database builder which contains exploitation information (symbol addresses, ROP gadgets, stack pivots, structure field offsets) for multiple kernel targets and consumed by the exploit kit to customize exploits for targets.
-   * For more details, read the [kpwn_db/README.md](kpwn_db/README.md) file.
+* **kxdb_tool**: a database builder which contains exploitation information (symbol addresses, ROP gadgets, stack pivots, structure field offsets) for multiple kernel targets and consumed by the exploit kit to customize exploits for targets.
+   * For more details, read the [kxdb_tool/README.md](kxdb_tool/README.md) file.
 
 ## Disclaimer
 

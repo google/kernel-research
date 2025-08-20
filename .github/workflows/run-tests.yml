@@ -2,7 +2,7 @@ name: Run tests
 on:
   push:
     paths:
-     - 'kpwn_db/**'
+     - 'kxdb_tool/**'
      - 'libxdk/**'
   pull_request:
   workflow_dispatch:
@@ -52,7 +52,7 @@ jobs:
 
       - name: Install tool prerequisites
         run: |
-          cd kpwn_db
+          cd kxdb_tool
           pip install -r requirements.txt
 
       - name: Environment info
@@ -74,9 +74,9 @@ jobs:
           ./kernel-image-db/collect_runtime_data.sh  # we need version.txt for compiling the correct xdk_device module
           ./kernel-image-runner/compile_custom_modules.sh ${{steps.vars.outputs.target}} xdk_device
 
-      - name: Test kpwn_db
+      - name: Test kxdb_tool
         if: ${{ success() || failure() }}
-        working-directory: ./kpwn_db
+        working-directory: ./kxdb_tool
         run: ./test.sh
 
       - name: Build libxdk

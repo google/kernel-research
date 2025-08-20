@@ -9,20 +9,20 @@ The recommended extension for the target db file: `.kxdb`.
 # Usage
 
 ```
-./kpwn_db.py
+./kxdb_tool.py
   [--kernel-image-db-path=<path to the kernel-image-db tool to add targets from>]
   [--release-filter=<regex for distro/release_name>]
-  [--input-file=<full file path to the source target_db.{kpwn,json,yaml}>]
-  [--output-file=<full file path to the destination target_db.{kpwn,json,yaml}>]
+  [--input-file=<full file path to the source target_db.{kxdb,json,yaml}>]
+  [--output-file=<full file path to the destination target_db.{kxdb,json,yaml}>]
   [--indent=<int, json indent>]
   [--log-level=<DEBUG|INFO|WARNING|ERROR|CRITICAL>]
 ```
 
 ## Arguments
 
-* `input-file` (optional): location of the current database to convert or extend. Supported file formats: kpwn, json, yaml.
+* `input-file` (optional): location of the current database to convert or extend. Supported file formats: kxdb, json, yaml.
 
-* `output-file` (required): where to save the resulting database. Supported file formats: kpwn, json, yaml.
+* `output-file` (required): where to save the resulting database. Supported file formats: kxdb, json, yaml.
 
 * `kernel-image-db-path` (optional): location of the `kernel-image-db` folder. If supplied then its targets will be added to the database.
 
@@ -36,19 +36,19 @@ If you specify `input-file` then the configuration will be reused from that file
 
 Processes all downloaded releases from the `../kernel-image-db` folder and extends the `target_db.kxdb` database with these new releases:
 
-    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db -i target_db.kxdb -o  target_db.kxdb
+    ./kxdb_tool.py --kernel-image-db-path ../kernel-image-db -i target_db.kxdb -o  target_db.kxdb
 
 Processes only the `kernelctf/lts-6.1.81` release from the `../kernel-image-db/releases` folder and save the resulting database to the `../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb` file:
 
-    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output-path ../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb
+    ./kxdb_tool.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output-path ../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb
 
 
 Processes all downloaded releases from `../kernel-image-db` and save the resulting database to `target_db.kxdb`:
 
-    ./kpwn_db.py --kernel-image-db-path ../kernel-image-db -o target_db.kxdb
+    ./kxdb_tool.py --kernel-image-db-path ../kernel-image-db -o target_db.kxdb
 
 Converts the database from a binary format (`.kxdb`) to JSON:
 
-    ./kpwn_db.py -i target_db.kxdb -o target_db.json
+    ./kxdb_tool.py -i target_db.kxdb -o target_db.json
 
 

@@ -4,7 +4,7 @@ import logging
 import unittest
 import test.config as config
 from converter.image_db_utils import collect_image_db_targets, get_targets_from_image_db
-from converter.kpwn_writer import KpwnWriter
+from converter.kxdb_writer import KxdbWriter
 from data_model.db import Db
 from data_model.meta import MetaConfig
 from test.utils import MOCK_DB_DIR, RELEASES_DIR, expect_file, ExceptionRaisingLogger
@@ -18,7 +18,7 @@ class ImageDbUtilsTests(unittest.TestCase):
       targets = get_targets_from_image_db(meta_config, db_path, release_filter, ExceptionRaisingLogger(__name__), False, True)
       self.assertEqual(expected_target_count, len(targets))
       db = Db(meta_config, targets)
-      KpwnWriter(db).write_to_file(f.name)
+      KxdbWriter(db).write_to_file(f.name)
 
   def test_generate_lts_6_1_36_db(self):
     self.expect_db(MOCK_DB_DIR, "kernelctf/lts-6.1.36", "lts_6_1_36_db.kxdb")

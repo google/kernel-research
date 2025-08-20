@@ -15,7 +15,7 @@ from data_model.meta import MetaConfig
 from data_model.serialization import *
 import converter.config as config
 from converter.image_db_utils import get_targets_from_image_db
-from converter.kpwn_file import read_kpwn_db, write_kpwn_db
+from converter.kxdb_file import read_kxdb, write_kxdb
 from converter.partial_sync import PartialSync
 
 def main():
@@ -27,9 +27,9 @@ def main():
   parser.add_argument("--release-filter-add", default=None,
                       help="Regex filter for which '{distro}/{release_name}' to be added to the database")
   parser.add_argument("-i", "--input-file",
-                      help="Full file path to the source target_db.{kpwn,json,yaml}")
+                      help="Full file path to the source target_db.{kxdb,json,yaml}")
   parser.add_argument("-o", "--output-file", default=None,
-                      help="Full file path to the destination target_db.{kpwn,json,yaml}")
+                      help="Full file path to the destination target_db.{kxdb,json,yaml}")
   parser.add_argument("--indent", type=int, default=None,
                       help="How much intendation to use in JSON output file")
   parser.add_argument('--list-targets', action='store_true',
@@ -54,7 +54,7 @@ def main():
     input_files = sorted(glob.glob(args.input_file, recursive=True))
     for input_file in input_files:
       logger.info("Processing input file: %s", input_file)
-      db = read_kpwn_db(input_file)
+      db = read_kxdb(input_file)
       if db_config and db_config != db.meta:
         with open("old_config.txt", "wt") as f: f.write(pprint.pformat(db_config))
         with open("new_config.txt", "wt") as f: f.write(pprint.pformat(db.meta))
@@ -103,7 +103,7 @@ def main():
   db = Db(new_config, targets)
 
   if args.output_file:
-    write_kpwn_db(args.output_file, db, indent=args.indent)
+    write_kxdb(args.output_file, db, indent=args.indent)
   else:
     return parser.error("at least one of --output-file or --list-targets or --partial-list-files required")
 

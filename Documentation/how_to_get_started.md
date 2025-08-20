@@ -30,10 +30,10 @@
 3. Initialize **TargetDb**:
 
     ```c++
-    TargetDb kpwn_db(target_db, target_db_size);
+    TargetDb kxdb(target_db, target_db_size);
     ```
 
-4. Already available in database structure and symbol offsets are documented in `kpwn_db/converter/config.py`. 
+4. Already available in database structure and symbol offsets are documented in `kxdb_tool/converter/config.py`. 
 They are added for all the supported targets.
 
 5. If the needed symbol is not in database, use `StaticTarget` object to add it. One object per target needed. For example:
@@ -43,7 +43,7 @@ They are added for all the supported targets.
 
     st.AddSymbol("nft_last_ops", 0x1acaf20);
 
-    kpwn_db.AddStaticTarget(st);
+    kxdb.AddStaticTarget(st);
     ```
 
 6. Similar approach could be taken for adding structure and fields information:
@@ -55,7 +55,7 @@ They are added for all the supported targets.
         {"dump", 64, 8},
         {"type", 120, 8} });
 
-    kpwn_db.AddStaticTarget(st);
+    kxdb.AddStaticTarget(st);
     ```
 
     > **Note**
@@ -72,7 +72,7 @@ They are added for all the supported targets.
 8.  Detect which target **TargetDb** is being run on.
 
     ```c++
-    auto target = kpwn_db.AutoDetectTarget();
+    auto target = kxdb.AutoDetectTarget();
     printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
     ```
 
@@ -104,7 +104,7 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
     ```
 
     > **Note**
-    > Available ROP actions could be found in `kpwn_db/converter/config.py`. 
+    > Available ROP actions could be found in `kxdb_tool/converter/config.py`. 
 
 ### Assembling the Final Payload with PayloadBuilder
 
