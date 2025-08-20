@@ -25,7 +25,6 @@ class RopChainArgument(RopChainItem):
 
 @dataclass
 class RopAction():
-  type_id: int
   description: Optional[str] = None
   gadgets: List[Union[RopChainConstant, RopChainOffset, RopChainArgument]] = field(default_factory=list)
 

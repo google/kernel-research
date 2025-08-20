@@ -2,41 +2,32 @@
     "meta": {
         "symbols": [
             {
-                "type_id": 16777217,
                 "name": "prepare_kernel_cred"
             },
             {
-                "type_id": 16777218,
                 "name": "commit_creds"
             },
             {
-                "type_id": 16777219,
                 "name": "find_task_by_vpid"
             },
             {
-                "type_id": 16777220,
                 "name": "switch_task_namespaces"
             },
             {
-                "type_id": 16777221,
                 "name": "__x64_sys_fork"
             },
             {
-                "type_id": 16777222,
                 "name": "msleep"
             },
             {
-                "type_id": 33554433,
                 "name": "init_nsproxy"
             },
             {
-                "type_id": 50331649,
                 "name": "anon_pipe_buf_ops"
             }
         ],
         "rop_actions": [
             {
-                "type_id": 1,
                 "desc": "msleep(ARG_time_msec)",
                 "args": [
                     {
@@ -46,12 +37,10 @@
                 ]
             },
             {
-                "type_id": 2,
                 "desc": "commit_kernel_cred(prepare_kernel_cred(0))",
                 "args": []
             },
             {
-                "type_id": 3,
                 "desc": "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
                 "args": [
                     {
@@ -62,7 +51,6 @@
                 ]
             },
             {
-                "type_id": 4,
                 "desc": "write_what_where_64(ARG_address, ARG_new_value)",
                 "args": [
                     {
@@ -76,12 +64,10 @@
                 ]
             },
             {
-                "type_id": 5,
                 "desc": "fork()",
                 "args": []
             },
             {
-                "type_id": 6,
                 "desc": "telefork(ARG_sleep_msec=0xffffffff)",
                 "args": [
                     {
@@ -92,7 +78,6 @@
                 ]
             },
             {
-                "type_id": 7,
                 "desc": "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
                 "args": [
                     {

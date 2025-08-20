@@ -6,10 +6,7 @@ from converter.symbols import SymbolReader
 from converter.rop_actions import RopActionReader
 from converter.stack_pivots import StackPivotReader
 from converter.structs import StructReader
-
-MAGIC = "KXDB"
-VERSION_MAJOR = 1
-VERSION_MINOR = 1
+from converter.consts import MAGIC, VERSION_MAJOR, VERSION_MINOR, SECTION_STRUCT_LAYOUTS
 
 class KpwnReaderException(Exception):
   pass
@@ -35,26 +32,27 @@ class KpwnReader:
     if major_ver != VERSION_MAJOR:
       raise KpwnReaderException(f"reading {major_ver} is not supported (only {VERSION_MAJOR})")
 
+    # skip section_offsets
+    sections = r_root.sections_dict()
+
     # meta header
-    r_meta = r_root.struct(4)
-    symbols_meta = self.symbol_reader.read_meta(r_meta)
-    rop_actions_meta = self.rop_action_reader.read_meta(r_meta)
-    structs_meta = self.struct_reader.read_meta(r_meta)
+    symbols_meta = self.symbol_reader.read_meta(r_root)
+    rop_actions_meta = self.rop_action_reader.read_meta(r_root)
+    structs_meta = self.struct_reader.read_meta(r_root)
     meta = MetaConfig(symbols_meta, rop_actions_meta, structs_meta)
-    self.struct_reader.read_struct_layouts(r_root)
+    self.struct_reader.read_struct_layouts(r_root, sections[SECTION_STRUCT_LAYOUTS]["offset"])
 
     # targets
     targets = []
-    for _ in range(r_root.u4()):
-      r_target = r_root.struct(4)
-      distro = r_target.zstr_u2()
-      release_name = r_target.zstr_u2()
-      version = r_target.zstr_u2()
+    for _ in range(len(r_root.seekable_list())):
+      distro = r_root.zstr()
+      release_name = r_root.zstr()
+      version = r_root.zstr()
 
-      symbols = self.symbol_reader.read_target(r_target)
-      rop_actions = self.rop_action_reader.read_target(r_target)
-      stack_pivots = self.stack_pivot_reader.read_target(r_target)
-      structs = self.struct_reader.read_target(r_target)
+      symbols = self.symbol_reader.read_target(r_root)
+      rop_actions = self.rop_action_reader.read_target(r_root)
+      stack_pivots = self.stack_pivot_reader.read_target(r_root)
+      structs = self.struct_reader.read_target(r_root)
 
       target = Target(distro, release_name, version,
                       symbols, rop_actions, stack_pivots, structs)

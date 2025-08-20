@@ -1,16 +1,12 @@
 """Classes for writing the kpwn file format."""
 import os
 
-from converter.binary_writer import BinaryWriter
+from converter.binary_writer import BinaryWriter, SectionDict
 from converter.symbols import SymbolWriter
 from converter.rop_actions import RopActionWriter
 from converter.stack_pivots import StackPivotWriter
 from converter.structs import StructWriter
-
-MAGIC = "KXDB"
-VERSION_MAJOR = 1
-VERSION_MINOR = 1
-
+from converter.consts import MAGIC, VERSION_MAJOR, VERSION_MINOR, SECTION_META, SECTION_TARGETS, SECTION_STRUCT_LAYOUTS
 
 class KpwnWriter:
   """Class to write the kpwn file format."""
@@ -22,25 +18,26 @@ class KpwnWriter:
     self.struct_writer = StructWriter(db.meta.structs)
     self.db = db
 
-  def write(self, f, minimal=False):
+  def write(self, f):
     wr_root = BinaryWriter(f)
     wr_root.write(bytes(MAGIC, "ascii"))
     wr_root.u2(VERSION_MAJOR)
     wr_root.u2(VERSION_MINOR)
 
+    sections = SectionDict(wr_root, 3)
+
     # meta header
-    with wr_root.struct(4) as wr_hdr:
-      self.symbol_writer.write_meta(wr_hdr, minimal)
-      self.rop_action_writer.write_meta(wr_hdr, minimal)
+    with sections.add(SECTION_META) as wr_hdr:
+      self.symbol_writer.write_meta(wr_hdr)
+      self.rop_action_writer.write_meta(wr_hdr)
       self.struct_writer.write_meta(wr_hdr)
 
     # targets
-    wr_root.u4(len(self.db.targets))
-    for target in self.db.targets:
-      with wr_root.struct(4) as wr_target:
-        wr_target.zstr_u2(target.distro)
-        wr_target.zstr_u2(target.release_name)
-        wr_target.zstr_u2(target.version)
+    with sections.add(SECTION_TARGETS) as wr_targets:
+      for (wr_target, target) in wr_targets.seekable_list(self.db.targets):
+        wr_target.zstr(target.distro)
+        wr_target.zstr(target.release_name)
+        wr_target.zstr(target.version)
 
         self.symbol_writer.write_target(wr_target, target)
         self.rop_action_writer.write_target(wr_target, target)
@@ -48,9 +45,10 @@ class KpwnWriter:
         self.struct_writer.write_target(wr_target, target)
 
     # struct layouts
-    self.struct_writer.write_struct_layouts(wr_root)
+    with sections.add(SECTION_STRUCT_LAYOUTS) as wr:
+        self.struct_writer.write_struct_layouts(wr)
 
-  def write_to_file(self, fn, minimal=False):
+  def write_to_file(self, fn):
     os.makedirs(os.path.abspath(os.path.dirname(fn)), exist_ok=True)
     with open(fn, "wb") as f:
-      self.write(f, minimal)
+      self.write(f)

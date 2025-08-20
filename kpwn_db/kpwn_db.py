@@ -32,8 +32,6 @@ def main():
                       help="Full file path to the destination target_db.{kpwn,json,yaml}")
   parser.add_argument("--indent", type=int, default=None,
                       help="How much intendation to use in JSON output file")
-  parser.add_argument('--minimal', action='store_true',
-                      help="Minimalize output kpwn size (skip well-known meta information)")
   parser.add_argument('--list-targets', action='store_true',
                       help="List the targets in the database")
   parser.add_argument('--partial-sync', action='store_true',
@@ -105,7 +103,7 @@ def main():
   db = Db(new_config, targets)
 
   if args.output_file:
-    write_kpwn_db(args.output_file, db, indent=args.indent, minimal=args.minimal)
+    write_kpwn_db(args.output_file, db, indent=args.indent)
   else:
     return parser.error("at least one of --output-file or --list-targets or --partial-list-files required")
 

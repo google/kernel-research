@@ -81,7 +81,7 @@ class BinaryWriterTests(unittest.TestCase):
       self.varint_test(expected, value, True)
 
   def test_struct(self):
-    with self.expect(b"\x07\x00\x00\x00" + b"\x05\x00" + b"ABCD\x00") as bw:
-      with bw.struct(4) as inner:
+    with self.expect(b"\x06" + b"\x05" + b"ABCD\x00") as bw:
+      with bw.struct() as inner:
         with inner.struct() as nested:
           nested.zstr_raw("ABCD")
