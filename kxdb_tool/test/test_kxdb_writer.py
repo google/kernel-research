@@ -1,11 +1,11 @@
-"""Contains tests for KpwnWriter."""
+"""Contains tests for KxdbWriter."""
 
 import io
 import unittest
 from converter.binary_writer import BinaryWriter
 from converter.image_db_target import ImageDbTarget
-from converter.kpwn_writer import KpwnWriter
-from converter.kpwn_writer import SymbolWriter
+from converter.kxdb_writer import KxdbWriter
+from converter.kxdb_writer import SymbolWriter
 from data_model.db import Db
 from data_model.meta import MetaConfig
 from test.utils import RELEASES_DIR
@@ -48,8 +48,8 @@ class SymbolWriterTests(unittest.TestCase):
     expect(struct.pack("<I", 0x2292e0) + struct.pack("<I", 0x1a1cf80), bw.data())
 
 
-class KpwnWriterTests(unittest.TestCase):
-  """Tests for the KpwnWriter class."""
+class KxdbWriterTests(unittest.TestCase):
+  """Tests for the KxdbWriter class."""
 
   EXPECTED_HDR = b"KXDB" + b"\x01\x00" + b"\x01\x00"  # v1.1
 
@@ -57,7 +57,7 @@ class KpwnWriterTests(unittest.TestCase):
     meta = MetaConfig.from_desc(symbols_desc, actions_desc)
     db = Db(meta, targets)
     stream = io.BytesIO()
-    KpwnWriter(db).write(stream)
+    KxdbWriter(db).write(stream)
     expect(expected, stream.getvalue())
 
   def expect_smart(self, meta, targets, layouts, symbols_desc=[], actions_desc={}, targets_desc=[]):

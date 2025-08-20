@@ -1,4 +1,4 @@
-"""Classes for writing the kpwn file format."""
+"""Classes for writing the kxdb file format."""
 from data_model.db import Db, Target
 from data_model.meta import MetaConfig
 from converter.binary_reader import BinaryReader
@@ -8,11 +8,11 @@ from converter.stack_pivots import StackPivotReader
 from converter.structs import StructReader
 from converter.consts import MAGIC, VERSION_MAJOR, VERSION_MINOR, SECTION_STRUCT_LAYOUTS
 
-class KpwnReaderException(Exception):
+class KxdbReaderException(Exception):
   pass
 
-class KpwnReader:
-  """Class to read the kpwn file format."""
+class KxdbReader:
+  """Class to read the kxdb file format."""
 
   def __init__(self):
     self.symbol_reader = SymbolReader()
@@ -25,12 +25,12 @@ class KpwnReader:
 
     magic = r_root.read(len(MAGIC))
     if magic.decode('ascii') != MAGIC:
-      raise KpwnReaderException(f"expected magic '{MAGIC}', but got {magic}")
+      raise KxdbReaderException(f"expected magic '{MAGIC}', but got {magic}")
 
     major_ver = r_root.u2()
     minor_ver = r_root.u2()
     if major_ver != VERSION_MAJOR:
-      raise KpwnReaderException(f"reading {major_ver} is not supported (only {VERSION_MAJOR})")
+      raise KxdbReaderException(f"reading {major_ver} is not supported (only {VERSION_MAJOR})")
 
     # skip section_offsets
     sections = r_root.sections_dict()

@@ -8,8 +8,8 @@ import os
 import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from kpwn_db.data_model.rop_chain import *
-from kpwn_db.data_model.serialization import *
+from kxdb_tool.data_model.rop_chain import *
+from kxdb_tool.data_model.serialization import *
 
 rop_actions = {
     "kernelctf/lts-6.1.81": [

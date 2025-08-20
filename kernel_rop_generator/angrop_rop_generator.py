@@ -16,8 +16,8 @@ import gadget_finder
 from gadget_filter import GadgetFilter
 
 sys.path.append(os.path.abspath(f"{__file__}/../.."))
-from kpwn_db.data_model.rop_chain import *
-from kpwn_db.data_model.serialization import *
+from kxdb_tool.data_model.rop_chain import *
+from kxdb_tool.data_model.serialization import *
 
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"

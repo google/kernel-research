@@ -1,4 +1,4 @@
-"""Module containing the configuration for generating the kpwn DB."""
+"""Module containing the configuration for generating the kxdb DB."""
 symbols = [
     # nm: T - text (code) section, global
     "prepare_kernel_cred",

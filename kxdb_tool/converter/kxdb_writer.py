@@ -1,4 +1,4 @@
-"""Classes for writing the kpwn file format."""
+"""Classes for writing the kxdb file format."""
 import os
 
 from converter.binary_writer import BinaryWriter, SectionDict
@@ -8,8 +8,8 @@ from converter.stack_pivots import StackPivotWriter
 from converter.structs import StructWriter
 from converter.consts import MAGIC, VERSION_MAJOR, VERSION_MINOR, SECTION_META, SECTION_TARGETS, SECTION_STRUCT_LAYOUTS
 
-class KpwnWriter:
-  """Class to write the kpwn file format."""
+class KxdbWriter:
+  """Class to write the kxdb file format."""
 
   def __init__(self, db):
     self.symbol_writer = SymbolWriter(db.meta.symbols)
