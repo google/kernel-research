@@ -70,6 +70,9 @@ class BinaryWriter:
   def varsint(self, value):
     self.varint(value, True)
 
+  def varuint_extra(self, extra_bit_len, extra_val, data_val):
+    self.varuint(extra_val | (data_val << extra_bit_len))
+
   def size(self):
     return self.file.tell()
 
@@ -83,11 +86,11 @@ class BinaryWriter:
     self.file.seek(current_offset, io.SEEK_SET)
 
   @contextlib.contextmanager
-  def struct(self, struct_size_len=2):
-    size_field = self.reserve(struct_size_len)
-    start_offset = self.size()
-    yield self
-    size_field.uint(struct_size_len, self.size() - start_offset) # struct_size
+  def struct(self):
+    bw = BinaryWriter()
+    yield bw
+    self.varuint(bw.size())
+    self.write(bw.data())
 
   def list(self, list_):
     self.varuint(len(list_))
@@ -134,4 +137,26 @@ class ReservedRange(BinaryWriter):
 
     self.parent_writer.overwrite(self.reserved_offset + self.offset, bytes_)
     self.offset += len(bytes_)
+
+class SectionDict:
+  def __init__(self, wr, capacity):
+    self.wr = wr
+    self.capacity = capacity
+    self.used = 0
+
+    wr.u2(capacity)
+    # 10 = type_id (u2) + start_offset (u4) + end_offset (u4)
+    self.wr_dict = wr.reserve(capacity * 10)
+
+  @contextlib.contextmanager
+  def add(self, type_id):
+    if self.used >= self.capacity:
+      raise Exception(f"Section dictionary is full, capacity: {self.capacity}")
+    self.used += 1
+
+    start_offset = self.wr.size()
+    self.wr_dict.u2(type_id)
+    self.wr_dict.u4(start_offset)
+    yield self.wr
+    self.wr_dict.u4(self.wr.size() - start_offset) # size
 

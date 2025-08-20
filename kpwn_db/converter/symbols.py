@@ -6,14 +6,9 @@ class SymbolWriter:
   def __init__(self, symbols_meta):
     self.symbols_meta = symbols_meta
 
-  def write_meta(self, wr_hdr, minimal=False):
-    wr_hdr.u4(len(self.symbols_meta))
-    for meta in self.symbols_meta:
-      with wr_hdr.struct() as wr_struct:
-        wr_struct.u4(meta.type_id)    # type_id
-        if minimal:
-          continue
-        wr_struct.zstr_u2(meta.name)  # name_len + name
+  def write_meta(self, wr):
+    for meta in wr.list(self.symbols_meta):
+      wr.zstr(meta.name)  # name_len + name
 
   def write_target(self, wr_target, target):
     for meta in self.symbols_meta:
@@ -26,14 +21,11 @@ class SymbolReader:
   def __init__(self):
     self.meta = []
 
-  def read_meta(self, reader):
-    len_ = reader.u4()
-    for _ in range(len_):
-      r = reader.struct()
-      type_id = r.u4()
-      name = r.zstr_u2()
-      self.meta.append(SymbolMeta(type_id, name))
+  def read_meta(self, r):
+    for _ in r.list():
+      name = r.zstr()
+      self.meta.append(SymbolMeta(name))
     return self.meta
 
-  def read_target(self, reader):
-    return {s.name: reader.u4() for s in self.meta}
+  def read_target(self, r):
+    return {s.name: r.u4() for s in self.meta}

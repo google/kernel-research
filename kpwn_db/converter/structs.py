@@ -16,7 +16,6 @@ class StructWriter:
       for f in wr.list(s.fields):
         wr.zstr(f.field_name)
         wr.u1(f.optional)
-    self.struct_layouts_db_offset_field = wr.reserve(4)
 
   def write_target(self, wr_target, target):
     for (meta_idx, struct_meta) in enumerate(self.structs_meta):
@@ -33,7 +32,6 @@ class StructWriter:
       wr_target.varuint(idx + 1)
 
   def write_struct_layouts(self, root_wr):
-    self.struct_layouts_db_offset_field.u4(root_wr.size())
     for (wr, struct) in root_wr.seekable_list(self.struct_layouts):
       wr.varuint(struct.meta_idx)
       wr.varuint(struct.size)
@@ -62,13 +60,12 @@ class StructReader:
         optional = r_hdr.u1()
         fields.append(StructFieldMeta(field_name, optional == 1))
       self.meta.append(StructMeta(struct_name, fields))
-    self.struct_layouts_db_offset = r_hdr.u4()
     return self.meta
 
-  def read_struct_layouts(self, r_root):
+  def read_struct_layouts(self, r_root, struct_layouts_db_offset):
     self.struct_layouts = []
-    with r_root.seek(self.struct_layouts_db_offset):
-      for _ in range(r_root.seekable_list()):
+    with r_root.seek(struct_layouts_db_offset):
+      for _ in range(len(r_root.seekable_list())):
         meta_idx = r_root.varuint()
         sizeof = r_root.varuint()
         fields = {}
@@ -81,6 +78,7 @@ class StructReader:
           size = r_root.varuint()
           fields[field_meta.field_name] = StructField(offset=offset, size=size)
         self.struct_layouts.append(Struct(meta_idx=meta_idx, size=sizeof, fields=fields))
+    return self.struct_layouts
 
   def read_target(self, r_target):
     structs = {}

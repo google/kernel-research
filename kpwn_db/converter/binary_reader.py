@@ -58,12 +58,21 @@ class BinaryReader:
   def varuint(self):
     return self.varint(False)
 
+  def varuint_extra(self, extra_bit_len):
+    raw_value = self.varuint()
+    extra_bits = raw_value & ((1 << extra_bit_len) - 1)
+    value = raw_value >> extra_bit_len
+    return (extra_bits, value)
+
   def varsint(self):
     return self.varint(True)
 
-  def struct(self, struct_size_len=2):
-    data_len = self.uint(struct_size_len)    # struct_size
+  def struct(self):
+    data_len = self.varuint()    # struct_size
     return BinaryReader(self.read(data_len)) if data_len > 0 else None
+
+  def list(self):
+    return range(self.varuint())
 
   @contextlib.contextmanager
   def seek(self, offs):
@@ -76,6 +85,28 @@ class BinaryReader:
     hdr = self.varuint()
     offset_size = (hdr & 0x3) + 1
     item_count = hdr >> 2
-    # skip the seek list
-    self.offset += offset_size * item_count
-    return item_count
+    items = []
+    for _ in range(item_count):
+      items.append(self.uint(offset_size))
+    return items
+
+  def seekable_list_sizes(self):
+    end_offsets = self.seekable_list()
+    sizes = []
+    start_offset = 0
+    for end_offset in end_offsets:
+      sizes.append(end_offset - start_offset)
+      start_offset = end_offset
+    return sizes
+
+  def sections_dict(self):
+    sections = {}
+    num_sections = self.u2()
+    for _ in range(num_sections):
+      id = self.u2()
+      offset = self.u4()
+      size = self.u4()
+      sections[id] = {"offset": offset, "size": size}
+    return sections
+
+
