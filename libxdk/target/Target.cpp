@@ -5,11 +5,22 @@
 #include <cstring>
 #include <kernelXDK/util/error.h>
 
+std::map<RopActionId, std::string> RopActionNames {
+    { RopActionId::MSLEEP, "msleep" },
+    { RopActionId::COMMIT_KERNEL_CREDS, "commit_kernel_cred" },
+    { RopActionId::SWITCH_TASK_NAMESPACES, "switch_task_namespaces" },
+    { RopActionId::WRITE_WHAT_WHERE_64, "write_what_where_64" },
+    { RopActionId::FORK, "fork" },
+    { RopActionId::TELEFORK, "telefork" },
+    { RopActionId::KPTI_TRAMPOLINE, "kpti_trampoline" },
+};
+
 std::vector<RopItem> Target::GetItemsForAction(RopActionId id) {
-  if (rop_actions.find(id) == rop_actions.end()) {
-    throw ExpKitError("missing RopActionID %u", id);
+  std::string name = RopActionNames.at(id);
+  if (rop_actions.find(name) == rop_actions.end()) {
+    throw ExpKitError("missing RopActionID %u, name=%s", id, name.c_str());
   }
-  return rop_actions[id];
+  return rop_actions[name];
 }
 
 uint32_t Target::GetSymbolOffset(std::string symbol_name) const {

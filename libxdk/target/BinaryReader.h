@@ -97,6 +97,8 @@ public:
     */
     uint64_t SeekableListCount();
 
+    std::vector<uint64_t> SeekableListSizes();
+
     /**
     * @brief Checks if a seek operation is currently in progress.
     * @return True if seeking is in progress, false otherwise.
