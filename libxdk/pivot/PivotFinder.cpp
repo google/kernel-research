@@ -147,7 +147,7 @@ std::optional<StackShiftingInfo> PivotFinder::FindShiftsInternal(
     }
 
     // check each pivot to see if it is applicable
-    for (int i = 0; i < pivots_.stack_shifts.size(); i++) {
+    for (size_t i = 0; i < pivots_.stack_shifts.size(); i++) {
       StackShiftPivot pivot = pivots_.stack_shifts[i];
 
       uint64_t new_sp = sp + pivot.shift_amount;
