@@ -4,10 +4,10 @@ class SymbolWriter:
   """Helper class to handle symbol writing to the db."""
 
   def __init__(self, symbols_meta):
-    self.symbols_meta = symbols_meta
+    self.symbols_meta = sorted(symbols_meta, key=lambda x: x.name)
 
-  def write_meta(self, wr):
-    for meta in wr.list(self.symbols_meta):
+  def write_meta(self, wr_meta):
+    for (wr, meta) in wr_meta.seekable_list(self.symbols_meta):
       wr.zstr(meta.name)  # name_len + name
 
   def write_target(self, wr_target, target):
@@ -22,7 +22,7 @@ class SymbolReader:
     self.meta = []
 
   def read_meta(self, r):
-    for _ in r.list():
+    for _ in r.seekable_list():
       name = r.zstr()
       self.meta.append(SymbolMeta(name))
     return self.meta

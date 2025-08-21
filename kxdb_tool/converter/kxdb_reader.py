@@ -44,7 +44,8 @@ class KxdbReader:
 
     # targets
     targets = []
-    for _ in range(len(r_root.seekable_list())):
+    targets_by_version = r_root.indexable_int_list()
+    for _ in r_root.seekable_list():
       distro = r_root.zstr()
       release_name = r_root.zstr()
       version = r_root.zstr()

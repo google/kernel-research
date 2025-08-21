@@ -2,7 +2,10 @@
     "meta": {
         "symbols": [
             {
-                "name": "prepare_kernel_cred"
+                "name": "__x64_sys_fork"
+            },
+            {
+                "name": "anon_pipe_buf_ops"
             },
             {
                 "name": "commit_creds"
@@ -11,69 +14,33 @@
                 "name": "find_task_by_vpid"
             },
             {
-                "name": "switch_task_namespaces"
-            },
-            {
-                "name": "__x64_sys_fork"
+                "name": "init_nsproxy"
             },
             {
                 "name": "msleep"
             },
             {
-                "name": "init_nsproxy"
+                "name": "prepare_kernel_cred"
             },
             {
-                "name": "anon_pipe_buf_ops"
+                "name": "switch_task_namespaces"
             }
         ],
         "rop_actions": [
             {
-                "desc": "msleep(ARG_time_msec)",
-                "args": [
-                    {
-                        "name": "time_msec",
-                        "required": true
-                    }
-                ]
-            },
-            {
                 "desc": "commit_kernel_cred(prepare_kernel_cred(0))",
                 "args": []
-            },
-            {
-                "desc": "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
-                "args": [
-                    {
-                        "name": "vpid",
-                        "required": false,
-                        "default_value": 1
-                    }
-                ]
-            },
-            {
-                "desc": "write_what_where_64(ARG_address, ARG_new_value)",
-                "args": [
-                    {
-                        "name": "address",
-                        "required": true
-                    },
-                    {
-                        "name": "new_value",
-                        "required": true
-                    }
-                ]
             },
             {
                 "desc": "fork()",
                 "args": []
             },
             {
-                "desc": "telefork(ARG_sleep_msec=0xffffffff)",
+                "desc": "msleep(ARG_time_msec)",
                 "args": [
                     {
-                        "name": "sleep_msec",
-                        "required": false,
-                        "default_value": 4294967295
+                        "name": "time_msec",
+                        "required": true
                     }
                 ]
             },
@@ -101,27 +68,67 @@
                         "required": true
                     }
                 ]
-            }
-        ],
-        "structs": [
+            },
             {
-                "struct_name": "pipe_buffer",
-                "fields": [
+                "desc": "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
+                "args": [
                     {
-                        "field_name": "ops",
-                        "optional": false
+                        "name": "vpid",
+                        "required": false,
+                        "default_value": 1
                     }
                 ]
             },
             {
-                "struct_name": "pipe_buf_operations",
+                "desc": "telefork(ARG_sleep_msec=0xffffffff)",
+                "args": [
+                    {
+                        "name": "sleep_msec",
+                        "required": false,
+                        "default_value": 4294967295
+                    }
+                ]
+            },
+            {
+                "desc": "write_what_where_64(ARG_address, ARG_new_value)",
+                "args": [
+                    {
+                        "name": "address",
+                        "required": true
+                    },
+                    {
+                        "name": "new_value",
+                        "required": true
+                    }
+                ]
+            }
+        ],
+        "structs": [
+            {
+                "struct_name": "hfsc_class",
                 "fields": [
                     {
-                        "field_name": "release",
+                        "field_name": "level",
                         "optional": false
                     },
                     {
-                        "field_name": "get",
+                        "field_name": "cl_parent",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "vt_node.__rb_parent_color",
+                        "optional": true
+                    },
+                    {
+                        "field_name": "cf_node.__rb_parent_color",
+                        "optional": true
+                    },
+                    {
+                        "field_name": "cl_vt",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "cl_cvtmin",
                         "optional": false
                     }
                 ]
@@ -165,30 +172,23 @@
                 ]
             },
             {
-                "struct_name": "hfsc_class",
+                "struct_name": "pipe_buf_operations",
                 "fields": [
                     {
-                        "field_name": "level",
+                        "field_name": "release",
                         "optional": false
                     },
                     {
-                        "field_name": "cl_parent",
+                        "field_name": "get",
                         "optional": false
-                    },
+                    }
+                ]
+            },
+            {
+                "struct_name": "pipe_buffer",
+                "fields": [
                     {
-                        "field_name": "vt_node.__rb_parent_color",
-                        "optional": true
-                    },
-                    {
-                        "field_name": "cf_node.__rb_parent_color",
-                        "optional": true
-                    },
-                    {
-                        "field_name": "cl_vt",
-                        "optional": false
-                    },
-                    {
-                        "field_name": "cl_cvtmin",
+                        "field_name": "ops",
                         "optional": false
                     }
                 ]
@@ -201,30 +201,16 @@
             "release_name": "lts-6.1.36",
             "version": "KernelCTF version 6.1.36 (...)",
             "symbols": {
-                "prepare_kernel_cred": 1830832,
+                "__x64_sys_fork": 0,
+                "anon_pipe_buf_ops": 27381632,
                 "commit_creds": 0,
                 "find_task_by_vpid": 0,
-                "switch_task_namespaces": 0,
-                "__x64_sys_fork": 0,
-                "msleep": 2265824,
                 "init_nsproxy": 40330688,
-                "anon_pipe_buf_ops": 27381632
+                "msleep": 2265824,
+                "prepare_kernel_cred": 1830832,
+                "switch_task_namespaces": 0
             },
             "rop_actions": [
-                {
-                    "description": "msleep(ARG_time_msec)",
-                    "gadgets": [
-                        {
-                            "kernel_offset": 8682
-                        },
-                        {
-                            "argument_index": 0
-                        },
-                        {
-                            "kernel_offset": 2265824
-                        }
-                    ]
-                },
                 {
                     "description": "commit_kernel_cred(prepare_kernel_cred(0))",
                     "gadgets": [
@@ -246,26 +232,6 @@
                     ]
                 },
                 {
-                    "description": "write_what_where_64(ARG_address, ARG_new_value)",
-                    "gadgets": [
-                        {
-                            "kernel_offset": 8682
-                        },
-                        {
-                            "argument_index": 0
-                        },
-                        {
-                            "kernel_offset": 9580
-                        },
-                        {
-                            "argument_index": 1
-                        },
-                        {
-                            "kernel_offset": 3091897
-                        }
-                    ]
-                },
-                {
                     "description": "fork()",
                     "gadgets": [
                         {
@@ -274,11 +240,8 @@
                     ]
                 },
                 {
-                    "description": "telefork(ARG_sleep_msec=0xffffffff)",
+                    "description": "msleep(ARG_time_msec)",
                     "gadgets": [
-                        {
-                            "kernel_offset": 1632512
-                        },
                         {
                             "kernel_offset": 8682
                         },
@@ -318,6 +281,43 @@
                             "argument_index": 4
                         }
                     ]
+                },
+                {
+                    "description": "telefork(ARG_sleep_msec=0xffffffff)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 1632512
+                        },
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "kernel_offset": 2265824
+                        }
+                    ]
+                },
+                {
+                    "description": "write_what_where_64(ARG_address, ARG_new_value)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "kernel_offset": 9580
+                        },
+                        {
+                            "argument_index": 1
+                        },
+                        {
+                            "kernel_offset": 3091897
+                        }
+                    ]
                 }
             ],
             "stack_pivots": {
@@ -327,30 +327,6 @@
                 "stack_shifts": []
             },
             "structs": {
-                "pipe_buffer": {
-                    "size": 40,
-                    "fields": {
-                        "ops": {
-                            "offset": 16,
-                            "size": 8
-                        }
-                    },
-                    "meta_idx": 0
-                },
-                "pipe_buf_operations": {
-                    "size": 32,
-                    "fields": {
-                        "release": {
-                            "offset": 8,
-                            "size": 8
-                        },
-                        "get": {
-                            "offset": 24,
-                            "size": 8
-                        }
-                    },
-                    "meta_idx": 1
-                },
                 "msg_msg": {
                     "size": 48,
                     "fields": {
@@ -379,7 +355,31 @@
                             "size": 8
                         }
                     },
-                    "meta_idx": 2
+                    "meta_idx": 1
+                },
+                "pipe_buf_operations": {
+                    "size": 32,
+                    "fields": {
+                        "release": {
+                            "offset": 8,
+                            "size": 8
+                        },
+                        "get": {
+                            "offset": 24,
+                            "size": 8
+                        }
+                    },
+                    "meta_idx": 3
+                },
+                "pipe_buffer": {
+                    "size": 40,
+                    "fields": {
+                        "ops": {
+                            "offset": 16,
+                            "size": 8
+                        }
+                    },
+                    "meta_idx": 4
                 }
             }
         }

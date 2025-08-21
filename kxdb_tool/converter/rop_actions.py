@@ -7,10 +7,10 @@ class RopActionWriter:
   """Helper class to handle ROP Action writing to the db."""
 
   def __init__(self, rop_actions_meta):
-    self.rop_actions_meta = rop_actions_meta
+    self.rop_actions_meta = sorted(rop_actions_meta, key=lambda x: x.desc)
 
-  def write_meta(self, wr):
-    for ra in wr.list(self.rop_actions_meta):
+  def write_meta(self, wr_meta):
+    for (wr, ra) in wr_meta.seekable_list(self.rop_actions_meta):
         wr.zstr(ra.desc)                   # desc
 
         for arg in wr.list(ra.args):
@@ -41,7 +41,7 @@ class RopActionReader:
 
   def read_meta(self, r):
     self.meta = []
-    for _ in r.list():
+    for _ in r.seekable_list():
       desc = r.zstr()
 
       args = []
@@ -63,7 +63,7 @@ class RopActionReader:
       if size == 0: continue
 
       items = []
-      for _ in range(r.varuint()):
+      for _ in r.list():
         (type_, value) = r.varuint_extra(2)
         if type_ >= len(item_types):
             raise TypeError(f"Unknown RopChainItem type ({type_})")
