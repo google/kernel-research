@@ -34,7 +34,13 @@ class KxdbWriter:
 
     # targets
     with sections.add(SECTION_TARGETS) as wr_targets:
-      for (wr_target, target) in wr_targets.seekable_list(self.db.targets):
+      targets = sorted(self.db.targets, key=lambda t: (t.distro, t.release_name))
+
+      # seekable list of targets sorted by version (to make log n binary search possible)
+      targets_by_version = [x[0] for x in sorted(enumerate(targets), key=lambda t: t[1].version)]
+      wr_targets.indexable_int_list(targets_by_version)
+
+      for (wr_target, target) in wr_targets.seekable_list(targets):
         wr_target.zstr(target.distro)
         wr_target.zstr(target.release_name)
         wr_target.zstr(target.version)

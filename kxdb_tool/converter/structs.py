@@ -7,11 +7,11 @@ class StructWriter:
   """Helper class to handle Struct writing to the db."""
 
   def __init__(self, structs_meta):
-    self.structs_meta = structs_meta
+    self.structs_meta = sorted(structs_meta, key=lambda x: x.struct_name)
     self.struct_layouts = []
 
-  def write_meta(self, wr):
-    for s in wr.list(self.structs_meta):
+  def write_meta(self, wr_meta):
+    for (wr, s) in wr_meta.seekable_list(self.structs_meta):
       wr.zstr(s.struct_name)
       for f in wr.list(s.fields):
         wr.zstr(f.field_name)
@@ -52,10 +52,10 @@ class StructReader:
 
   def read_meta(self, r_hdr):
     self.meta = []
-    for _ in range(r_hdr.varuint()):
+    for _ in r_hdr.seekable_list():
       struct_name = r_hdr.zstr()
       fields = []
-      for _ in range(r_hdr.varuint()):
+      for _ in r_hdr.list():
         field_name = r_hdr.zstr()
         optional = r_hdr.u1()
         fields.append(StructFieldMeta(field_name, optional == 1))
@@ -65,7 +65,7 @@ class StructReader:
   def read_struct_layouts(self, r_root, struct_layouts_db_offset):
     self.struct_layouts = []
     with r_root.seek(struct_layouts_db_offset):
-      for _ in range(len(r_root.seekable_list())):
+      for _ in r_root.seekable_list():
         meta_idx = r_root.varuint()
         sizeof = r_root.varuint()
         fields = {}

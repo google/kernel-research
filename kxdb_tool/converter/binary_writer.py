@@ -97,6 +97,14 @@ class BinaryWriter:
     for item in list_:
       yield item
 
+  def indexable_int_list(self, list_):
+    max_offs = max(list_) if list_ else 0
+    offset_size = 1 if max_offs < 256 else 2 if max_offs < 65536 else 4
+
+    self.varuint((offset_size - 1) | len(list_) << 2)
+    for item in list_:
+      self.uint(offset_size, item)
+
   def seekable_list(self, list_):
     #self.varuint(len(list_))
     bw = BinaryWriter()
@@ -105,12 +113,7 @@ class BinaryWriter:
       yield (bw, item)
       end_offsets.append(bw.size())
 
-    max_offs = end_offsets[-1] if end_offsets else 0
-    offset_size = 1 if max_offs < 256 else 2 if max_offs < 65536 else 4
-
-    self.varuint((offset_size - 1) | len(end_offsets) << 2)
-    for offs in end_offsets:
-      self.uint(offset_size, offs)
+    self.indexable_int_list(end_offsets)
     self.write(bw.data())
 
   # Reserve fields to be written later. Usage example:

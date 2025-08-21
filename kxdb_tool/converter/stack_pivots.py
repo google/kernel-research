@@ -46,23 +46,24 @@ class StackPivotWriter:
 
 class StackPivotReader:
   def read_target(self, r_target):
-    p = Pivots()
+    r = r_target.struct()
 
     def read_int_list():
       result = []
-      for _ in range(r.varuint()):
+      for _ in r.list():
         result.append(r.varsint())
       return result
 
-    r = r_target.struct()
-    for _ in range(r.varuint()):
+    p = Pivots()
+
+    for _ in r.list():
       address = r.varuint()
       pivot_reg = REGISTERS[r.varuint()]
       used_offsets = read_int_list()
       next_rip_offset = r.varsint()
       p.one_gadgets.append(OneGadgetPivot(address, [], pivot_reg, used_offsets, next_rip_offset))
 
-    for _ in range(r.varuint()):
+    for _ in r.list():
       address = r.varuint()
       indirect_type = INDIRECT_TYPES[r.varuint()]
       push_register = REGISTERS[r.varuint()]
@@ -73,13 +74,13 @@ class StackPivotReader:
       p.push_indirects.append(PushIndirectPivot(address, [], indirect_type, push_register, used_offsets_in_push,
         indirect_register, used_offsets_in_indirect_reg, next_rip_offset))
 
-    for _ in range(r.varuint()):
+    for _ in r.list():
       address = r.varuint()
       stack_change_before_rsp = r.varuint()
       next_rip_offset = r.varsint()
       p.pop_rsps.append(PopRspPivot(address, [], stack_change_before_rsp, next_rip_offset))
 
-    for _ in range(r.varuint()):
+    for _ in r.list():
       address = r.varuint()
       ret_offset = r.varuint()
       shift_amount = r.varuint()

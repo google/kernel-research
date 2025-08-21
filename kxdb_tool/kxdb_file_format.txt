@@ -9,21 +9,22 @@ sections[num_sections]
   offset (u4)
   size (u4)          # inclusive
 meta:
-  symbols[varsize]
+  symbols[seekable_varsize]      # sorted by name
     name[varsize] (zstr)
-  rop_actions[varsize]
+  rop_actions[seekable_varsize]  # sorted by desc
     desc[varsize] (zstr)
     arguments[varsize]
       name[varsize] (zstr)
       flags (uint)
         required - 0x1
       default_value (uint) - only if required == 0
-  structs[varsize]
+  structs[seekable_varsize]      # sorted by struct_name
     struct_name[varsize] (zstr)
     fields[varsize]
       field_name[varsize] (zstr)
       optional (u1)
-targets[seekable_varsize]
+targets_by_version (varsize_ints)  # sorting by version
+targets[seekable_varsize]          # sorted by (distro,release_name)
   distro[varsize] (zstr)
   release_name[varsize] (zstr)
   version[varsize] (zstr)

@@ -81,7 +81,7 @@ class BinaryReader:
     yield
     self.offset = saved_offset
 
-  def seekable_list(self):
+  def indexable_int_list(self):
     hdr = self.varuint()
     offset_size = (hdr & 0x3) + 1
     item_count = hdr >> 2
@@ -90,8 +90,15 @@ class BinaryReader:
       items.append(self.uint(offset_size))
     return items
 
+  def seekable_list(self):
+    hdr = self.varuint()
+    offset_size = (hdr & 0x3) + 1
+    item_count = hdr >> 2
+    self.offset += item_count * offset_size
+    return range(item_count)
+
   def seekable_list_sizes(self):
-    end_offsets = self.seekable_list()
+    end_offsets = self.indexable_int_list()
     sizes = []
     start_offset = 0
     for end_offset in end_offsets:

@@ -32,7 +32,7 @@ class SymbolWriterTests(unittest.TestCase):
     bw = BinaryWriter()
     sw.write_meta(bw)
 
-    expect(b"\x02" +                  # symbols len
+    expect(bytes([2 << 2, 10, 20]) +  # symbols seek list, count=2, end_offsets=10,20
            b"\x08" + b"SYMBOL_1\0" +  # symbols[0].name == "SYMBOL_1"
            b"\x08" + b"SYMBOL_2\0",   # symbols[1].name == "SYMBOL_2"
            bw.data())
@@ -45,7 +45,10 @@ class SymbolWriterTests(unittest.TestCase):
     bw = BinaryWriter()
     sw.write_target(bw, target)
 
-    expect(struct.pack("<I", 0x2292e0) + struct.pack("<I", 0x1a1cf80), bw.data())
+    # symbols are stored in alphabetical order to allow binsearch
+    expect(struct.pack("<I", 0x1a1cf80) + # anon_pipe_buf_ops
+           struct.pack("<I", 0x2292e0),   # msleep
+           bw.data())
 
 
 class KxdbWriterTests(unittest.TestCase):
@@ -87,15 +90,17 @@ class KxdbWriterTests(unittest.TestCase):
                 b"\x00" +        # meta.symbols.count
                 b"\x00" +        # meta.rop_actions.count
                 b"\x00",         # meta.structs.count
+                b"\x00" +        # targets_by_version.count
                 b"\x00",         # targets.count
                 b"\x00")         # struct_layouts.count
 
   def test_msleep(self):
     self.expect_smart(
-                b"\x01" +                # meta.symbols.count
+                bytes([1 << 2, 8]) +     # meta.symbols seekable: item_count = 1, len(symbols[0]) = 8
                 b"\x06" + b"msleep\0" +  # meta.symbols[0].name == "msleep"
                 b"\x00" +                # meta.rop_actions.count
                 b"\x00",                 # meta.structs.count
+                b"\x00" +                # targets_by_version.count
                 b"\x00",                 # targets.count
                 b"\x00",                 # struct_layouts.count
                 ["msleep"])
@@ -121,8 +126,9 @@ class KxdbWriterTests(unittest.TestCase):
                 b"\x00" +        # meta.rop_actions.count
                 b"\x00",         # meta.structs.count
 
-                b"\x04" +                     # item_count = 1, offset_size = u1 (0), 1 << 2 | 0 = 4
-                struct.pack("<B", len(t0)) +  # end_offset[0] = 0x3d
+                # item_count = 1, offset_size = u1 (0), 1 << 2 | 0 = 4
+                bytes([1 << 2, 0]) +          # targets_by_version[0] = 0
+                bytes([1 << 2, len(t0)]) +    # end_offset[0] = len(t0)
                 t0,
                 b"\x00",                      # struct_layouts.count
                 targets_desc=[target])
