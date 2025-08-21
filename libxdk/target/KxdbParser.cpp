@@ -127,6 +127,7 @@ std::vector<Target> KxdbParser::ParseTargets(
 }
 
 void KxdbParser::ParseStructs(Target& target) {
+  BeginStruct(-1);
   DebugLog("ParseStructs(): count=%u", structs_meta_.size());
   for (size_t i = 0; i < structs_meta_.size(); i++) {
     // layout_idx_opt = layout_idx + 1 or 0 if the struct does not exist in this
@@ -137,6 +138,7 @@ void KxdbParser::ParseStructs(Target& target) {
     auto str = GetStructLayout(layout_idx_opt - 1);
     target.structs[str.name] = str;
   }
+  EndStruct();
 }
 
 Struct& KxdbParser::GetStructLayout(uint64_t layout_idx) {
