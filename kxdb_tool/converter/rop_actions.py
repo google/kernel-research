@@ -21,8 +21,8 @@ class RopActionWriter:
 
   def write_target(self, wr_target, target):
     for (wr, ra_meta) in wr_target.seekable_list(self.rop_actions_meta):
-      rop_actions = {ra.description: ra for ra in target.rop_actions}
-      rop_chain = rop_actions.get(ra_meta.desc)
+      rop_actions = {ra.description.split('(')[0]: ra for ra in target.rop_actions}
+      rop_chain = rop_actions.get(ra_meta.desc.split('(')[0])
       if not rop_chain: continue
 
       wr.varuint(len(rop_chain.gadgets))
