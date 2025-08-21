@@ -59,7 +59,7 @@ targets[seekable_varsize]          # sorted by (distro,release_name)
       ret_offset (uint)
       shift_amount (uint)
   struct_layout_indices
-    struct_size (uint) - to skip this container if we don't care - TODO
+    struct_size (uint) - to skip this container if we don't care
     items[len(meta.structs)] (uint) # 1-based, 0 means missing
 struct_layouts[seekable_varsize]
   struct_meta_idx (uint)

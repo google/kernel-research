@@ -283,6 +283,32 @@
                     ]
                 },
                 {
+                    "description": "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "kernel_offset": 1791488
+                        },
+                        {
+                            "kernel_offset": 2390333
+                        },
+                        {
+                            "kernel_offset": 9580
+                        },
+                        {
+                            "kernel_offset": 40330688
+                        },
+                        {
+                            "kernel_offset": 1823104
+                        }
+                    ]
+                },
+                {
                     "description": "telefork(ARG_sleep_msec=0xffffffff)",
                     "gadgets": [
                         {
