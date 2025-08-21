@@ -18,7 +18,7 @@ class Main {
     void ListTests() {
         for (auto& testSuite : runner_.GetTestSuites()) {
             cout << testSuite->class_name << ": ";
-            for (int i = 0; i < testSuite->tests.size(); i++)
+            for (size_t i = 0; i < testSuite->tests.size(); i++)
                 cout << (i == 0 ? "" : ", ") << testSuite->tests[i].func_name;
             cout << "\n";
         }

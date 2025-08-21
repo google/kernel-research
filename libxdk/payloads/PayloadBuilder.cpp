@@ -101,17 +101,17 @@ void PayloadBuilder::PrintDebugInfo() const {
     }
     uint64_t offset = chosen_pivot_->GetDestinationOffset()+8;
 
-    for (int i = 0; i < chosen_shifts_.size(); i++) {
+    for (size_t i = 0; i < chosen_shifts_.size(); i++) {
         const StackShiftingInfo &shift_info = chosen_shifts_[i];
         uint64_t to_offset = shift_info.to_offset;
         if(shift_info.stack_shifts.size() > 0) {
             uint64_t ret_offset = shift_info.next_ret_offset;
-            printf("[+]    Shifts from: %#x to next ret: %#x and stack pos: %#x\n",
+            printf("[+]    Shifts from: %#lx to next ret: %#lx and stack pos: %#lx\n",
                    shift_info.from_offset, ret_offset, to_offset);
             for (auto& shift : shift_info.stack_shifts) {
                 uint64_t sp_offset = offset + shift.pivot.shift_amount;
                 uint64_t ret_offset = offset + shift.pivot.ret_offset;
-                printf("[+]        Stack shift @%#x at offset: %#x next ret: %#x next sp: %#x\n",
+                printf("[+]        Stack shift @%#lx at offset: %#lx next ret: %#lx next sp: %#lx\n",
                        shift.pivot.address, shift.ret_offset, ret_offset, sp_offset);
             }
         }
@@ -127,10 +127,10 @@ void PayloadBuilder::PrintDebugInfo() const {
 
         if (to_offset != shift_info.next_ret_offset + 8) {
             // this case is a retn
-            printf("[+]    first rop gadget at: %#x (for retn)\n", shift_info.next_ret_offset);
+            printf("[+]    first rop gadget at: %#lx (for retn)\n", shift_info.next_ret_offset);
             rop_chain_size -= 8;
         }
-        printf("[+]    rop chain at offset: %#x of size: %#x\n", to_offset, rop_chain_size);
+        printf("[+]    rop chain at offset: %#lx of size: %#lx\n", to_offset, rop_chain_size);
     }
 }
 
@@ -152,7 +152,7 @@ bool PayloadBuilder::TryPayloadPivot(Payload& payload, StackPivot pivot) {
     chosen_shifts_.clear();
 
     // now we need to see if we can apply the all the rop actions, shifting to the next action as needed
-    for (int i = 0; i < rop_actions_.size(); i++) {
+    for (size_t i = 0; i < rop_actions_.size(); i++) {
         auto &action = rop_actions_[i];
         auto shifts = pivot_finder.GetShiftToRop(payload_off, 
                                                  action.values.size()*8, 
