@@ -83,8 +83,8 @@ class ImageDbTarget:
   def process_rop_actions(self, config=None):
     rop_actions = self.get_rop_actions()
     if rop_actions and config and config.rop_actions:
-      descs = [ra.desc for ra in config.rop_actions]
-      rop_actions = [ra for ra in rop_actions if ra.description in descs]
+      descs = [ra.desc.split('(')[0] for ra in config.rop_actions]
+      rop_actions = [ra for ra in rop_actions if ra.description.split('(')[0] in descs]
     return rop_actions
 
   def process_structs(self, config=None, allow_missing=False):

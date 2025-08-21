@@ -40,7 +40,7 @@ Processes all downloaded releases from the `../kernel-image-db` folder and exten
 
 Processes only the `kernelctf/lts-6.1.81` release from the `../kernel-image-db/releases` folder and save the resulting database to the `../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb` file:
 
-    ./kxdb_tool.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output-path ../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb
+    ./kxdb_tool.py --kernel-image-db-path ../kernel-image-db --release-filter lts-6.1.81 --output ../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb
 
 
 Processes all downloaded releases from `../kernel-image-db` and save the resulting database to `target_db.kxdb`:

@@ -81,7 +81,7 @@ def main():
     sys.exit(0 if missing_files else 1)
 
   if args.kernel_image_db_path:
-    new_targets = get_targets_from_image_db(new_config, args.kernel_image_db_path, args.release_filter_add, logger, args.partial_sync, True)
+    new_targets = get_targets_from_image_db(new_config, args.kernel_image_db_path, args.release_filter_add or args.release_filter, logger, args.partial_sync, True)
     if not new_targets:
       sys.stderr.write("No new targets to add. Exiting...\n")
       sys.exit(1)
