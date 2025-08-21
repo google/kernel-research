@@ -48,18 +48,11 @@ struct TargetDbTests: TestSuite {
         ASSERT_EQ(0x227a50, target.GetSymbolOffset("msleep"));
     }
 
-    TEST_METHOD(metaDataIsNotParsedByDefault, "metadata is not parsed by default") {
-        auto parser = getParser();
-        parser.ParseHeader();
-        ASSERT_EQ(0, parser.rop_action_meta_.size());
-    }
-
     TEST_METHOD(ropActionsMetaLts6181, "rop actions metadata is correct (lts-6.1.81)") {
         auto parser = getParser();
-        parser.ParseHeader(true);
+        parser.ParseHeader();
         ASSERT_EQ(7, parser.rop_action_meta_.size());
-        auto& msleep_meta = parser.rop_action_meta_[RopActionId::MSLEEP];
-        ASSERT_EQ(RopActionId::MSLEEP, msleep_meta.type_id);
+        auto& msleep_meta = parser.rop_action_meta_.at(2);
         ASSERT_EQ("msleep(ARG_time_msec)", msleep_meta.desc.c_str());
         ASSERT_EQ(1, msleep_meta.args.size());
         ASSERT_EQ("time_msec", msleep_meta.args[0].name.c_str());
@@ -70,7 +63,7 @@ struct TargetDbTests: TestSuite {
     TEST_METHOD(ropActionsLts6181, "rop actions are correct (lts-6.1.81)") {
         auto target = getLts6181();
 
-        auto& telefork = target.rop_actions[RopActionId::TELEFORK];
+        auto& telefork = target.rop_actions.at("telefork");
         ASSERT_EQ(4, telefork.size());
         ASSERT_EQ(RopItemType::SYMBOL, telefork[0].type);
         ASSERT_EQ(0x18f0d0 /* FORK */, telefork[0].value);
@@ -100,27 +93,28 @@ struct TargetDbTests: TestSuite {
 
     TEST_METHOD(pivotsLts6181, "stack pivots are correct (lts-6.1.81)") {
         auto pivots = getLts6181().pivots;
-        ASSERT_EQ(6, pivots.one_gadgets.size());
-        ASSERT_EQ(187, pivots.push_indirects.size());
-        ASSERT_EQ(3, pivots.pop_rsps.size());
+        ASSERT_EQ(11, pivots.one_gadgets.size());
+        ASSERT_EQ(156, pivots.push_indirects.size());
+        ASSERT_EQ(6, pivots.pop_rsps.size());
+        ASSERT_EQ(116, pivots.stack_shifts.size());
 
         auto& g1 = pivots.one_gadgets[0];
-        ASSERT_EQ(0x840463, g1.address);
-        ASSERT_EQ(Register::RBP, g1.pivot_reg.reg);
+        ASSERT_EQ(0x80bc85, g1.address);
+        ASSERT_EQ(Register::RDI, g1.pivot_reg.reg);
         ASSERT_EQ(0, g1.pivot_reg.used_offsets.size());
-        ASSERT_EQ(8, g1.next_rip_offset);
+        ASSERT_EQ(0, g1.next_rip_offset);
 
         auto& g2 = pivots.push_indirects[0];
-        ASSERT_EQ(0xcbbce1, g2.address);
-        ASSERT_EQ(IndirectType::CALL, g2.indirect_type);
-        ASSERT_EQ(Register::R11, g2.push_reg.reg);
-        ASSERT_EQ(Register::R13, g2.indirect_reg.reg);
-        ASSERT_EQ(72, g2.next_rip_offset);
-
         auto& g3 = pivots.pop_rsps[0];
-        ASSERT_EQ(0x12c7be, g3.address);
+        ASSERT_EQ(0xe55486, g2.address);
+        ASSERT_EQ(IndirectType::JMP, g2.indirect_type);
+        ASSERT_EQ(Register::RSI, g2.push_reg.reg);
+        ASSERT_EQ(Register::RSI, g2.indirect_reg.reg);
+        ASSERT_EQ(-123, g2.next_rip_offset);
+
+        ASSERT_EQ(0x87a, g3.address);
         ASSERT_EQ(0, g3.stack_change_before_rsp);
-        ASSERT_EQ(8, g3.next_rip_offset);
+        ASSERT_EQ(0, g3.next_rip_offset);
     }
 
     TEST_METHOD(structLts6181, "structs are correct (lts-6.1.81)") {

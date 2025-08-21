@@ -19,15 +19,20 @@ struct StructMeta {
     std::vector<FieldMeta> fields;
 };
 
+enum class Section { Meta = 1, Targets = 2, StructLayouts = 3 };
+
+struct SectionInfo {
+    uint32_t offset;
+    uint32_t size;
+};
+
 class KxdbParser: protected BinaryReader {
 protected:
     uint64_t offset_targets_ = 0, offset_struct_layouts_ = 0;
-    bool has_structs_data_ = false;
-    uint32_t num_targets_;
     std::vector<std::string> symbol_names_;
-    std::vector<RopActionId> rop_action_ids_;
     std::vector<StructMeta> structs_meta_;
     std::map<uint64_t, Struct> struct_layouts_;
+    std::map<Section, SectionInfo> sections_;
 
     /**
      * @brief Parses the symbols header section of the KXDB file.
@@ -47,10 +52,9 @@ protected:
     /**
      * @brief Parses the ROP actions header section of the KXDB file.
      * @details Reads the number of ROP actions and their metadata, storing the ROP action IDs and optionally parsing detailed metadata.
-     * @param parse_known_metadata If true, parses the description and arguments for each ROP action.
      * @throws ExpKitError if there's an error reading the binary data.
      */
-    void ParseRopActionsHeader(bool parse_known_metadata);
+    void ParseRopActionsHeader();
 
     /**
      * @brief Parses the ROP actions section for a given target.
@@ -134,7 +138,7 @@ protected:
         std::optional<const std::string> version, bool throw_on_missing);
 
    public:
-    std::map<RopActionId, RopActionMeta> rop_action_meta_;
+    std::vector<RopActionMeta> rop_action_meta_;
 
     /**
      * @brief Constructs a KxdbParser from a buffer.
@@ -165,10 +169,9 @@ protected:
     /**
      * @brief Parses the header section of the KXDB file.
      * @details Reads the magic number, version, and the offsets to the different data sections (symbols, ROP actions, structs, targets). Optionally parses known metadata.
-     * @param parse_known_metadata If true, parses detailed metadata for ROP actions.
      * @throws ExpKitError if the magic number is invalid, the version is unsupported, or there's an error reading the binary data.
      */
-    void ParseHeader(bool parse_known_metadata = false);
+    void ParseHeader();
 
     /**
      * @brief Retrieves a target by its distribution and release name.
