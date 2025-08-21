@@ -43,6 +43,6 @@ cat missing_db_releases.txt | gsutil -m cp -I ./db
 "$KXDB_DIR/kxdb_tool.py" -i kernelctf.kxdb -o kernelctf.json
 
 echo "Uploading new db"
-for EXT in kpwn json; do
+for EXT in kxdb json; do
     gcloud storage cp -Z -a publicRead kernelctf.$EXT gs://kernel-research/pwnkit/db/kernelctf.$EXT
 done

@@ -20,6 +20,6 @@ gcloud storage rsync --recursive "gs://kernel-research/kernel-image-db/releases/
 "$KXDB_DIR/kxdb_tool.py" -i kernelctf_new.kxdb -o kernelctf_new.json
 
 echo "Uploading new db"
-for EXT in kpwn json; do
+for EXT in kxdb json; do
     gcloud storage cp -Z -a publicRead kernelctf_new.$EXT gs://kernel-research/pwnkit/db/kernelctf.$EXT
 done

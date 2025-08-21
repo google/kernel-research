@@ -35,7 +35,7 @@ echo "Creating db for release $DISTRO $RELEASE"
 
 if [[ "$3" == "--upload" ]]; then
     echo "Uploading dbs"
-    for EXT in kpwn json; do
+    for EXT in kxdb json; do
         gcloud storage cp -Z -a publicRead db.$EXT gs://kernel-research/pwnkit/db/$DISTRO/$RELEASE.$EXT
     done
 
