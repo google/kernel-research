@@ -119,7 +119,7 @@ class KxdbWriterTests(unittest.TestCase):
           b"\0" +                      # t[0].pivots.push_indirects.count
           b"\0" +                      # t[0].pivots.pop_rsps.count
           b"\0" +                      # t[0].pivots.stack_shifts.count
-          b"\0")                       # t[0].struct_layout_indices.struct_size
+          b"\0")                       # t[0].struct_layout_indices
 
 
     self.expect_smart(

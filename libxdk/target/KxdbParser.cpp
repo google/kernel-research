@@ -127,18 +127,17 @@ std::vector<Target> KxdbParser::ParseTargets(
 }
 
 void KxdbParser::ParseStructs(Target& target) {
-  BeginStruct(-1);
+  auto values = IndexableIntList();
   DebugLog("ParseStructs(): count=%u", structs_meta_.size());
   for (size_t i = 0; i < structs_meta_.size(); i++) {
     // layout_idx_opt = layout_idx + 1 or 0 if the struct does not exist in this
     // release
-    auto layout_idx_opt = ReadUInt();
+    auto layout_idx_opt = values.at(i);
     DebugLog("  struct[%u]: layout_idx_opt=%u", i, layout_idx_opt);
     if (layout_idx_opt == 0) continue;
     auto str = GetStructLayout(layout_idx_opt - 1);
     target.structs[str.name] = str;
   }
-  EndStruct();
 }
 
 Struct& KxdbParser::GetStructLayout(uint64_t layout_idx) {
