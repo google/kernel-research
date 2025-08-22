@@ -97,6 +97,8 @@ public:
     */
     uint64_t SeekableListCount();
 
+    std::vector<uint64_t> SeekableListRawEndOffsets();
+    std::vector<uint64_t> SeekableListOffsets();
     std::vector<uint64_t> SeekableListSizes();
 
     /**

@@ -94,11 +94,11 @@ std::vector<Target> KxdbParser::ParseTargets(
 
   std::vector<Target> result;
   offset_ = offset_targets_;
-  auto by_version = SeekableListCount();
-  auto num_targets = SeekableListCount();
-  DebugLog("ParseTarget(): offset = 0x%x, by_version=%u, num_targets=%u", offset_targets_, by_version, num_targets);
-  for (uint32_t i_target = 0; i_target < num_targets;
-       i_target++) {
+  auto num_targets = SeekableListCount(); // by_version
+  auto offsets = SeekableListOffsets();
+  DebugLog("ParseTarget(): offset = 0x%x, num_targets=%u, offset[0] = 0x%x", offset_targets_, num_targets, offsets[0]);
+  for (uint32_t i_target = 0; i_target < num_targets; i_target++) {
+    offset_ = offsets[i_target];
     const char* t_distro = ZStr();
     const char* t_release = ZStr();
     const char* t_version = ZStr();
@@ -152,7 +152,9 @@ Struct& KxdbParser::ParseStructLayout(uint64_t layout_idx) {
   SeekToItem(offset_struct_layouts_, layout_idx);
 
   auto meta_idx = ReadUInt();
+  DebugLog("meta_idx = %u", meta_idx);
   auto [struct_name, fields] = structs_meta_.at(meta_idx);
+  DebugLog("struct_name = %s", struct_name.c_str());
 
   Struct str;
   str.size = ReadUInt();
