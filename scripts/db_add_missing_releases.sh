@@ -18,7 +18,7 @@ SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
 KXDB_DIR="$SCRIPT_DIR/../kxdb_tool"
 
-./get_missing_releases.sh
+./db_get_missing_releases.sh
 
 while IFS= read -r RELEASE <&3; do
     if [ "$1" == "--auto-cleanup" ]; then
@@ -40,4 +40,4 @@ while IFS= read -r RELEASE <&3; do
 
     echo "Uploading new db"
     gcloud storage cp -Z -a publicRead db.kxdb gs://kernel-research/pwnkit/db/kernelctf.kxdb
-done 3< missing_releases.txt
+done 3< missing_db_releases.txt
