@@ -24,15 +24,14 @@ std::optional<Target> KxdbParser::GetTarget(const std::string& distro,
   return ParseTarget(distro, release_name, std::nullopt, throw_on_missing);
 }
 
-void KxdbParser::ParseHeader(bool parse_known_metadata) {
+void KxdbParser::ParseHeader() {
   if (offset_ != 0)
     throw ExpKitError(
         "header can only be parsed from offset 0, current offset is 0x%llx",
         offset_);
 
   auto magic = ReadU32();
-  // TODO remove KPWN magic check after db rebuild
-  if (magic != *(uint32_t*)"KXDB" && magic != *(uint32_t*)"KPWN")
+  if (magic != *(uint32_t*)"KXDB")
     throw ExpKitError("invalid magic: %llx", magic);
 
   auto version_major = ReadU16();
@@ -41,16 +40,18 @@ void KxdbParser::ParseHeader(bool parse_known_metadata) {
     throw ExpKitError("version v%d.%d is not supported (only v1.x)",
                       version_major, version_minor);
 
-  has_structs_data_ = version_minor >= 1;
+  auto num_sections = ReadU16();
+  for (auto i = 0; i < num_sections; i++) {
+    auto id = ReadU16();
+    sections_[(Section) id] = { .offset = ReadU32(), .size = ReadU32() };
+  }
 
-  BeginStruct(4);  // meta header
   ParseSymbolsHeader();
-  ParseRopActionsHeader(parse_known_metadata);
+  ParseRopActionsHeader();
   ParseStructsHeader();
-  EndStruct();
 
-  num_targets_ = ReadU32();
   offset_targets_ = offset_;
+  offset_struct_layouts_ = sections_[Section::StructLayouts].offset;
 }
 
 void KxdbParser::SetLog(ILog* log) { log_ = log; }
@@ -91,29 +92,15 @@ std::vector<Target> KxdbParser::ParseTargets(
   if (offset_targets_ == 0) ParseHeader();
 
   std::vector<Target> result;
-  offset_ = offset_targets_;
-  DebugLog("ParseTarget(): offset = 0x%x", offset_targets_);
-  for (uint32_t i_target = 0; i_target < num_targets_;
-       i_target++, EndStruct()) {
-    BeginStruct(4);
-
-    auto distro_len = ReadU16();
-    const char* t_distro = ZStr(distro_len);
-
-    auto release_name_len = ReadU16();
-    const char* t_release = ZStr(release_name_len);
-
-    auto version_len = ReadU16();
-    const char* t_version = ZStr(version_len);
-
-    DebugLog(
-        "target[%d] distro_len = %d, release_name_len = %d, version_len = %d",
-        i_target, distro_len, release_name_len, version_len);
-    if ((distro.has_value() && distro_len != distro->length()) ||
-        (release_name.has_value() &&
-         release_name_len != release_name->length()) ||
-        (version.has_value() && version_len != version->length()))
-      continue;
+  SeekTo(offset_targets_);
+  auto num_targets = SeekableListCount(); // by_version
+  auto offsets = SeekableListOffsets();
+  DebugLog("ParseTarget(): offset = 0x%x, num_targets=%u", offset_targets_, num_targets);
+  for (uint32_t i_target = 0; i_target < num_targets; i_target++) {
+    SeekTo(offsets.at(i_target));
+    const char* t_distro = ZStr();
+    const char* t_release = ZStr();
+    const char* t_version = ZStr();
 
     DebugLog("distro = '%s', release = '%s', version = '%s'", t_distro,
              t_release, t_version);
@@ -139,13 +126,12 @@ std::vector<Target> KxdbParser::ParseTargets(
 }
 
 void KxdbParser::ParseStructs(Target& target) {
-  if (!has_structs_data_) return;
+  auto values = IndexableIntList();
   DebugLog("ParseStructs(): count=%u", structs_meta_.size());
-
-  for (int i = 0; i < structs_meta_.size(); i++) {
+  for (size_t i = 0; i < structs_meta_.size(); i++) {
     // layout_idx_opt = layout_idx + 1 or 0 if the struct does not exist in this
     // release
-    auto layout_idx_opt = ReadUInt();
+    auto layout_idx_opt = values.at(i);
     DebugLog("  struct[%u]: layout_idx_opt=%u", i, layout_idx_opt);
     if (layout_idx_opt == 0) continue;
     auto str = GetStructLayout(layout_idx_opt - 1);
@@ -164,7 +150,9 @@ Struct& KxdbParser::ParseStructLayout(uint64_t layout_idx) {
   SeekToItem(offset_struct_layouts_, layout_idx);
 
   auto meta_idx = ReadUInt();
+  DebugLog("meta_idx = %u", meta_idx);
   auto [struct_name, fields] = structs_meta_.at(meta_idx);
+  DebugLog("struct_name = %s", struct_name.c_str());
 
   Struct str;
   str.size = ReadUInt();
@@ -191,20 +179,19 @@ Struct& KxdbParser::ParseStructLayout(uint64_t layout_idx) {
 }
 
 void KxdbParser::ParseStructsHeader() {
-  if (!has_structs_data_) return;
   DebugLog("ParseStructsHeader()");
 
-  auto num_structs = ReadUInt();
+  auto num_structs = SeekableListCount();
   DebugLog("ParseStructsHeader(): num_structs=%u", num_structs);
 
-  for (int i = 0; i < num_structs; i++) {
+  for (uint64_t i = 0; i < num_structs; i++) {
     auto struct_name = ZStr();
     auto num_fields = ReadUInt();
     DebugLog("  struct[%u]: name:%s field_count:%u", i, struct_name,
              num_fields);
 
     std::vector<FieldMeta> fields;
-    for (int j = 0; j < num_fields; j++) {
+    for (uint64_t j = 0; j < num_fields; j++) {
       auto field_name = ZStr();
       auto optional = ReadU8() == 1;
       fields.push_back({field_name, optional});
@@ -212,16 +199,14 @@ void KxdbParser::ParseStructsHeader() {
 
     structs_meta_.push_back({struct_name, fields});
   }
-  offset_struct_layouts_ = ReadU32();
 }
 
 void KxdbParser::ParsePivots(Target& target) {
-  DebugLog("ParsePivots()");
-  if (!BeginStruct(2, false)) return;
+  BeginStruct(-1);
 
   auto num_one_gadgets = ReadUInt();
   DebugLog("ParsePivots(): num_one_gadgets = %u", num_one_gadgets);
-  for (int i = 0; i < num_one_gadgets; i++) {
+  for (uint64_t i = 0; i < num_one_gadgets; i++) {
     OneGadgetPivot pivot;
     pivot.address = ReadUInt();
     pivot.pivot_reg = ReadRegisterUsage();
@@ -233,7 +218,7 @@ void KxdbParser::ParsePivots(Target& target) {
 
   auto num_push_indirects = ReadUInt();
   DebugLog("ParsePivots(): num_push_indirects = %u", num_push_indirects);
-  for (int i = 0; i < num_push_indirects; i++) {
+  for (uint64_t i = 0; i < num_push_indirects; i++) {
     PushIndirectPivot pivot;
     pivot.address = ReadUInt();
     pivot.indirect_type = (IndirectType)ReadUInt();
@@ -245,7 +230,7 @@ void KxdbParser::ParsePivots(Target& target) {
 
   auto num_poprsps = ReadUInt();
   DebugLog("ParsePivots(): num_poprsps = %u", num_poprsps);
-  for (int i = 0; i < num_poprsps; i++) {
+  for (uint64_t i = 0; i < num_poprsps; i++) {
     PopRspPivot pivot;
     pivot.address = ReadUInt();
     pivot.stack_change_before_rsp = ReadInt();
@@ -255,7 +240,7 @@ void KxdbParser::ParsePivots(Target& target) {
 
   auto num_stack_shifts = ReadUInt();
   DebugLog("ParsePivots(): num_stack_shifts = %u", num_stack_shifts);
-  for (int i = 0; i < num_stack_shifts; i++) {
+  for (uint64_t i = 0; i < num_stack_shifts; i++) {
     StackShiftPivot pivot;
     pivot.address = ReadUInt();
     pivot.ret_offset = ReadUInt();
@@ -272,55 +257,52 @@ RegisterUsage KxdbParser::ReadRegisterUsage() {
   RegisterUsage reg_usage;
   reg_usage.reg = (Register)ReadUInt();
   auto count = ReadUInt();
-  for (int i = 0; i < count; i++) reg_usage.used_offsets.push_back(ReadInt());
+  for (uint64_t i = 0; i < count; i++)
+    reg_usage.used_offsets.push_back(ReadInt());
   return reg_usage;
 }
 
 void KxdbParser::ParseRopActions(Target& target) {
-  DebugLog("ParseRopActions (num=%u)", rop_action_ids_.size());
-  for (int i_action = 0; i_action < rop_action_ids_.size();
-       i_action++, EndStruct()) {
-    // skip if this ROP action is not supported
-    if (!BeginStruct(2)) continue;
+  auto sizes = SeekableListSizes();
+  DebugLog("ParseRopActions (num=%u == %u)", rop_action_meta_.size(), sizes.size());
+  for (size_t i_action = 0; i_action < rop_action_meta_.size(); i_action++) {
+    if (sizes[i_action] == 0) continue;
 
+    auto name = split(rop_action_meta_[i_action].desc, "(")[0];
     auto num_items = ReadUInt();
+    DebugLog("  RA[%s] num_items = %u", name.c_str(), num_items);
     std::vector<RopItem> rop_items;
-    for (int i = 0; i < num_items; i++) {
+    for (uint64_t i = 0; i < num_items; i++) {
       auto type_and_value = ReadUInt();
-      rop_items.push_back(
-          RopItem((RopItemType)(type_and_value & 0x03), type_and_value >> 2));
+      auto type = (RopItemType)(type_and_value & 0x03);
+      auto value = type_and_value >> 2;
+      DebugLog("  RA[%s] item[%u] type = %u, value = %u", name.c_str(), i, type, value);
+      rop_items.push_back(RopItem(type, value));
     }
 
-    auto type_id = rop_action_ids_[i_action];
-    target.rop_actions[type_id] = rop_items;
+    target.rop_actions[name] = rop_items;
   }
 }
 
-void KxdbParser::ParseRopActionsHeader(bool parse_known_metadata) {
-  auto num_rop_actions = ReadU32();
+void KxdbParser::ParseRopActionsHeader() {
+  auto num_rop_actions = SeekableListCount();
   DebugLog("num_rop_actions = %d", num_rop_actions);
-  for (int i = 0; i < num_rop_actions; i++, EndStruct()) {
-    BeginStruct(2);
-    auto type_id = (RopActionId)ReadU32();
-    rop_action_ids_.push_back(type_id);
-    if (parse_known_metadata) {
-      auto desc = ZStr(ReadU16());
-      auto num_args = ReadU8();
-      DebugLog("rop_action[%d] = %d, num_args = %d, desc = '%s'", i, type_id,
-               num_args, desc);
+  for (uint64_t i = 0; i < num_rop_actions; i++) {
+    auto desc = ZStr();
+    auto num_args = ReadUInt();
+    DebugLog("rop_action[%d], num_args = %d, desc = '%s'", i, num_args, desc);
 
-      RopActionMeta ra(type_id, desc);
-      for (int j = 0; j < num_args; j++) {
-        auto arg_name = ZStr(ReadU16());
-        auto flags = ReadU8();
-        bool required = (flags & 0x1) == 0x1;
-        uint64_t default_value = required ? 0 : ReadU64();
-        DebugLog("argument: name='%s', flags=0x%x, default_value=%x", arg_name,
-                 flags, default_value);
-        ra.args.push_back(RopActionArgMeta(arg_name, required, default_value));
-      }
-      rop_action_meta_.insert({type_id, ra});
+    RopActionMeta ra(desc);
+    for (uint64_t j = 0; j < num_args; j++) {
+      auto arg_name = ZStr();
+      auto flags = ReadU8();
+      bool required = (flags & 0x1) == 0x1;
+      uint64_t default_value = required ? 0 : ReadUInt();
+      DebugLog("  argument: name='%s', flags=0x%x, default_value=%x", arg_name,
+               flags, default_value);
+      ra.args.push_back(RopActionArgMeta(arg_name, required, default_value));
     }
+    rop_action_meta_.push_back(ra);
   }
 }
 
@@ -329,18 +311,15 @@ void KxdbParser::ParseSymbols(Target& target) {
   for (auto& name : symbol_names_) {
     auto value = ReadU32();
     target.symbols[name] = value;
-    DebugLog("symbol[%s] = 0x%x", name.c_str(), value);
+    DebugLog("  symbol[%s] = 0x%x", name.c_str(), value);
   }
 }
 
 void KxdbParser::ParseSymbolsHeader() {
-  auto num_symbols = ReadU32();
+  auto num_symbols = SeekableListCount();
   DebugLog("num_symbols = %d", num_symbols);
-  for (int i = 0; i < num_symbols; i++, EndStruct()) {
-    BeginStruct(2);
-    auto type_id = ReadU32();
-    auto name_len = ReadU16();
-    auto name = ZStr(name_len);
+  for (uint64_t i = 0; i < num_symbols; i++) {
+    auto name = ZStr();
     DebugLog("symbol[%d] = %s", i, name);
     symbol_names_.push_back(name);
   }

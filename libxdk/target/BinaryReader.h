@@ -47,6 +47,20 @@ public:
     void SizeCheck(uint64_t len);
 
     /**
+    * @brief Skip len amount of bytes.
+    * @param len The number of bytes to skip.
+    * @throws ExpKitError if there are not enough remaining bytes.
+    */
+    void Skip(uint64_t len);
+
+    /**
+    * @brief Seek to offset.
+    * @param offset The offset within the file to seek.
+    * @throws ExpKitError if the offset is out-of-bounds.
+    */
+    void SeekTo(uint64_t offset);
+
+    /**
     * @brief Reads a block of raw bytes from the buffer.
     * @param len The number of bytes to read.
     * @return A pointer to the read bytes within the internal buffer.
@@ -96,6 +110,10 @@ public:
     * @return The number of items in the seekable list.
     */
     uint64_t SeekableListCount();
+
+    std::vector<uint64_t> IndexableIntList();
+    std::vector<uint64_t> SeekableListOffsets();
+    std::vector<uint64_t> SeekableListSizes();
 
     /**
     * @brief Checks if a seek operation is currently in progress.

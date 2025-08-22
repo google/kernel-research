@@ -16,9 +16,9 @@ set -ex
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
-KXDB_DIR="$SCRIPT_DIR/../kpwn_db"
+KXDB_DIR="$SCRIPT_DIR/../kxdb_tool"
 
-./get_missing_releases.sh
+./db_get_missing_releases.sh
 
 while IFS= read -r RELEASE <&3; do
     if [ "$1" == "--auto-cleanup" ]; then
@@ -36,8 +36,8 @@ while IFS= read -r RELEASE <&3; do
     "$IMAGE_DB_DIR/collect_runtime_data.sh" || continue
 
     echo "Adding $RELEASE to the database"
-    "$KXDB_DIR/kpwn_db.py" -i db.kxdb -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR"
+    "$KXDB_DIR/kxdb_tool.py" -i db.kxdb -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR"
 
     echo "Uploading new db"
     gcloud storage cp -Z -a publicRead db.kxdb gs://kernel-research/pwnkit/db/kernelctf.kxdb
-done 3< missing_releases.txt
+done 3< missing_db_releases.txt

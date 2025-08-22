@@ -39,12 +39,11 @@ struct RopActionArgMeta {
 };
 
 struct RopActionMeta {
-    RopActionId type_id;
     std::string desc;
     std::vector<RopActionArgMeta> args;
 
     RopActionMeta() {}
-    RopActionMeta(RopActionId type_id, std::string desc): type_id(type_id), desc(desc) { }
+    RopActionMeta(std::string desc): desc(desc) { }
 };
 
 struct StructField {
@@ -64,7 +63,7 @@ struct Target {
     std::string release_name;
     std::string version;
     std::map<std::string, uint32_t> symbols;
-    std::map<RopActionId, std::vector<RopItem>> rop_actions;
+    std::map<std::string, std::vector<RopItem>> rop_actions;
     std::map<std::string, Struct> structs;
     Pivots pivots;
 

@@ -16,7 +16,7 @@ set -eo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
-KXDB_DIR="$SCRIPT_DIR/../kpwn_db"
+KXDB_DIR="$SCRIPT_DIR/../kxdb_tool"
 DISTRO="$1"
 RELEASE="$2"
 
@@ -30,12 +30,12 @@ echo "Collecting runtime data..."
 "$IMAGE_DB_DIR/collect_runtime_data.sh"
 
 echo "Creating db for release $DISTRO $RELEASE"
-"$KXDB_DIR/kpwn_db.py" -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
-"$KXDB_DIR/kpwn_db.py" -i db.kxdb -o db.json --indent 4
+"$KXDB_DIR/kxdb_tool.py" -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
+"$KXDB_DIR/kxdb_tool.py" -i db.kxdb -o db.json --indent 4
 
 if [[ "$3" == "--upload" ]]; then
     echo "Uploading dbs"
-    for EXT in kpwn json; do
+    for EXT in kxdb json; do
         gcloud storage cp -Z -a publicRead db.$EXT gs://kernel-research/pwnkit/db/$DISTRO/$RELEASE.$EXT
     done
 

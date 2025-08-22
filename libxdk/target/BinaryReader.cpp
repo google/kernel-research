@@ -36,12 +36,12 @@ void BinaryReader::EndStruct() {
 }
 
 bool BinaryReader::BeginStruct(int struct_size_len, bool begin_if_empty) {
-  if (struct_size_len != 2 && struct_size_len != 4)
+  if (struct_size_len != 2 && struct_size_len != 4 && struct_size_len != -1)
     throw ExpKitError(
         "unsupported struct_size_len (%d), only 2 and 4 supported",
         struct_size_len);
 
-  auto struct_size = struct_size_len == 2 ? ReadU16() : ReadU32();
+  auto struct_size = struct_size_len == 2 ? ReadU16() : struct_size_len == 4 ? ReadU32() : ReadUInt();
   DebugLog("BeginStruct(): offset = %u, struct_size = %u, end_offset = %u",
            offset_, struct_size, offset_ + struct_size);
   SizeCheck(struct_size);
@@ -66,7 +66,7 @@ void BinaryReader::SeekToItem(uint64_t seeklist_offset, uint64_t item_idx) {
     throw ExpKitError("Seeking is already in progress. Call EndSeek() first.");
 
   seek_origin_offset_ = offset_;
-  offset_ = seeklist_offset;
+  SeekTo(seeklist_offset);
   auto value = ReadUInt();
   auto offset_size = (value & 0x3) + 1;
   auto item_count = value >> 2;
@@ -78,12 +78,12 @@ void BinaryReader::SeekToItem(uint64_t seeklist_offset, uint64_t item_idx) {
   auto hdr_offset = offset_;
   uint64_t item_offset = 0;
   if (item_idx != 0) {
-    offset_ += offset_size * (item_idx - 1);
+    Skip(offset_size * (item_idx - 1));
     item_offset = Uint(offset_size);
   }
 
-  // skip the seek list
-  offset_ = hdr_offset + offset_size * item_count + item_offset;
+  // skip the remaining seek list and jump to the item
+  Skip((item_count - item_idx) * offset_size + item_offset);
   DebugLog(
       "SeekToItem(): seeklist_offset=%u, item_idx=%u, offset_size=%u, "
       "item_count=%u, item_offset=%u, new offset=%u",
@@ -93,12 +93,45 @@ void BinaryReader::SeekToItem(uint64_t seeklist_offset, uint64_t item_idx) {
 bool BinaryReader::IsSeekingInProgress() { return seek_origin_offset_ != -1; }
 
 uint64_t BinaryReader::SeekableListCount() {
-  auto value = ReadUInt();
-  auto offset_size = (value & 0x3) + 1;
-  auto item_count = value >> 2;
+  auto hdr = ReadUInt();
+  auto offset_size = 1 << (hdr & 0x3); // 0=u1, 1=u2, 2=u4, 3=u8
+  auto item_count = hdr >> 2;
   // skip the seek list
-  offset_ += offset_size * item_count;
+  Skip(offset_size * item_count);
   return item_count;
+}
+
+std::vector<uint64_t> BinaryReader::IndexableIntList() {
+  auto hdr = ReadUInt();
+  auto item_size = 1 << (hdr & 0x3); // 0=u1, 1=u2, 2=u4, 3=u8
+  auto item_count = hdr >> 2;
+
+  std::vector<uint64_t> items;
+  for (uint64_t i = 0; i < item_count; i++)
+    items.push_back(Uint(item_size));
+  return items;
+}
+
+std::vector<uint64_t> BinaryReader::SeekableListOffsets() {
+  auto raw = IndexableIntList();
+  if (raw.size() == 0)
+    return {};
+
+  std::vector<uint64_t> offsets { offset_ };
+  for (uint64_t i = 0; i < raw.size() - 1; i++)
+    offsets.push_back(offset_ + raw[i]);
+  return offsets;
+}
+
+std::vector<uint64_t> BinaryReader::SeekableListSizes() {
+  auto start_offset = 0;
+
+  std::vector<uint64_t> sizes;
+  for (auto end_offset : IndexableIntList()) {
+    sizes.push_back(end_offset - start_offset);
+    start_offset = end_offset;
+  }
+  return sizes;
 }
 
 uint64_t BinaryReader::ReadUInt() { return ReadInt(false); }
@@ -124,6 +157,11 @@ uint16_t BinaryReader::ReadU16() { return *(uint16_t*)Read(2); }
 
 uint8_t BinaryReader::ReadU8() { return *(uint8_t*)Read(1); }
 
+void BinaryReader::Skip(uint64_t len) {
+  SizeCheck(len);
+  offset_ += len;
+}
+
 uint8_t* BinaryReader::Read(uint16_t len) {
   SizeCheck(len);
   uint8_t* ptr = &data_.data()[offset_];
@@ -136,6 +174,14 @@ void BinaryReader::SizeCheck(uint64_t len) {
     throw ExpKitError(
         "tried to read outside of buffer: offset=%u, len=%u, struct_end=%u",
         offset_, len, EndOffset());
+}
+
+void BinaryReader::SeekTo(uint64_t offset) {
+  if (offset >= EndOffset())
+    throw ExpKitError(
+        "tried to read seek outside of the buffer: from_offset=%lu, to_offset=%lu, struct_end=%lu",
+        offset_, offset, EndOffset());
+  offset_ = offset;
 }
 
 uint64_t BinaryReader::RemainingBytes() { return EndOffset() - offset_; }

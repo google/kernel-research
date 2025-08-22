@@ -43,7 +43,7 @@ public:
         Log("Stack content:\n%s", HexDump::Dump(used_stack).c_str());
         xdk_->Kfree(rop_buf_addr);
 
-        int non_used_bytes = 0;
+        size_t non_used_bytes = 0;
         for (; non_used_bytes < used_stack.size(); non_used_bytes++)
             if (used_stack[non_used_bytes] != 0)
                 break;
@@ -83,7 +83,7 @@ public:
 
     TEST_METHOD(writeWhatWhereTest, "WRITE_WHAT_WHERE_64 is working") {
         Payload p(40);
-        auto target_offs = 16;
+        size_t target_offs = 16;
         uint64_t new_value = 0x1122334455667788;
 
         auto target_buf_addr = xdk_->AllocBuffer(p.GetData(), true);
@@ -93,7 +93,7 @@ public:
         Log("Leaked buffer:\n%s", HexDump::Dump(buf_leak).c_str());
         xdk_->Kfree(target_buf_addr);
 
-        for (int i = 0; i < p.Size(); i += 8)
+        for (size_t i = 0; i < p.Size(); i += 8)
             ASSERT_EQ(i == target_offs ? new_value : 0, *((uint64_t*)&buf_leak[i]));
     }
 

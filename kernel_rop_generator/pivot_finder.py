@@ -14,8 +14,8 @@ from rop_instruction_patcher import RopInstructionPatcher
 from rop_util import setup_logger
 
 sys.path.append(os.path.abspath(f"{__file__}/../.."))
-from kpwn_db.data_model.pivots import *
-from kpwn_db.data_model.serialization import *
+from kxdb_tool.data_model.pivots import *
+from kxdb_tool.data_model.serialization import *
 
 logger = setup_logger("pivot_finder")
 logger.setLevel(logging.INFO)

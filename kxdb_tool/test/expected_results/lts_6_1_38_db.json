@@ -1,0 +1,264 @@
+{
+    "meta": {
+        "symbols": [
+            {
+                "name": "__x64_sys_fork"
+            },
+            {
+                "name": "anon_pipe_buf_ops"
+            },
+            {
+                "name": "commit_creds"
+            },
+            {
+                "name": "find_task_by_vpid"
+            },
+            {
+                "name": "init_nsproxy"
+            },
+            {
+                "name": "msleep"
+            },
+            {
+                "name": "prepare_kernel_cred"
+            },
+            {
+                "name": "switch_task_namespaces"
+            }
+        ],
+        "rop_actions": [
+            {
+                "desc": "commit_kernel_cred(prepare_kernel_cred(0))",
+                "args": []
+            },
+            {
+                "desc": "fork()",
+                "args": []
+            },
+            {
+                "desc": "msleep(ARG_time_msec)",
+                "args": [
+                    {
+                        "name": "time_msec",
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "desc": "ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+                "args": [
+                    {
+                        "name": "user_rip",
+                        "required": true
+                    },
+                    {
+                        "name": "user_cs",
+                        "required": true
+                    },
+                    {
+                        "name": "user_rflags",
+                        "required": true
+                    },
+                    {
+                        "name": "user_sp",
+                        "required": true
+                    },
+                    {
+                        "name": "user_ss",
+                        "required": true
+                    }
+                ]
+            },
+            {
+                "desc": "switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)",
+                "args": [
+                    {
+                        "name": "vpid",
+                        "required": false,
+                        "default_value": 1
+                    }
+                ]
+            },
+            {
+                "desc": "telefork(ARG_sleep_msec=0xffffffff)",
+                "args": [
+                    {
+                        "name": "sleep_msec",
+                        "required": false,
+                        "default_value": 4294967295
+                    }
+                ]
+            },
+            {
+                "desc": "write_what_where_64(ARG_address, ARG_new_value)",
+                "args": [
+                    {
+                        "name": "address",
+                        "required": true
+                    },
+                    {
+                        "name": "new_value",
+                        "required": true
+                    }
+                ]
+            }
+        ],
+        "structs": [
+            {
+                "struct_name": "hfsc_class",
+                "fields": [
+                    {
+                        "field_name": "level",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "cl_parent",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "vt_node.__rb_parent_color",
+                        "optional": true
+                    },
+                    {
+                        "field_name": "cf_node.__rb_parent_color",
+                        "optional": true
+                    },
+                    {
+                        "field_name": "cl_vt",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "cl_cvtmin",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "msg_msg",
+                "fields": [
+                    {
+                        "field_name": "m_list.next",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "m_list.prev",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "m_type",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "m_ts",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "next",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "security",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "msg_msgseg",
+                "fields": [
+                    {
+                        "field_name": "next",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "pipe_buf_operations",
+                "fields": [
+                    {
+                        "field_name": "release",
+                        "optional": false
+                    },
+                    {
+                        "field_name": "get",
+                        "optional": false
+                    }
+                ]
+            },
+            {
+                "struct_name": "pipe_buffer",
+                "fields": [
+                    {
+                        "field_name": "ops",
+                        "optional": false
+                    }
+                ]
+            }
+        ]
+    },
+    "targets": [
+        {
+            "distro": "kernelctf",
+            "release_name": "lts-6.1.38",
+            "version": "KernelCTF version 6.1.38 (...)",
+            "symbols": {
+                "__x64_sys_fork": 0,
+                "anon_pipe_buf_ops": 0,
+                "commit_creds": 0,
+                "find_task_by_vpid": 0,
+                "init_nsproxy": 0,
+                "msleep": 0,
+                "prepare_kernel_cred": 0,
+                "switch_task_namespaces": 0
+            },
+            "rop_actions": [],
+            "stack_pivots": {
+                "one_gadgets": [
+                    {
+                        "address": 1337,
+                        "instructions": [],
+                        "pivot_reg": "rbp",
+                        "used_offsets": [
+                            1,
+                            -2,
+                            3
+                        ],
+                        "next_rip_offset": 8
+                    }
+                ],
+                "push_indirects": [
+                    {
+                        "address": 1234,
+                        "instructions": [],
+                        "indirect_type": "call",
+                        "push_register": "r10",
+                        "used_offsets_in_push": [
+                            -10
+                        ],
+                        "indirect_register": "rax",
+                        "used_offsets_in_indirect_reg": [
+                            20
+                        ],
+                        "next_rip_offset": -16
+                    }
+                ],
+                "pop_rsps": [
+                    {
+                        "address": 9876,
+                        "instructions": [],
+                        "stack_change_before_rsp": 8,
+                        "next_rip_offset": 16
+                    }
+                ],
+                "stack_shifts": [
+                    {
+                        "address": 31337,
+                        "instructions": [],
+                        "ret_offset": 16,
+                        "shift_amount": 24
+                    }
+                ]
+            },
+            "structs": {}
+        }
+    ]
+}

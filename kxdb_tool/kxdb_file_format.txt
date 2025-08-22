@@ -1,0 +1,84 @@
+# .kxdb file format structure
+
+magic = KXDB (u4)
+version_major = 0x1 (u2)
+version_minor = 0x1 (u2)
+num_sections (u2)
+sections[num_sections]
+  id (u2)            # 1 - meta, 2 - targets, 3 - struct_layouts
+  offset (u4)
+  size (u4)          # inclusive
+meta:
+  symbols[seekable_varsize]      # sorted by name
+    name[varsize] (zstr)
+  rop_actions[seekable_varsize]  # sorted by desc
+    desc[varsize] (zstr)
+    arguments[varsize]
+      name[varsize] (zstr)
+      flags (uint)
+        required - 0x1
+      default_value (uint) - only if required == 0
+  structs[seekable_varsize]      # sorted by struct_name
+    struct_name[varsize] (zstr)
+    fields[varsize]
+      field_name[varsize] (zstr)
+      optional (u1)
+targets_by_version (varsize_ints)  # sorting by version
+targets[seekable_varsize]          # sorted by (distro,release_name)
+  distro[varsize] (zstr)
+  release_name[varsize] (zstr)
+  version[varsize] (zstr)
+  symbols[len(meta.symbols)]
+    offset (u4)                # constant size to make it seekable
+  rop_actions[seekable_varsize]
+    items[varsize]
+      type_and_value (uint) - "(value << 2) | type"
+        the 2 LSB bits: enum, 0 = constant_value, 1 = symbol, 2 = argument
+        other bits: value
+  stack_pivots
+    struct_size (uint) - to skip this container if we don't care
+    one_gadgets[varsize]
+      address (uint)
+      pivot_reg (uint) - enum
+      pivot_reg_used_offsets[varsize] (sint)
+      next_rip_offset (sint)
+    push_indirects[varsize]
+      address (uint)
+      indirect_type (uint) - enum: 0 = jmp, 1 = call
+      push_reg (uint) - enum
+      push_reg_used_offsets[varsize] (sint)
+      indirect_reg (uint) - enum
+      indirect_reg_used_offsets[varsize] (sint)
+      next_rip_offset (sint)
+    pop_rsps[varsize]
+      address (uint)
+      stack_change_before_rsp (uint)
+      next_rip_offset (sint)
+    stack_shifts[varsize]
+      address (uint)
+      ret_offset (uint)
+      shift_amount (uint)
+  struct_layout_indices (varsize_ints) # seekable, skippable
+struct_layouts[seekable_varsize]
+  struct_meta_idx (uint)
+  sizeof_structure (uint)
+  fields[num_fields]
+    offset (uint) # 1-based, 0 means missing
+    field_size (uint)
+
+u[N] = N-byte unsigned integer (u1 = uint8_t, u4 = uint32_t)
+b[N] = N-bit unsigned integer (b4 = integer stored on 4 bits)
+uint = generic, variable-sized unsigned integer
+sint = generic, variable-sized signed integer
+zstr = string with a terminating \0 character
+varsize = array-size stored as uint before the array
+varsize_ints =
+    hdr (uint) - "(item_count << 2) | item_size"
+        item_size: 0=u1, 1=u2, 2=u4, 3=u8
+    items[item_count] (u1/u2/u4/u8 depending on item_size)
+seekable_varsize =
+    # array item END* offsets are stored as varsize_ints before the real array
+    # *END offsets to support skipping <n> elements (even all elements) and to
+    # be able to calculate item sizes (first start offset is 0 anyway)
+    end_offsets (varsize_ints)
+    array_items[len(end_offsets)]

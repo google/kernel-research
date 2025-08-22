@@ -102,7 +102,7 @@ typedef struct {
     volatile uint64_t arguments[6];
     volatile uint64_t return_value;
     volatile uint64_t call_stack_size;
-    volatile uint8_t call_stack[];
+    volatile uint8_t call_stack[1];
 } kprobe_log_entry;
 
 typedef struct {
