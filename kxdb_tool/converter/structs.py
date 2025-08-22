@@ -18,19 +18,20 @@ class StructWriter:
         wr.u1(f.optional)
 
   def write_target(self, wr_target, target):
-    with wr_target.struct() as wr:
-      for (meta_idx, struct_meta) in enumerate(self.structs_meta):
-        struct = target.structs.get(struct_meta.struct_name, None)
-        if struct:
-          struct.meta_idx = meta_idx
-          try:
-            idx = self.struct_layouts.index(struct)
-          except ValueError:
-            idx = len(self.struct_layouts)
-            self.struct_layouts.append(struct)
-        else:
-          idx = -1
-        wr.varuint(idx + 1)
+    items = []
+    for (meta_idx, struct_meta) in enumerate(self.structs_meta):
+      struct = target.structs.get(struct_meta.struct_name, None)
+      if struct:
+        struct.meta_idx = meta_idx
+        try:
+          idx = self.struct_layouts.index(struct)
+        except ValueError:
+          idx = len(self.struct_layouts)
+          self.struct_layouts.append(struct)
+      else:
+        idx = -1
+      items.append(idx + 1)
+    wr_target.indexable_int_list(items)
 
   def write_struct_layouts(self, root_wr):
     for (wr, struct) in root_wr.seekable_list(self.struct_layouts):
@@ -82,12 +83,11 @@ class StructReader:
     return self.struct_layouts
 
   def read_target(self, r_target):
-    r = r_target.struct()
+    layout_idxs = r_target.indexable_int_list()
     structs = {}
-    for struct_meta in self.meta:
-      layout_idx = r.varuint() - 1
-      if layout_idx == -1:
+    for (struct_meta, layout_idx) in zip(self.meta, layout_idxs):
+      if layout_idx == 0:
         continue
-      structs[struct_meta.struct_name] = self.struct_layouts[layout_idx]
+      structs[struct_meta.struct_name] = self.struct_layouts[layout_idx - 1]
     return structs
 
