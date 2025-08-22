@@ -99,11 +99,11 @@ class BinaryWriter:
 
   def indexable_int_list(self, list_):
     max_offs = max(list_) if list_ else 0
-    offset_size = 1 if max_offs < 256 else 2 if max_offs < 65536 else 4
+    offset_size = 0 if max_offs < 2**8 else 1 if max_offs < 2**16 else 2 if max_offs < 2**24 else 3
 
-    self.varuint((offset_size - 1) | len(list_) << 2)
+    self.varuint(offset_size | len(list_) << 2)
     for item in list_:
-      self.uint(offset_size, item)
+      self.uint(1 << offset_size, item)
 
   def seekable_list(self, list_):
     #self.varuint(len(list_))
