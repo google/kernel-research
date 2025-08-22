@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-set -ex
+set -exo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
@@ -37,7 +37,7 @@ echo "The following files were not merged into the DB yet: "
 cat missing_db_releases.txt
 echo
 
-cat missing_db_releases.txt | gsutil -m cp -I ./db
+cat missing_db_releases.txt | gcloud storage cp -I ./db
 
 "$KXDB_DIR/kxdb_tool.py" -i "db/*.kxdb" -o kernelctf.kxdb
 "$KXDB_DIR/kxdb_tool.py" -i kernelctf.kxdb -o kernelctf.json
