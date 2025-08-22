@@ -12,7 +12,7 @@ std::map<RopActionId, std::string> RopActionNames {
     { RopActionId::WRITE_WHAT_WHERE_64, "write_what_where_64" },
     { RopActionId::FORK, "fork" },
     { RopActionId::TELEFORK, "telefork" },
-    { RopActionId::KPTI_TRAMPOLINE, "kpti_trampoline" },
+    { RopActionId::KPTI_TRAMPOLINE, "ret_via_kpti_retpoline" },
 };
 
 std::vector<RopItem> Target::GetItemsForAction(RopActionId id) {
@@ -33,7 +33,7 @@ uint32_t Target::GetSymbolOffset(std::string symbol_name) const {
 
 void StaticTarget::AddStruct(const std::string& name, uint64_t size,
                              const std::vector<StructField>& fields) {
-  Struct str{name, size};
+  Struct str{name, size, {}};
   for (auto field : fields) str.fields[field.name] = field;
   structs[name] = str;
 }
