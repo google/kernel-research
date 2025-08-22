@@ -94,7 +94,7 @@ bool BinaryReader::IsSeekingInProgress() { return seek_origin_offset_ != -1; }
 
 uint64_t BinaryReader::SeekableListCount() {
   auto hdr = ReadUInt();
-  auto offset_size = (hdr & 0x3) + 1;
+  auto offset_size = 1 << (hdr & 0x3); // 0=u1, 1=u2, 2=u4, 3=u8
   auto item_count = hdr >> 2;
   // skip the seek list
   offset_ += offset_size * item_count;
@@ -103,13 +103,13 @@ uint64_t BinaryReader::SeekableListCount() {
 
 std::vector<uint64_t> BinaryReader::IndexableIntList() {
   auto hdr = ReadUInt();
-  auto offset_size = (hdr & 0x3) + 1;
+  auto item_size = 1 << (hdr & 0x3); // 0=u1, 1=u2, 2=u4, 3=u8
   auto item_count = hdr >> 2;
 
-  std::vector<uint64_t> offsets;
+  std::vector<uint64_t> items;
   for (uint64_t i = 0; i < item_count; i++)
-    offsets.push_back(Uint(offset_size));
-  return offsets;
+    items.push_back(Uint(item_size));
+  return items;
 }
 
 std::vector<uint64_t> BinaryReader::SeekableListOffsets() {

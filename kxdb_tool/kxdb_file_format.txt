@@ -72,14 +72,13 @@ uint = generic, variable-sized unsigned integer
 sint = generic, variable-sized signed integer
 zstr = string with a terminating \0 character
 varsize = array-size stored as uint before the array
+varsize_ints =
+    hdr (uint) - "(item_count << 2) | item_size"
+        item_size: 0=u1, 1=u2, 2=u4, 3=u8
+    items[item_count] (u1/u2/u4/u8 depending on item_size)
 seekable_varsize =
-    array item end* offsets are stored as a varsize array before the array
-    *end offsets to support skipping <n> elements (even all elements)
-    so it expands to:
-        hdr (uint) - "(item_count << 2) | offset_size"
-            the 2 LSB bits: item size is also stored as int: 1 or 2 or 4
-            other bits: value
-        offset_size (uint)
-        item_count (uint)
-        end_offsets[item_count] (u1, u2 or u4 depending on offset_size)
-        array_items[item_count]
+    # array item END* offsets are stored as varsize_ints before the real array
+    # *END offsets to support skipping <n> elements (even all elements) and to
+    # be able to calculate item sizes (first start offset is 0 anyway)
+    end_offsets (varsize_ints)
+    array_items[len(end_offsets)]
