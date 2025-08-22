@@ -31,7 +31,6 @@ void KxdbParser::ParseHeader() {
         offset_);
 
   auto magic = ReadU32();
-  // TODO remove KPWN magic check after db rebuild
   if (magic != *(uint32_t*)"KXDB")
     throw ExpKitError("invalid magic: %llx", magic);
 

@@ -83,16 +83,16 @@ class BinaryReader:
 
   def indexable_int_list(self):
     hdr = self.varuint()
-    offset_size = (hdr & 0x3) + 1
+    item_size = 1 << (hdr & 0x3)  # 0=u1, 1=u2, 2=u4, 3=u8
     item_count = hdr >> 2
     items = []
     for _ in range(item_count):
-      items.append(self.uint(offset_size))
+      items.append(self.uint(item_size))
     return items
 
   def seekable_list(self):
     hdr = self.varuint()
-    offset_size = (hdr & 0x3) + 1
+    offset_size = 1 << (hdr & 0x3)  # 0=u1, 1=u2, 2=u4, 3=u8
     item_count = hdr >> 2
     self.offset += item_count * offset_size
     return range(item_count)
