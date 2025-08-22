@@ -92,12 +92,12 @@ std::vector<Target> KxdbParser::ParseTargets(
   if (offset_targets_ == 0) ParseHeader();
 
   std::vector<Target> result;
-  offset_ = offset_targets_;
+  SeekTo(offset_targets_);
   auto num_targets = SeekableListCount(); // by_version
   auto offsets = SeekableListOffsets();
-  DebugLog("ParseTarget(): offset = 0x%x, num_targets=%u, offset[0] = 0x%x", offset_targets_, num_targets, offsets[0]);
+  DebugLog("ParseTarget(): offset = 0x%x, num_targets=%u", offset_targets_, num_targets);
   for (uint32_t i_target = 0; i_target < num_targets; i_target++) {
-    offset_ = offsets[i_target];
+    SeekTo(offsets.at(i_target));
     const char* t_distro = ZStr();
     const char* t_release = ZStr();
     const char* t_version = ZStr();
@@ -293,7 +293,7 @@ void KxdbParser::ParseRopActionsHeader() {
     DebugLog("rop_action[%d], num_args = %d, desc = '%s'", i, num_args, desc);
 
     RopActionMeta ra(desc);
-    for (int j = 0; j < num_args; j++) {
+    for (uint64_t j = 0; j < num_args; j++) {
       auto arg_name = ZStr();
       auto flags = ReadU8();
       bool required = (flags & 0x1) == 0x1;

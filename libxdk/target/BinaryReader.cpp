@@ -66,7 +66,7 @@ void BinaryReader::SeekToItem(uint64_t seeklist_offset, uint64_t item_idx) {
     throw ExpKitError("Seeking is already in progress. Call EndSeek() first.");
 
   seek_origin_offset_ = offset_;
-  offset_ = seeklist_offset;
+  SeekTo(seeklist_offset);
   auto value = ReadUInt();
   auto offset_size = (value & 0x3) + 1;
   auto item_count = value >> 2;
@@ -78,12 +78,12 @@ void BinaryReader::SeekToItem(uint64_t seeklist_offset, uint64_t item_idx) {
   auto hdr_offset = offset_;
   uint64_t item_offset = 0;
   if (item_idx != 0) {
-    offset_ += offset_size * (item_idx - 1);
+    Skip(offset_size * (item_idx - 1));
     item_offset = Uint(offset_size);
   }
 
-  // skip the seek list
-  offset_ = hdr_offset + offset_size * item_count + item_offset;
+  // skip the remaining seek list and jump to the item
+  Skip((item_count - item_idx) * offset_size + item_offset);
   DebugLog(
       "SeekToItem(): seeklist_offset=%u, item_idx=%u, offset_size=%u, "
       "item_count=%u, item_offset=%u, new offset=%u",
@@ -97,7 +97,7 @@ uint64_t BinaryReader::SeekableListCount() {
   auto offset_size = 1 << (hdr & 0x3); // 0=u1, 1=u2, 2=u4, 3=u8
   auto item_count = hdr >> 2;
   // skip the seek list
-  offset_ += offset_size * item_count;
+  Skip(offset_size * item_count);
   return item_count;
 }
 
@@ -157,6 +157,11 @@ uint16_t BinaryReader::ReadU16() { return *(uint16_t*)Read(2); }
 
 uint8_t BinaryReader::ReadU8() { return *(uint8_t*)Read(1); }
 
+void BinaryReader::Skip(uint64_t len) {
+  SizeCheck(len);
+  offset_ += len;
+}
+
 uint8_t* BinaryReader::Read(uint16_t len) {
   SizeCheck(len);
   uint8_t* ptr = &data_.data()[offset_];
@@ -169,6 +174,14 @@ void BinaryReader::SizeCheck(uint64_t len) {
     throw ExpKitError(
         "tried to read outside of buffer: offset=%u, len=%u, struct_end=%u",
         offset_, len, EndOffset());
+}
+
+void BinaryReader::SeekTo(uint64_t offset) {
+  if (offset >= EndOffset())
+    throw ExpKitError(
+        "tried to read seek outside of the buffer: from_offset=%lu, to_offset=%lu, struct_end=%lu",
+        offset_, offset, EndOffset());
+  offset_ = offset;
 }
 
 uint64_t BinaryReader::RemainingBytes() { return EndOffset() - offset_; }
