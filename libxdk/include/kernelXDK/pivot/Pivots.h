@@ -4,9 +4,19 @@
 #include <vector>
 #include <kernelXDK/util/Register.h>
 
+/**
+ * @defgroup pivot_classes Pivot Classes
+ * @brief Classes for stack pivoting and related techniques.
+ */
+
+/**
+ * @ingroup pivot_classes
+ * @brief Enum representing the type of indirect jump.
+ */
 enum class IndirectType { JMP, CALL };
 
 /**
+ * @ingroup pivot_classes
  * @brief Base struct for all pivot gadgets.
  */
 struct Pivot {
@@ -14,6 +24,7 @@ struct Pivot {
 };
 
 /**
+ * @ingroup pivot_classes
  * @brief Represents the usage of a register and the offsets relative to it that are used.
  */
 struct RegisterUsage {
@@ -24,6 +35,7 @@ struct RegisterUsage {
 };
 
 /**
+ * @ingroup pivot_classes
  * @brief Represents a stack shifting pivot gadget.
  */
 struct StackShiftPivot: Pivot {
@@ -40,6 +52,7 @@ struct StackShiftPivot: Pivot {
 };
 
 /**
+ * @ingroup pivot_classes
  * @brief Represents a one-gadget pivot.
  */
 struct OneGadgetPivot: Pivot {
@@ -50,6 +63,7 @@ struct OneGadgetPivot: Pivot {
 };
 
 /**
+ * @ingroup pivot_classes
  * @brief Represents a push indirect pivot gadget.
  */
 struct PushIndirectPivot: Pivot {
@@ -64,6 +78,7 @@ struct PushIndirectPivot: Pivot {
 };
 
 /**
+ * @ingroup pivot_classes
  * @brief Represents a pop RSP pivot gadget.
  */
 struct PopRspPivot: Pivot {
@@ -74,6 +89,7 @@ struct PopRspPivot: Pivot {
 };
 
 /**
+ * @ingroup pivot_classes
  * @brief A collection of different types of pivot gadgets.
  */
 struct Pivots {

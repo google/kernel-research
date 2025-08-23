@@ -6,6 +6,15 @@
 
 #include <kernelXDK/util/str.h>
 
+/**
+ * @defgroup util_classes Utility Classes
+ * @brief Helper classes for various utilities.
+ */
+
+/**
+ * @ingroup util_classes
+ * @brief Custom exception class for ExpKit-specific errors.
+ */
 struct ExpKitError : public std::runtime_error {
     /**
      * @brief Constructs an ExpKitError with a single error message.
@@ -25,6 +34,7 @@ struct ExpKitError : public std::runtime_error {
 };
 
 /**
+ * @ingroup util_classes
  * @brief Represents an error based on the current value of errno.
  */
 struct errno_error: std::system_error {

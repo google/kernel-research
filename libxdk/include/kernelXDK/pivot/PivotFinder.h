@@ -9,8 +9,13 @@
 #include <kernelXDK/payloads/Payload.h>
 #include <kernelXDK/payloads/RopChain.h>
 
+/**
+ * @defgroup pivot_classes Pivot Classes
+ * @brief Classes for stack pivoting and related techniques.
+ */
 
 /**
+ * @ingroup pivot_classes
  * @brief Encapsulates information about a successful ROP pivot.
  */
 struct RopPivotInfo {
@@ -35,6 +40,8 @@ struct RopPivotInfo {
 };
 
 /**
+ * @ingroup pivot_classes
+ * @class PivotFinder
  * @brief Finds suitable stack pivots and stack shifting gadgets within a payload.
  */
 class PivotFinder {
@@ -62,7 +69,7 @@ class PivotFinder {
      */
     void SortFields();
 
-   public:
+public:
     /**
      * @brief Constructs a PivotFinder object with a single buffer register.
      *
@@ -110,7 +117,7 @@ class PivotFinder {
      * @return True if the Push/Indirect pivot is valid, false otherwise.
      */
     bool CheckPushIndirect(const PushIndirectPivot& pivot,
-                           uint64_t free_bytes_after = 0);
+                            uint64_t free_bytes_after = 0);
 
     /**
      * @brief Finds all suitable stack pivot gadgets.
@@ -148,7 +155,7 @@ class PivotFinder {
      * @return An optional StackShiftingInfo object. Contains a value if a sequence of shifts is found, otherwise `std::nullopt`.
      */
     std::optional<StackShiftingInfo> GetShiftToOffset(uint64_t from_offset,
-                                                      uint64_t min_to_offset);
+                                                     uint64_t min_to_offset);
 
     /**
      * @brief Finds a sequence of stack shift gadgets to shift the stack pointer
@@ -160,8 +167,8 @@ class PivotFinder {
      * @return An optional StackShiftingInfo object. Contains a value if a sequence of shifts is found, otherwise `std::nullopt`.
      */
     std::optional<StackShiftingInfo> GetShiftToRop(uint64_t from_offset,
-                                                   uint64_t byte_size,
-                                                   bool include_extra_slot);
+                                                     uint64_t byte_size,
+                                                     bool include_extra_slot);
 
     /**
      * @brief Internal helper function to find a sequence of stack shift gadgets using a breadth-first search.
@@ -206,7 +213,7 @@ class PivotFinder {
 
     /**
      * @brief Attempts to find a stack pivot and a sequence of stack shifts
-     * to pivot to a given ROP chain.
+     * to pivot to a given Rop chain.
      *
      * @param rop The ROP chain to pivot to.
      * @return A RopPivotInfo structure containing information about the successful pivot and shifts.

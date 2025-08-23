@@ -9,6 +9,12 @@
 #include <optional>
 
 /**
+ * @defgroup payloads_classes Payloads Classes
+ * @brief Classes for generating and managing payloads.
+ */
+
+/**
+ * @ingroup payloads_classes
  * @class Payload
  * @brief Manages a dynamic, contiguous block of memory, tracking used sections.
  *
@@ -19,9 +25,9 @@
  */
 class Payload {
 private:
-    std::vector<uint8_t> data_;       ///< @brief The underlying data buffer.
-    std::vector<bool> used_bytes_;    ///< @brief Tracks which bytes in `data_` are marked as used.
-    uint64_t used_size_;              ///< @brief The highest offset that has been marked as used.
+    std::vector<uint8_t> data_;      ///< @brief The underlying data buffer.
+    std::vector<bool> used_bytes_;   ///< @brief Tracks which bytes in `data_` are marked as used.
+    uint64_t used_size_;             ///< @brief The highest offset that has been marked as used.
 
 public:
     /**

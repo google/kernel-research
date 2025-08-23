@@ -6,6 +6,12 @@
 #include <kernelXDK/payloads/Payload.h>
 
 /**
+ * @defgroup pivot_classes Pivot Classes
+ * @brief Classes for stack pivoting and related techniques.
+ */
+
+/**
+ * @ingroup pivot_classes
  * @brief Represents information about a single stack shifting gadget within a chain.
  */
 struct StackShiftInfo {
@@ -16,6 +22,7 @@ struct StackShiftInfo {
 };
 
 /**
+ * @ingroup pivot_classes
  * @brief Stores information about a chain of stack shifting gadgets.
  */
 struct StackShiftingInfo {

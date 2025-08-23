@@ -7,7 +7,16 @@
 #include <kernelXDK/target/Target.h>
 
 class KxdbParser;
+/**
+ * @defgroup target_classes Target Classes
+ * @brief Classes for managing and representing targets.
+ */
 
+/**
+ * @ingroup target_classes
+ * @class TargetDb
+ * @brief Manages a database of kernel targets, including both static and dynamically parsed ones.
+ */
 class TargetDb {
     std::unique_ptr<KxdbParser> parser_;
 
@@ -32,7 +41,7 @@ class TargetDb {
     Target GetTarget(std::optional<Target> target_opt,
                      std::optional<size_t> static_idx);
 
-   public:
+public:
     // declare destructor
     ~TargetDb();
     TargetDb() = default;
