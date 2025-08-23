@@ -4,6 +4,11 @@
 #include <vector>
 #include <kernelXDK/target/Target.h>
 
+/**
+ * @defgroup payloads_classes Payloads Classes
+ * @brief Classes for generating and managing payloads.
+ */
+
 // Forward declarations for types used in the header if their full definitions
 // are not strictly needed (e.g., if only pointers/references are used),
 // but in this case, the full definitions are likely needed due to value types.
@@ -12,6 +17,7 @@
 
 
 /**
+ * @ingroup payloads_classes
  * @brief Represents a single ROP (Return-Oriented Programming) action.
  *
  * A RopAction is a sequence of 64-bit values that form part of a ROP chain.
@@ -25,6 +31,8 @@ struct RopAction {
 };
 
 /**
+ * @ingroup payloads_classes
+ * @class RopChain
  * @brief Manages an ordered sequence of ROP actions to form a ROP chain.
  *
  * The RopChain class allows for the construction of complex ROP chains

@@ -11,6 +11,11 @@
 #include <kernelXDK/pivot/Pivots.h>
 #include <kernelXDK/payloads/Payload.h>
 
+/**
+ * @defgroup pivot_classes Pivot Classes
+ * @brief Classes for stack pivoting and related techniques.
+ */
+
 // Forward declarations if `Pivots.h` doesn't include full definitions,
 // or if these are defined in separate headers.
 // If these are actually defined in "pivot/Pivots.h", these might be redundant but harmless.
@@ -20,6 +25,7 @@
 // class Register; // If Register is used directly as a type here, otherwise it's part of pivots.
 
 /**
+ * @ingroup pivot_classes
  * @class StackPivot
  * @brief Represents a mechanism for changing the stack pointer (RSP) during exploit execution.
  *

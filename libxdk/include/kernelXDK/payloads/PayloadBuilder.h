@@ -17,6 +17,12 @@
 #include <kernelXDK/payloads/Payload.h>
 
 /**
+ * @defgroup payloads_classes Payloads Classes
+ * @brief Classes for generating and managing payloads.
+ */
+
+/**
+ * @ingroup payloads_classes
  * @brief Helper struct to encapsulate payload data for the builder.
  *
  * This struct groups a Payload object, associated registers, and an optional
@@ -45,6 +51,7 @@ struct PayloadData {
 
 
 /**
+ * @ingroup payloads_classes
  * @brief Converts a 64-bit unsigned integer to its hexadecimal string representation.
  * @param value The 64-bit unsigned integer to convert.
  * @return A `std::string` containing the "0x" prefixed hexadecimal representation
@@ -54,6 +61,7 @@ std::string intToHex(uint64_t value);
 
 
 /**
+ * @ingroup payloads_classes
  * @class PayloadBuilder
  * @brief A class designed to construct and optimize exploit payloads.
  *
@@ -148,11 +156,11 @@ private:
      */
     uint64_t EstimatePayloadSpaceAfter(Payload& payload, uint64_t offset);
 
-    std::vector<PayloadData> payload_datas_;           ///< @brief List of payload components to integrate.
-    std::vector<RopAction> rop_actions_;               ///< @brief Sequence of ROP actions to execute.
-    Pivots pivots_;                                    ///< @brief Available stack pivot gadgets.
-    uint64_t kaslr_base_;                              ///< @brief The Kernel Address Space Layout Randomization base address.
-    std::optional<StackPivot> chosen_pivot_;           ///< @brief The pivot chosen during the build process.
-    std::optional<Payload> chosen_payload_;            ///< @brief The final constructed payload.
-    std::vector<StackShiftingInfo> chosen_shifts_;     ///< @brief Information about stack shifts performed during the build.
+    std::vector<PayloadData> payload_datas_;              ///< @brief List of payload components to integrate.
+    std::vector<RopAction> rop_actions_;                  ///< @brief Sequence of ROP actions to execute.
+    Pivots pivots_;                                       ///< @brief Available stack pivot gadgets.
+    uint64_t kaslr_base_;                                 ///< @brief The Kernel Address Space Layout Randomization base address.
+    std::optional<StackPivot> chosen_pivot_;              ///< @brief The pivot chosen during the build process.
+    std::optional<Payload> chosen_payload_;               ///< @brief The final constructed payload.
+    std::vector<StackShiftingInfo> chosen_shifts_;        ///< @brief Information about stack shifts performed during the build.
 };

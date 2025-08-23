@@ -13,11 +13,18 @@
 #define DEVICE_PATH "/dev/xdk"
 
 /**
+ * @defgroup xdk_device_classes XDK Device Classes
+ * @brief Classes for XDK device interaction.
+ */
+
+/**
+ * @ingroup xdk_device_classes
  * @brief Enum representing the possible actions for RIP control.
  */
 enum class RipAction { Jmp = 0x1, Call = 0x2, Ret = 0x3 };
 
 /**
+ * @ingroup xdk_device_classes
  * @brief Structure to hold information about a kernel function call log.
  */
 struct CallLog {
@@ -36,9 +43,16 @@ struct CallLog {
     std::string GetSummary();
 };
 
+/**
+ * @ingroup xdk_device_classes
+ * @class XdkDevice
+ * @brief Manages communication and data for the XDK device.
+ */
 class XdkDevice;
 
 /**
+ * @ingroup xdk_device_classes
+ * @class Kprobe
  * @brief Class representing a Kprobe in the kernel.
  */
 class Kprobe {
@@ -53,11 +67,10 @@ public:
      * @param log_call_stack_filter An optional filter for the call stack (default is nullptr).
      */
     Kprobe(const char* function_name, uint8_t arg_count = 0,
-           enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK |
-                                                             RETURN),
+           enum kprobe_log_mode log_mode = (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN),
            const char* log_call_stack_filter = nullptr);
 
-           /**
+    /**
      * @brief Retrieves the call logs for this Kprobe.
      * @param clear_log Whether to clear the log after retrieving (default is
      * false).
@@ -80,6 +93,8 @@ public:
 };
 
 /**
+ * @ingroup xdk_device_classes
+ * @class XdkDevice
  * @brief Class representing the interface to the xdk kernel module.
  */
 class XdkDevice {
@@ -98,7 +113,7 @@ class XdkDevice {
 
     /**
      * @brief Converts the provided RIP action and register map into a `rip_control_args` structure.
-     *        This structure is used to communicate with the kernel module for RIP control.
+     * This structure is used to communicate with the kernel module for RIP control.
      * @param action The desired RIP action (Jump, Call, or Return).
      * @param regs A map of registers to set before performing the RIP action.
      * @return A `rip_control_args` structure populated with the provided action and registers.
@@ -115,7 +130,7 @@ class XdkDevice {
      */
     xdk_error CallRaw(enum xdk_cmd cmd, void* arg) const;
 
-   public:
+public:
     /**
      * @brief Checks if the xdk device is available.
      * @return True if the device exists, false otherwise.
@@ -233,7 +248,7 @@ class XdkDevice {
     void RipControl(RipAction action,
                     const std::map<Register, uint64_t>& regs = {});
 
-                    /**
+    /**
      * @brief Calls a kernel function at a specific address (with the "call" asm
      * call).
      * @param addr The address of the function to call.
@@ -254,9 +269,9 @@ class XdkDevice {
      * @param regs A map of registers to set before the return.
      */
     void SetRspAndRet(uint64_t new_rsp,
-                      const std::map<Register, uint64_t>& regs = {});
+                     const std::map<Register, uint64_t>& regs = {});
 
-                      /**
+    /**
      * @brief Gets the recovery address for RIP control.
      * @return The recovery address.
      */
@@ -276,7 +291,7 @@ class XdkDevice {
                               (kprobe_log_mode)(ENTRY_WITH_CALLSTACK | RETURN),
                           const char* log_call_stack_filter = nullptr);
 
-                          /**
+    /**
      * @brief Removes an installed Kprobe.
      * @param probe A pointer to the Kprobe object to remove.
      */

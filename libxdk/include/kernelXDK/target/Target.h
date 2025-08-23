@@ -6,6 +6,15 @@
 #include <vector>
 #include <kernelXDK/pivot/Pivots.h>
 
+/**
+ * @defgroup target_classes Target Classes
+ * @brief Classes for managing and representing targets.
+ */
+
+/**
+ * @ingroup target_classes
+ * @brief Enum for predefined ROP action IDs.
+ */
 enum struct RopActionId: uint32_t {
     MSLEEP = 0x01,
     COMMIT_INIT_TASK_CREDS = 0x02,
@@ -16,12 +25,20 @@ enum struct RopActionId: uint32_t {
     KPTI_TRAMPOLINE = 0x07,
 };
 
+/**
+ * @ingroup target_classes
+ * @brief Enum for the types of ROP items.
+ */
 enum struct RopItemType: uint8_t {
     CONSTANT_VALUE = 0,
     SYMBOL = 1,
     ARGUMENT = 2
 };
 
+/**
+ * @ingroup target_classes
+ * @brief Represents a single item in a ROP chain.
+ */
 struct RopItem {
     RopItemType type;
     uint64_t value;
@@ -29,6 +46,10 @@ struct RopItem {
     RopItem(RopItemType type, uint64_t value): type(type), value(value) { }
 };
 
+/**
+ * @ingroup target_classes
+ * @brief Metadata for a ROP action argument.
+ */
 struct RopActionArgMeta {
     std::string name;
     bool required;
@@ -38,6 +59,10 @@ struct RopActionArgMeta {
         : name(name), required(required), default_value(default_value) { }
 };
 
+/**
+ * @ingroup target_classes
+ * @brief Metadata for a ROP action.
+ */
 struct RopActionMeta {
     std::string desc;
     std::vector<RopActionArgMeta> args;
@@ -46,18 +71,31 @@ struct RopActionMeta {
     RopActionMeta(std::string desc): desc(desc) { }
 };
 
+/**
+ * @ingroup target_classes
+ * @brief Represents a field within a struct.
+ */
 struct StructField {
     std::string name;
     uint64_t offset;
     uint64_t size;
 };
 
+/**
+ * @ingroup target_classes
+ * @brief Represents a kernel struct definition.
+ */
 struct Struct {
     std::string name;
     uint64_t size;
     std::map<std::string, StructField> fields;
 };
 
+/**
+ * @ingroup target_classes
+ * @class Target
+ * @brief Represents a specific kernel target with its symbols, ROP gadgets, and other definitions.
+ */
 struct Target {
     std::string distro;
     std::string release_name;
@@ -84,6 +122,11 @@ struct Target {
     std::vector<RopItem> GetItemsForAction(RopActionId id);
 };
 
+/**
+ * @ingroup target_classes
+ * @class StaticTarget
+ * @brief A concrete implementation of Target for static kernel versions.
+ */
 struct StaticTarget: Target {
     /**
      * @brief Constructor for a StaticTarget.
@@ -108,5 +151,5 @@ struct StaticTarget: Target {
      * @param fields A vector of StructField objects representing the fields of the struct.
      */
     void AddStruct(const std::string& name, uint64_t size,
-                   const std::vector<StructField>& fields);
+                    const std::vector<StructField>& fields);
 };

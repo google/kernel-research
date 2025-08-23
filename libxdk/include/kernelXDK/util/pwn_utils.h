@@ -3,6 +3,12 @@
 #include <stdint.h>
 
 /**
+ * @defgroup util_classes Utility Classes
+ * @brief Helper classes for various utilities.
+ */
+
+/**
+ * @ingroup util_classes
  * @brief Checks if the provided address is a valid KASLR base address.
  *
  * @param kbase_addr The address to check.
@@ -11,6 +17,7 @@
 bool is_kaslr_base(uint64_t kbase_addr);
 
 /**
+ * @ingroup util_classes
  * @brief Checks if the provided address is a valid KASLR base address.
  *
  * @param kbase_addr The address to check.
@@ -19,6 +26,7 @@ bool is_kaslr_base(uint64_t kbase_addr);
 uint64_t check_kaslr_base(uint64_t kbase_addr);
 
 /**
+ * @ingroup util_classes
  * @brief Checks if the provided address is a valid kernel heap pointer.
  *
  * @param heap_leak The address to check.

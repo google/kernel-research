@@ -4,6 +4,15 @@
 #include <cstring>
 #include <kernelXDK/payloads/RopChain.h>
 
+/**
+ * @defgroup rip_classes RIP Classes
+ * @brief Classes related to Return-Oriented Programming (ROP) utilities.
+ */
+
+/**
+ * @ingroup rip_classes
+ * @class RopUtils
+ * @brief Utility functions for ROP chain generation.
 class RopUtils {
 public:
     /**
