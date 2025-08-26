@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../third_party/kernel-modules/kpwn/kpwn.h"
+#include "../../third_party/kernel-modules/xdk_device/xdk_device.h"
 #include <sys/reboot.h>    /* Definition of RB_* constants */
 
 long check(long res, const char* cmd) {
@@ -41,58 +41,58 @@ void wait() {
     usleep(40 * 1000);
 }
 
-int kpwn_fd;
+int xdk_fd;
 
 void rip_control_test() {
-    printf("kpwn_test: calling KASLR_LEAK...\n");
+    printf("xdk_dev_test: calling KASLR_LEAK...\n");
     uint64_t kaslr_base = 0x1337;
-    CHECK(ioctl(kpwn_fd, KASLR_LEAK, &kaslr_base));
+    CHECK(ioctl(xdk_fd, KASLR_LEAK, &kaslr_base));
     printf("kaslr base: %lx\n", kaslr_base);
 
-    printf("kpwn_test: calling WIN_TARGET...\n");
+    printf("xdk_dev_test: calling WIN_TARGET...\n");
     uint64_t win_target = 0x1337;
-    CHECK(ioctl(kpwn_fd, WIN_TARGET, &win_target));
+    CHECK(ioctl(xdk_fd, WIN_TARGET, &win_target));
     printf("win_target: %lx\n", win_target);
 
-    printf("kpwn_test: calling ALLOC_BUFFER...\n");
-    kpwn_message msg = { 1024 };
-    CHECK(ioctl(kpwn_fd, ALLOC_BUFFER, &msg));
+    printf("xdk_dev_test: calling ALLOC_BUFFER...\n");
+    xdk_message msg = { 1024 };
+    CHECK(ioctl(xdk_fd, ALLOC_BUFFER, &msg));
     printf("kernel buffer address = 0x%lx\n", msg.kernel_addr);
 
-    printf("kpwn_test: calling ARB_WRITE ioctl...\n");
+    printf("xdk_dev_test: calling ARB_WRITE ioctl...\n");
     msg.data = malloc(msg.length);
     uint64_t* rop = (uint64_t*)&msg.data[0];
     rop[0] = 0xffffff4141414141;
     rop[1] = win_target;
     rop[2] = 0xffffff4343434343;
     rop[3] = 0xffffff4444444444;
-    CHECK(ioctl(kpwn_fd, ARB_WRITE, &msg));
+    CHECK(ioctl(xdk_fd, ARB_WRITE, &msg));
 
-    printf("kpwn_test: calling ARB_READ ioctl...\n");
+    printf("xdk_dev_test: calling ARB_READ ioctl...\n");
     msg.kernel_addr += 8;
     msg.length -= 8;
     free(msg.data);
     msg.data = malloc(msg.length);
     memset(msg.data, 0, msg.length);
-    CHECK(ioctl(kpwn_fd, ARB_READ, &msg));
+    CHECK(ioctl(xdk_fd, ARB_READ, &msg));
     printf("result = %lx\n", *(uint64_t*)&msg.data[0]);
     if (*(uint64_t*)&msg.data[0] != win_target) {
         printf("[-] excepted data[0] to be 0x%lx, but it was 0x%lx", win_target, *(uint64_t*)&msg.data[0]);
         _exit(2);
     }
 
-    printf("kpwn_test: calling RIP_CONTROL ioctl...\n");
+    printf("xdk_dev_test: calling RIP_CONTROL ioctl...\n");
     rip_control_args rip = { .rsp = (uint64_t) msg.kernel_ptr, .regs_to_set = RSP, .action = RET };
     wait();
-    CHECK(ioctl(kpwn_fd, RIP_CONTROL, &rip));
+    CHECK(ioctl(xdk_fd, RIP_CONTROL, &rip));
 }
 
 void kprobe_test() {
     kprobe_args args = { .function_name = "__kmalloc", .pid_filter = getpid(), .log_mode = ENTRY_WITH_CALLSTACK | RETURN };
-    CHECK(ioctl(kpwn_fd, INSTALL_KPROBE, &args));
+    CHECK(ioctl(xdk_fd, INSTALL_KPROBE, &args));
 
-    kpwn_message msg = { 1024 };
-    CHECK(ioctl(kpwn_fd, ALLOC_BUFFER, &msg));
+    xdk_message msg = { 1024 };
+    CHECK(ioctl(xdk_fd, ALLOC_BUFFER, &msg));
     printf("kernel buffer address = 0x%lx\n", msg.kernel_addr);
 }
 
@@ -140,25 +140,25 @@ typedef struct pipe_buffer {
 uint64_t get_sym_addr(const char* name) {
     sym_addr sym_addr;
     strncpy(sym_addr.symbol_name, name, sizeof(sym_addr.symbol_name));
-    CHECK(ioctl(kpwn_fd, SYM_ADDR, &sym_addr));
+    CHECK(ioctl(xdk_fd, SYM_ADDR, &sym_addr));
     return sym_addr.symbol_addr;
 }
 
 uint64_t alloc_buffer(void* data, uint64_t len) {
-    kpwn_message msg = { .data = (uint8_t*)data, .length = len };
-    CHECK(ioctl(kpwn_fd, ALLOC_BUFFER, &msg));
+    xdk_message msg = { .data = (uint8_t*)data, .length = len };
+    CHECK(ioctl(xdk_fd, ALLOC_BUFFER, &msg));
     return msg.kernel_addr;
 }
 
 void arb_read(uint64_t kernel_addr, void* buf, uint64_t len) {
-    kpwn_message msg = { .length = len, .kernel_addr = kernel_addr, .data = (uint8_t*)buf };
+    xdk_message msg = { .length = len, .kernel_addr = kernel_addr, .data = (uint8_t*)buf };
     memset(msg.data, 'A', msg.length);
-    CHECK(ioctl(kpwn_fd, ARB_READ, &msg));
+    CHECK(ioctl(xdk_fd, ARB_READ, &msg));
 }
 
 void arb_write(uint64_t kernel_addr, void* buf, uint64_t len) {
-    kpwn_message msg = { .length = len, .kernel_addr = kernel_addr, .data = (uint8_t*)buf };
-    CHECK(ioctl(kpwn_fd, ARB_WRITE, &msg));
+    xdk_message msg = { .length = len, .kernel_addr = kernel_addr, .data = (uint8_t*)buf };
+    CHECK(ioctl(xdk_fd, ARB_WRITE, &msg));
 }
 
 kprobe_log* install_kprobe(const char* function_name, uint8_t arg_count, const char* call_stack_filter) {
@@ -179,12 +179,12 @@ kprobe_log* install_kprobe(const char* function_name, uint8_t arg_count, const c
     strncpy(args.function_name, function_name, sizeof(args.function_name));
     if (call_stack_filter)
         strncpy(args.log_call_stack_filter, call_stack_filter, sizeof(args.log_call_stack_filter));
-    CHECK(ioctl(kpwn_fd, INSTALL_KPROBE, &args));
+    CHECK(ioctl(xdk_fd, INSTALL_KPROBE, &args));
     return log;
 }
 
 void pipebuf_test() {
-    printf("kpwn_test: calling SYM_ADDR...\n");
+    printf("xdk_dev_test: calling SYM_ADDR...\n");
     uint64_t rip_target = get_sym_addr("dump_stack");
 
     kprobe_log* log = install_kprobe("__kmalloc", 1, "create_pipe_files");
@@ -231,8 +231,8 @@ void pipebuf_test() {
 int main(int argc, const char** argv) {
     void (*test_func)() = rip_control_test;
 
-    printf("kpwn_test: opening device...\n");
-    kpwn_fd = CHECK(open("/dev/" DEVICE_NAME, O_RDWR));
+    printf("xdk_dev_test: opening device...\n");
+    xdk_fd = CHECK(open("/dev/" DEVICE_NAME, O_RDWR));
     wait();
 
     for (int i = 0; i < argc; i++)
@@ -244,10 +244,10 @@ int main(int argc, const char** argv) {
     test_func();
 
     wait();
-    printf("kpwn_test: closing device...\n");
+    printf("xdk_dev_test: closing device...\n");
     wait();
-    CHECK(close(kpwn_fd));
+    CHECK(close(xdk_fd));
 
-    printf("kpwn_test: exiting...\n");
+    printf("xdk_dev_test: exiting...\n");
     return 0;
 }

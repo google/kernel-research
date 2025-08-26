@@ -16,24 +16,24 @@ The xdk kernel module helps simulating vulnerabilities in the kernel, tracking f
 
      ```c
      int ret;
-     kpwn_message msg = { .length = 1024 };
+     xdk_message msg = { .length = 1024 };
      if ((ret = ioctl(fd, ALLOC_BUFFER, &msg)) != SUCCESS) {
-         printf("kpwn command failed with %u\n", ret);
+         printf("xdk_dev command failed with %u\n", ret);
      }
      ```
 
-     The return value of the `ioctl` is one of the `enum kpwn_errors` values:
+     The return value of the `ioctl` is one of the `enum xdk_errors` values:
         * zero is `SUCCESS`
         * non-zero values are errors
 
 
 ## Examples
 
-Examples how to use the module can be found in the [test/kpwn_test.c](../../test/kpwn_test.c) file or the below in the command-specific documentation.
+Examples how to use the module can be found in the [test/xdk_dev_test.c](../../test/xdk_dev_test.c) file or the below in the command-specific documentation.
 
 # Supported commands
 
-The supported commands are listed in `enum kpwn_cmd`. Currently the following commands are supported:
+The supported commands are listed in `enum xdk_cmd`. Currently the following commands are supported:
 
 ## ALLOC_BUFFER: Kernel buffer allocation
 
@@ -44,7 +44,7 @@ Allocates a kernel buffer and optionally copies data from the user-space into th
 ```c
 int ret;
 
-kpwn_message msg = { .length = 1024, .gfp_account = 1 };
+xdk_message msg = { .length = 1024, .gfp_account = 1 };
 msg.data = malloc(msg.length);
 memset(msg.data, 0x41, msg.length);
 
@@ -99,7 +99,7 @@ Gets the address of a kernel function which can be called from a ROP chain or vi
 
 ```
 [    1.535654] ...
-[    1.538542] kpwn: win_target was called.
+[    1.538542] xdk_dev: win_target was called.
 [    1.538542] 
 [    1.538542] !!! YOU WON !!! 
 [    1.538542] 
@@ -141,7 +141,7 @@ sym_addr sym_addr = { .symbol_name = "core_pattern" };
 if (ioctl(fd, SYM_ADDR, &sym_addr) != SUCCESS) return;
 
 uint8_t buffer[32];
-kpwn_message msg = { .length = sizeof(buffer), .data = buffer, .kernel_addr = sym_addr.symbol_addr };
+xdk_message msg = { .length = sizeof(buffer), .data = buffer, .kernel_addr = sym_addr.symbol_addr };
 if (ioctl(fd, ARB_READ, &msg) == SUCCESS) {
     printf("current core_pattern = '%s', should be same as:\n", buffer);
     system("cat /proc/sys/kernel/core_pattern");
@@ -159,7 +159,7 @@ sym_addr sym_addr = { .symbol_name = "core_pattern" };
 if (ioctl(fd, SYM_ADDR, &sym_addr) != SUCCESS) return;
 
 char new_core_pattern[] = "|/tmp/run_as_root";
-kpwn_message msg = { .length = sizeof(new_core_pattern), .data = new_core_pattern, .kernel_addr = sym_addr.symbol_addr };
+xdk_message msg = { .length = sizeof(new_core_pattern), .data = new_core_pattern, .kernel_addr = sym_addr.symbol_addr };
 if (ioctl(fd, ARB_WRITE, &msg) == SUCCESS) {
     printf("core_pattern was successfully overwritten, the new value is:\n");
     system("cat /proc/sys/kernel/core_pattern");
@@ -194,12 +194,12 @@ if (ioctl(fd, RIP_CONTROL, &rip) == SUCCESS)
 Which results in the following logs:
 
 ```
-[    1.398862] kpwn: rip_control: action=0x2, rsp=0x0, value@rsp=0x0, regs_to_set=0x0, rip=0xffffffffc02e8218
-[    1.401394] kpwn: win_target was called.
+[    1.398862] xdk_dev: rip_control: action=0x2, rsp=0x0, value@rsp=0x0, regs_to_set=0x0, rip=0xffffffffc02e8218
+[    1.401394] xdk_dev: win_target was called.
 [    1.401394] 
 [    1.401394] !!! YOU WON !!! 
 [    1.401394] 
-[    1.403947] kpwn: kpwn: rip_control, after asm
+[    1.403947] xdk_dev: rip_control, after asm
 User-space program execution continues after executing our target function in the kernel...
 ```
 
@@ -228,7 +228,7 @@ uint64_t rop[128];
 rop[0] = 0xffffff4141414141;
 
 // store ROP chain in kernel memory
-kpwn_message msg = { .length = sizeof(rop), .data = &rop };
+xdk_message msg = { .length = sizeof(rop), .data = &rop };
 if (ioctl(fd, ALLOC_BUFFER, &msg) != SUCCESS) return;
 
 // jump to ROP chain by setting RSP to the ROP chain's kernel memory address
@@ -239,7 +239,7 @@ ioctl(fd, RIP_CONTROL, &rip);
 Which results in a crash like (ROP chain item is executed):
 
 ```
-[    1.381932] kpwn: rip_control: action=0x3, rsp=0xffff9e5d025e7c00, value@rsp=0xffffff4141414141, regs_to_set=0x80, rip=0x0
+[    1.381932] xdk_dev: rip_control: action=0x3, rsp=0xffff9e5d025e7c00, value@rsp=0xffffff4141414141, regs_to_set=0x80, rip=0x0
 [    1.384801] BUG: unable to handle page fault for address: ffffff4141414141
 ...
 [    1.396223] RIP: 0010:0xffffff4141414141

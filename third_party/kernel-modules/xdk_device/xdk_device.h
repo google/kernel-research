@@ -16,7 +16,7 @@
 #include <linux/types.h>
 
 #define DEVICE_NAME "xdk"
-typedef struct kpwn_message {
+typedef struct xdk_message {
     uint64_t length;
     uint8_t* data;
     union {
@@ -24,13 +24,13 @@ typedef struct kpwn_message {
         void* kernel_ptr;
     };
     uint8_t gfp_account;
-} kpwn_message;
+} xdk_message;
 
 #define FIRST_CMD_ID 0x1000
-enum kpwn_cmd { ALLOC_BUFFER = FIRST_CMD_ID, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE, GET_RIP_CONTROL_RECOVERY, CHECK_WIN };
+enum xdk_cmd { ALLOC_BUFFER = FIRST_CMD_ID, KFREE, KASLR_LEAK, WIN_TARGET, RIP_CONTROL, ARB_READ, ARB_WRITE, INSTALL_KPROBE, PRINTK, SYM_ADDR, REMOVE_KPROBE, GET_RIP_CONTROL_RECOVERY, CHECK_WIN };
 const char* cmd_names[] = { "ALLOC_BUFFER", "KFREE", "KASLR_LEAK", "WIN_TARGET", "RIP_CONTROL", "ARB_READ", "ARB_WRITE", "INSTALL_KPROBE", "PRINTK", "SYM_ADDR", "REMOVE_KPROBE", "GET_RIP_CONTROL_RECOVERY", "CHECK_WIN" };
 
-enum kpwn_errors {
+enum xdk_errors {
     SUCCESS = 0,
     ERROR_GENERIC = 0x1000,
     ERROR_UNKNOWN_COMMAND = 0x1001,

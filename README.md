@@ -8,8 +8,8 @@ This repository contains useful tools for Linux kernel security research:
 * **kernel-image-runner**: tool for running various kernel distributions, with debugging and custom kernel module compilation support.
    * For more details, read the [kernel-image-runner/README.md](kernel-image-runner/README.md) file.
 
-* **kpwn kernel module**: kernel module for simulating vulnerabilities in the kernel, tracking function calls and testing exploitation primitives.
-   * For more details, read the [third_party/kernel-modules/kpwn/README.md](third_party/kernel-modules/kpwn/README.md) file.
+* **xdk_device**: kernel module for simulating vulnerabilities in the kernel, tracking function calls and testing exploitation primitives.
+   * For more details, read the [third_party/kernel-modules/xdk_device/README.md](third_party/kernel-modules/xdk_device/README.md) file.
 
 * **kernel_rop_generator**: tools for generating ROP chains and stack pivots on Linux Kernel images.
    * For more details, read the [kernel_rop_generator/README.md](kernel_rop_generator/README.md) file.
