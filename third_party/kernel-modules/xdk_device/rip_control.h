@@ -151,7 +151,7 @@ void noinline rip_control(rip_control_args* regs) {
         : // No clobbered registers
     );
 
-    LOG("kpwn: rip_control, after asm");
+    LOG("rip_control, after asm");
 }
 
 void noinline NOINST rip_control_wrapper(rip_control_args* regs) {

@@ -21,7 +21,7 @@ Downloads a Linux kernel release with and runs commands on it.
 
 * `<release-name>` (required): name of the release, run `./run.sh (ubuntu|kernelctf)` to list the supported release names
 
-* `--custom-modules=helloworld,kpwn` (optional): it compiles and loads the listed custom modules. Source code of the custom kernel modules can be found in the `third_party/kernel-modules/` folder.
+* `--custom-modules=helloworld,xdk_device` (optional): it compiles and loads the listed custom modules. Source code of the custom kernel modules can be found in the `third_party/kernel-modules/` folder.
 
 * `--only-command-output` (optional): by default the kernel logs are also printed, but with this argument you can disable this behaviour.
 
@@ -99,14 +99,14 @@ Running arbitrary commands on arbitrary `vmlinuz` or `bzImage` files.
 ./run_vmlinuz.sh ../kernel-image-db/releases/kernelctf/lts-6.1.72/vmlinuz -- cat /proc/slabinfo
 ```
 
-## test/kpwn_test.sh
+## test/xdk_dev_test.sh
 
-Compiles the `third_party/kernel-modules/kpwn` kernel module and the `test/kpwn_test.c` user-space binary and tests the `kpwn` module.
+Compiles the `third_party/kernel-modules/xdk_device` kernel module and the `test/xdk_dev_test.c` user-space binary and tests the `xdk_device` module.
 
 ### Usage
 
 ```
-test/kpwn_test.sh [(kernelctf|ubuntu) <release-name>]
+test/xdk_dev_test.sh [(kernelctf|ubuntu) <release-name>]
 ```
 
 ### Arguments
@@ -115,14 +115,14 @@ test/kpwn_test.sh [(kernelctf|ubuntu) <release-name>]
 
 ### Example usages
 
-* Tests the `kpwn` module on the default kernel version (currently `ubuntu 5.4.0-26.30`):
+* Tests the `xdk_device` module on the default kernel version (currently `ubuntu 5.4.0-26.30`):
 
 ```
-test/kpwn_test.sh
+test/xdk_dev_test.sh
 ```
 
-* Tests the `kpwn` module on the `ubuntu 5.4.0-67.75` release:
+* Tests the `xdk_device` module on the `ubuntu 5.4.0-67.75` release:
 
 ```
-test/kpwn_test.sh ubuntu 5.4.0-67.75
+test/xdk_dev_test.sh ubuntu 5.4.0-67.75
 ```

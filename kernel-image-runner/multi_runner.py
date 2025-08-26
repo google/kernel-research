@@ -152,7 +152,7 @@ class ReleaseRunner:
       self.update_status("compiling custom modules...")
       self.run(f"./compile_custom_modules.sh '{self.distro}' '{self.release_name}' 'xdk_device'", True)
 
-      self.update_status("running kpwn_test...")
+      self.update_status("running payload...")
       while True:
         try:
           result = self.run(f"./run.sh {self.distro} {self.release_name} --snapshot --custom-modules=keep -- {self.multi_runner.cmd_line}")

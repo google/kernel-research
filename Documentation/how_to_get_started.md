@@ -5,20 +5,8 @@
 1. Add the necessary includes to the exploit code.
 
     ```c++
-    #include <cassert>
-    #include <target/TargetDb.cpp>
-    #include <test/kpwn/Kpwn.cpp>
-    #include <util/incbin.cpp>
-    #include <util/syscalls.cpp>
-    #include <util/error.cpp>
-    #include <util/pwn_utils.cpp>
-    #include <payloads/Payload.cpp>
-    #include <util/HexDump.cpp>
-    #include <util/ArgumentParser.cpp>
-    #include <pivot/PivotFinder.cpp>
-    #include <pivot/StackPivot.cpp>
-    #include <payloads/PayloadBuilder.h>
-    #include <payloads/PayloadBuilder.cpp>
+    #include <xdk/core.h>
+    #include <xdk/postrip.h>
     ```
 
 2. Include the **target_db** in the exploit. `INCBIN` creates a read-only section in the binary with the file contents.

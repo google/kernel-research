@@ -41,7 +41,7 @@ int (*_stack_trace_save_tsk)(struct task_struct *tsk, unsigned long *store, unsi
 #define __GFP_ACCOUNT 0
 #endif
 
-static long alloc_buffer(kpwn_message* msg, void* user_ptr) {
+static long alloc_buffer(xdk_message* msg, void* user_ptr) {
     msg->kernel_ptr = 0;
     STRUCT_FROM_USER(msg, user_ptr);
     msg->kernel_ptr = CHECK_ALLOC(kmalloc(msg->length, GFP_KERNEL | (msg->gfp_account ? __GFP_ACCOUNT : 0)));
@@ -87,8 +87,8 @@ static int my_dump_stack(const char* hooked_func, char* buf, int buf_size) {
     int buf_idx = 0;
 
     // skip first 5 entries, they are:
-    //   my_dump_stack.isra.0+0x3b/0xb0 [kpwn]
-    //   entry_handler+0x98/0xb0 [kpwn]
+    //   my_dump_stack.isra.0+0x3b/0xb0 [xdk_dev]
+    //   entry_handler+0x98/0xb0 [xdk_dev]
     //   pre_handler_kretprobe+0x37/0x90
     //   kprobe_ftrace_handler+0x1a2/0x240
     //   0xffffffffc03db0dc   // optimized area(?)
@@ -139,7 +139,7 @@ static int entry_handler(struct kretprobe_instance *ri, struct pt_regs *regs) {
 
     kprobe_log_entry new_entry = { 0, { regs->di, regs->si, regs->dx, regs->cx, regs->r8, regs->r9 }, 0, 0 };
 
-    // TODO: also filter out if this comes from install_kprobe or remove_kprobe (or any function which is within kpwn module)
+    // TODO: also filter out if this comes from install_kprobe or remove_kprobe (or any function which is within xdk_device module)
     char* call_stack_buf = get_cpu_ptr(cpu_call_stack);
     bool filter_out = false;
     if (log_call || print_callstack || log_filter) {
@@ -262,7 +262,7 @@ static void remove_kprobe(kretprobe_wrapper* wr) {
 }
 
 static noinline long dev_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
-    kpwn_message msg;
+    xdk_message msg;
     void* user_ptr = (void*) arg;
 
     uint name_idx = cmd - FIRST_CMD_ID;

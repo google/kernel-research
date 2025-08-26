@@ -13,7 +13,7 @@
 
 #pragma once
 
-#define LOG(msg, ...) printk(KERN_ERR "kpwn: " msg "\n" __VA_OPT__(,) __VA_ARGS__)
+#define LOG(msg, ...) printk(KERN_ERR "xdk_dev: " msg "\n" __VA_OPT__(,) __VA_ARGS__)
 
 #define CHECK_ALLOC(x) ({ \
     typeof(x) __temp = (x); \

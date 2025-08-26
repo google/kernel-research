@@ -37,6 +37,8 @@ if [ ! -f "$VERSION_FN" ]; then
     ./run.sh --only-command-output $DISTRO $RELEASE_NAME -- cat /proc/version > $VERSION_FN
 fi
 
+mkdir -p $CUSTOM_MODULES_DIR
+rm $CUSTOM_MODULES_DIR/*.ko
 mkdir -p "$CUSTOM_MODULES_BUILD_DIR"
 
 for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
@@ -58,7 +60,6 @@ for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
     fi
 
     KBUILD_MODPOST_WARN=1 make -C $HDR_DIR M=$BUILD_DIR modules || exit 1
-    mkdir -p $CUSTOM_MODULES_DIR
     cp "$BUILD_DIR/$MODULE_NAME.ko" $CUSTOM_MODULES_DIR/
     #make -C $HDR_DIR M=$MODULE_DIR clean
 done
