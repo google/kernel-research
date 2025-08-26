@@ -293,8 +293,8 @@ class RopGeneratorAngrop:
 
         target_addr = self._find_symbol_addr(KPTI_TRAMPOLINE)
 
-        # step at most 4 times
-        for _ in range(4):
+        # step at most 8 times
+        for _ in range(8):
             target_block = self._project.factory.block(target_addr)
             for ins in target_block.disassembly.insns:
                 if ins.mnemonic == "mov" and "rdi, rsp" in ins.op_str:
