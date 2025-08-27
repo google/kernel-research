@@ -28,7 +28,7 @@
         ],
         "rop_actions": [
             {
-                "desc": "commit_kernel_cred(prepare_kernel_cred(0))",
+                "desc": "commit_creds(prepare_kernel_cred(&init_task))",
                 "args": []
             },
             {

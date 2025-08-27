@@ -87,7 +87,7 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
 
     ```c++
     RopChain rop(target, kaslr_base);
-    rop.AddRopAction(RopActionId::COMMIT_KERNEL_CREDS);
+    rop.AddRopAction(RopActionId::COMMIT_INIT_TASK_CREDS);
     RopUtils::Ret2Usr(rop, (void*)win);
     ```
 

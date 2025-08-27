@@ -40,7 +40,7 @@ This database can be included into the exploit binary as a binary blob or can be
 
   * ROP actions (configurable ROP chains which execute predefined functionality):
     * `msleep(ARG_time_msec)`
-    * `commit_kernel_cred(prepare_kernel_cred(0))`
+    * `commit_creds(prepare_kernel_cred(&init_task))`
     * `switch_task_namespaces(find_task_by_vpid(ARG_vpid=1), init_nsproxy)`
     * `write_what_where_64(ARG_address, ARG_new_value)`
     * `fork()`
