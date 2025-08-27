@@ -2,6 +2,7 @@ import logging
 import subprocess
 import re
 import sys
+import os.path
 from elftools.elf.elffile import ELFFile
 from elftools.common.exceptions import ELFError
 from rop_util import setup_logger
@@ -41,7 +42,7 @@ class RopGadgetBackend:
         return get_text_section_range(self.binary_path) if self.binary_path else (0, float("inf"))
 
 class RppBackend(RopGadgetBackend):
-    def __init__(self, binary_path, context_size):
+    def __init__(self, binary_path, context_size, cache_fn=None):
         """Backend using the rp++ tool
 
           Args:
@@ -50,8 +51,13 @@ class RppBackend(RopGadgetBackend):
         """
         super().__init__(binary_path)
         self.context_size = context_size
+        self.cache_fn = cache_fn
 
     def get_gadgets(self):
+        if self.cache_fn and os.path.isfile(self.cache_fn):
+          with open(self.cache_fn, "rt") as f:
+            return f.readlines()
+
         try:
             logger.debug("running gadget finder rp++")
             result = subprocess.check_output(['rp++', '-r', str(self.context_size), '-f',
@@ -64,14 +70,16 @@ class RppBackend(RopGadgetBackend):
         # rp++ starts by printing a preamble
         # find the last preamble line
         lines = result.splitlines()
-        start_line_index = 0
         for i, l in enumerate(lines):
             if "gadgets found." in l:
-                start_line_index = i+1
+                lines = lines[i+1:]
                 break
 
-        for line in lines[start_line_index:]:
-            yield line
+        if self.cache_fn:
+          with open(self.cache_fn, "wt") as f:
+            f.writelines(f"{l}\n" for l in lines)
+
+        return lines
 
 class TextFileBackend(RopGadgetBackend):
     def __init__(self, file_path, vmlinux_path=None):
@@ -79,7 +87,8 @@ class TextFileBackend(RopGadgetBackend):
         self.file_path = file_path
 
     def get_gadgets(self):
-        return open(self.file_path, "rt")
+        with open(self.file_path, "rt") as f:
+          return f.readlines()
 
 def run_gadget_finder(backend):
     """
