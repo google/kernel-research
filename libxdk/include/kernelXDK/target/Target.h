@@ -8,7 +8,7 @@
 
 enum struct RopActionId: uint32_t {
     MSLEEP = 0x01,
-    COMMIT_KERNEL_CREDS = 0x02,
+    COMMIT_INIT_TASK_CREDS = 0x02,
     SWITCH_TASK_NAMESPACES = 0x03,
     WRITE_WHAT_WHERE_64 = 0x04,
     FORK = 0x5,

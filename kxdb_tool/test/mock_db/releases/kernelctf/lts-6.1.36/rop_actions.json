@@ -18,7 +18,7 @@
     },
     {
         "type_id": 2,
-        "description": "commit_kernel_cred(prepare_kernel_cred(0))",
+        "description": "commit_creds(prepare_kernel_cred(0))",
         "gadgets": [
             {
                 "kernel_offset": 8682,

@@ -7,7 +7,7 @@
 
 std::map<RopActionId, std::string> RopActionNames {
     { RopActionId::MSLEEP, "msleep" },
-    { RopActionId::COMMIT_KERNEL_CREDS, "commit_kernel_cred" },
+    { RopActionId::COMMIT_INIT_TASK_CREDS, "commit_creds" },
     { RopActionId::SWITCH_TASK_NAMESPACES, "switch_task_namespaces" },
     { RopActionId::WRITE_WHAT_WHERE_64, "write_what_where_64" },
     { RopActionId::FORK, "fork" },

