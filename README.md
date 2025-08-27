@@ -20,6 +20,21 @@ This repository contains useful tools for Linux kernel security research:
 * **kxdb_tool**: a database builder which contains exploitation information (symbol addresses, ROP gadgets, stack pivots, structure field offsets) for multiple kernel targets and consumed by the exploit kit to customize exploits for targets.
    * For more details, read the [kxdb_tool/README.md](kxdb_tool/README.md) file.
 
+## Reporting Bugs
+
+If you find a bug, please help us by [submitting an issue](https://github.com/google/kernel-research/issues/new) on GitHub.
+
+Before you create a new issue, please check the existing ones to see if your bug has already been reported.
+
+When reporting a bug, please include:
+* A clear and descriptive title
+* Steps to reproduce the behavior
+* Expected vs. actual behavior
+* Any screenshots or code snippets that might be helpful
+* If relevant, details about your OS, installed libraries, compiler toolchain, the target kernel image (distro + release).
+
+_Note: this project is currently in a **beta state**. We are focused on core development, so bug fixes may take some time or may not happen at all. We appreciate your patience and understanding._
+
 ## Disclaimer
 
 This is not an officially supported Google product.
