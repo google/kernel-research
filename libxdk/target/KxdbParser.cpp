@@ -94,10 +94,10 @@ std::vector<Target> KxdbParser::ParseTargets(
   std::vector<Target> result;
   SeekTo(offset_targets_);
   auto num_targets = SeekableListCount(); // by_version
-  auto offsets = SeekableListOffsets();
+  auto sizes = SeekableListSizes();
   DebugLog("ParseTarget(): offset = 0x%x, num_targets=%u", offset_targets_, num_targets);
-  for (uint32_t i_target = 0; i_target < num_targets; i_target++) {
-    SeekTo(offsets.at(i_target));
+  for (uint32_t i_target = 0; i_target < num_targets; i_target++, EndStruct()) {
+    BeginStruct(sizes[i_target]);
     const char* t_distro = ZStr();
     const char* t_release = ZStr();
     const char* t_version = ZStr();
@@ -181,10 +181,12 @@ Struct& KxdbParser::ParseStructLayout(uint64_t layout_idx) {
 void KxdbParser::ParseStructsHeader() {
   DebugLog("ParseStructsHeader()");
 
-  auto num_structs = SeekableListCount();
-  DebugLog("ParseStructsHeader(): num_structs=%u", num_structs);
+  auto sizes = SeekableListSizes();
+  DebugLog("ParseStructsHeader(): num_structs=%u", sizes.size());
 
-  for (uint64_t i = 0; i < num_structs; i++) {
+  for (uint64_t i = 0; i < sizes.size(); i++, EndStruct()) {
+    BeginStruct(sizes[i]);
+
     auto struct_name = ZStr();
     auto num_fields = ReadUInt();
     DebugLog("  struct[%u]: name:%s field_count:%u", i, struct_name,
@@ -202,7 +204,7 @@ void KxdbParser::ParseStructsHeader() {
 }
 
 void KxdbParser::ParsePivots(Target& target) {
-  BeginStruct(-1);
+  BeginStruct(ReadUInt());
 
   auto num_one_gadgets = ReadUInt();
   DebugLog("ParsePivots(): num_one_gadgets = %u", num_one_gadgets);
@@ -265,8 +267,8 @@ RegisterUsage KxdbParser::ReadRegisterUsage() {
 void KxdbParser::ParseRopActions(Target& target) {
   auto sizes = SeekableListSizes();
   DebugLog("ParseRopActions (num=%u == %u)", rop_action_meta_.size(), sizes.size());
-  for (size_t i_action = 0; i_action < rop_action_meta_.size(); i_action++) {
-    if (sizes[i_action] == 0) continue;
+  for (size_t i_action = 0; i_action < rop_action_meta_.size(); i_action++, EndStruct()) {
+    if (!BeginStruct(sizes[i_action])) continue;
 
     auto name = split(rop_action_meta_[i_action].desc, "(")[0];
     auto num_items = ReadUInt();
@@ -285,9 +287,11 @@ void KxdbParser::ParseRopActions(Target& target) {
 }
 
 void KxdbParser::ParseRopActionsHeader() {
-  auto num_rop_actions = SeekableListCount();
-  DebugLog("num_rop_actions = %d", num_rop_actions);
-  for (uint64_t i = 0; i < num_rop_actions; i++) {
+  auto sizes = SeekableListSizes();
+  DebugLog("num_rop_actions = %d", sizes.size());
+  for (uint64_t i = 0; i < sizes.size(); i++, EndStruct()) {
+    BeginStruct(sizes[i]);
+
     auto desc = ZStr();
     auto num_args = ReadUInt();
     DebugLog("rop_action[%d], num_args = %d, desc = '%s'", i, num_args, desc);
@@ -316,9 +320,11 @@ void KxdbParser::ParseSymbols(Target& target) {
 }
 
 void KxdbParser::ParseSymbolsHeader() {
-  auto num_symbols = SeekableListCount();
-  DebugLog("num_symbols = %d", num_symbols);
-  for (uint64_t i = 0; i < num_symbols; i++) {
+  auto sizes = SeekableListSizes();
+  DebugLog("num_symbols = %d", sizes.size());
+  for (uint64_t i = 0; i < sizes.size(); i++, EndStruct()) {
+    BeginStruct(sizes[i]);
+
     auto name = ZStr();
     DebugLog("symbol[%d] = %s", i, name);
     symbol_names_.push_back(name);
