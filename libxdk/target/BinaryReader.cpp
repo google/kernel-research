@@ -35,22 +35,13 @@ void BinaryReader::EndStruct() {
   log_padding -= 2;
 }
 
-bool BinaryReader::BeginStruct(int struct_size_len, bool begin_if_empty) {
-  if (struct_size_len != 2 && struct_size_len != 4 && struct_size_len != -1)
-    throw ExpKitError(
-        "unsupported struct_size_len (%d), only 2 and 4 supported",
-        struct_size_len);
-
-  auto struct_size = struct_size_len == 2 ? ReadU16() : struct_size_len == 4 ? ReadU32() : ReadUInt();
+bool BinaryReader::BeginStruct(uint64_t struct_size) {
   DebugLog("BeginStruct(): offset = %u, struct_size = %u, end_offset = %u",
            offset_, struct_size, offset_ + struct_size);
   SizeCheck(struct_size);
-  bool empty = struct_size == 0;
-  if (!empty || begin_if_empty) {
-    struct_ends_.push_back(offset_ + struct_size);
-    log_padding += 2;
-  }
-  return !empty;
+  struct_ends_.push_back(offset_ + struct_size);
+  log_padding += 2;
+  return struct_size != 0;
 }
 
 void BinaryReader::EndSeek() {
@@ -110,17 +101,6 @@ std::vector<uint64_t> BinaryReader::IndexableIntList() {
   for (uint64_t i = 0; i < item_count; i++)
     items.push_back(Uint(item_size));
   return items;
-}
-
-std::vector<uint64_t> BinaryReader::SeekableListOffsets() {
-  auto raw = IndexableIntList();
-  if (raw.size() == 0)
-    return {};
-
-  std::vector<uint64_t> offsets { offset_ };
-  for (uint64_t i = 0; i < raw.size() - 1; i++)
-    offsets.push_back(offset_ + raw[i]);
-  return offsets;
 }
 
 std::vector<uint64_t> BinaryReader::SeekableListSizes() {
