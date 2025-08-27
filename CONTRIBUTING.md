@@ -1,6 +1,14 @@
 # How to contribute
 
-We'd love to accept your patches and contributions to this project.
+We're excited you're interested in contributing to our project!
+
+Right now, the project is in a beta phase, and our team is concentrating on
+building out the core features. Because of this, we aren't accepting
+contributions at the moment.
+
+However, we would love to hear your ideas! If you have a specific contribution
+in mind, please reach out to us on [Discord](https://discord.gg/8W8PJzA567) to
+chat with the team before you start coding.
 
 ## Before you begin
 
