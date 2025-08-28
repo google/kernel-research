@@ -15,7 +15,7 @@
 set -eo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
-IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
+IMAGE_DB_DIR="$SCRIPT_DIR/../image_db"
 KXDB_DIR="$SCRIPT_DIR/../kxdb_tool"
 DISTRO="$1"
 RELEASE="$2"
@@ -30,7 +30,7 @@ echo "Collecting runtime data..."
 "$IMAGE_DB_DIR/collect_runtime_data.sh"
 
 echo "Creating db for release $DISTRO $RELEASE"
-"$KXDB_DIR/kxdb_tool.py" -o db.kxdb --kernel-image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
+"$KXDB_DIR/kxdb_tool.py" -o db.kxdb --image-db-path "$IMAGE_DB_DIR" --release-filter-add "$DISTRO/$RELEASE"
 "$KXDB_DIR/kxdb_tool.py" -i db.kxdb -o db.json --indent 4
 
 if [[ "$3" == "--upload" ]]; then
@@ -39,6 +39,6 @@ if [[ "$3" == "--upload" ]]; then
         gcloud storage cp -Z -a publicRead db.$EXT gs://kernel-research/pwnkit/db/$DISTRO/$RELEASE.$EXT
     done
 
-    echo "Uploading missing kernel-image-db information"
-    gcloud storage rsync "$IMAGE_DB_DIR/releases/$DISTRO/$RELEASE" "gs://kernel-research/kernel-image-db/releases/$DISTRO/$RELEASE" -a publicRead -x "^(?!(btf|btf.json|rop_actions.json|slabinfo.txt|stack_pivots.json|structs.json|symbols.txt|version.txt)$).*"
+    echo "Uploading missing image_db information"
+    gcloud storage rsync "$IMAGE_DB_DIR/releases/$DISTRO/$RELEASE" "gs://kernel-research/image_db/releases/$DISTRO/$RELEASE" -a publicRead -x "^(?!(btf|btf.json|rop_actions.json|slabinfo.txt|stack_pivots.json|structs.json|symbols.txt|version.txt)$).*"
 fi

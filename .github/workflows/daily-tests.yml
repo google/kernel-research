@@ -54,4 +54,4 @@ jobs:
         if: ${{ needs.tests.result != 'success' }}
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_EXPKIT }}
-        run: node ./scripts/send_notification.js
+        run: node ./.github/scripts/send_notification.js

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../third_party/kernel-modules/xdk_device/xdk_device.h"
+#include "../../third_party/kernel_modules/xdk_device/xdk_device.h"
 #include <sys/reboot.h>    /* Definition of RB_* constants */
 
 long check(long res, const char* cmd) {

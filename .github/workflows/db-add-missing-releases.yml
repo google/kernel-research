@@ -26,7 +26,7 @@ jobs:
 
       - name: Get missing releases
         id: get_missing_releases
-        working-directory: scripts
+        working-directory: .github/scripts
         run: |
           ./db_get_missing_releases.sh ${{ inputs.rebuild && '--rebuild' }}
           echo "missing_gcs=$(cat missing_gcs_releases.txt | jq -Rsc 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
@@ -35,7 +35,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          path: 'scripts/*.txt'
+          path: '.github/scripts/*.txt'
 
   process_release:
     needs: get_missing_releases
@@ -67,5 +67,5 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Merge DB
-        working-directory: scripts
+        working-directory: .github/scripts
         run: ./db_merge.sh ${{ inputs.rebuild && '--rebuild' }}

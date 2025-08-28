@@ -24,15 +24,15 @@ target_db.kxdb:
 	wget -O target_db.kxdb https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb
 
 run: build
-	cp exp* ../../../kernel-image-runner/rootfs/
-	../../../kernel-image-runner/run.sh $(TARGET) --custom-modules=xdk_device --only-command-output --dmesg=dmesg.txt -- /exp.sh|tee output.txt
+	cp exp* ../../../image_runner/rootfs/
+	../../../image_runner/run.sh $(TARGET) --custom-modules=xdk_device --only-command-output --dmesg=dmesg.txt -- /exp.sh|tee output.txt
 
 test: run
 	grep "CTF{secret_flag_deadbeef}" output.txt || { echo "Failed to leak the flag."; grep -q ExpKitError output.txt || { echo "dmesg content: "; cat dmesg.txt; }; exit 1; }
 
 stability_test: build
-	cp exp* ../../../kernel-image-runner/rootfs/
-	../../../kernel-image-runner/test/run_stability_test.sh $(TARGET) /exp.sh
+	cp exp* ../../../image_runner/rootfs/
+	../../../image_runner/test/run_stability_test.sh $(TARGET) /exp.sh
 
 echo:
 	echo $(TARGET)

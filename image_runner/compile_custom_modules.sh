@@ -19,7 +19,7 @@ CUSTOM_MODULES="$3"
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 cd $SCRIPT_DIR
 
-RELEASE_DIR="$SCRIPT_DIR/../kernel-image-db/releases/$DISTRO/$RELEASE_NAME"
+RELEASE_DIR="$SCRIPT_DIR/../image_db/releases/$DISTRO/$RELEASE_NAME"
 CUSTOM_MODULES_DIR="$RELEASE_DIR/custom_modules"
 CUSTOM_MODULES_BUILD_DIR="$RELEASE_DIR/.custom_modules_build"
 
@@ -31,7 +31,7 @@ usage() {
 if [[ $# -lt 3 ]]; then usage; fi
 if [ -z "$CUSTOM_MODULES" ]; then exit; fi
 
-../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" headers
+../image_db/download_release.sh "$DISTRO" "$RELEASE_NAME" headers
 VERSION_FN="$RELEASE_DIR/version.txt"
 if [ ! -f "$VERSION_FN" ]; then
     ./run.sh --only-command-output $DISTRO $RELEASE_NAME -- cat /proc/version > $VERSION_FN
@@ -43,7 +43,7 @@ mkdir -p "$CUSTOM_MODULES_BUILD_DIR"
 
 for MODULE_NAME in ${CUSTOM_MODULES//,/ }; do
     HDR_DIR="$RELEASE_DIR/linux-headers-for-module/"
-    MODULE_DIR="$SCRIPT_DIR/../third_party/kernel-modules/$MODULE_NAME"
+    MODULE_DIR="$SCRIPT_DIR/../third_party/kernel_modules/$MODULE_NAME"
     BUILD_DIR="$CUSTOM_MODULES_BUILD_DIR/$MODULE_NAME"
 
     cp -a "$MODULE_DIR/." "$BUILD_DIR/"

@@ -64,15 +64,15 @@ jobs:
 
       - name: Download cached xdk_device module # to skip compilation and speedup tests
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
-        # uploaded with "gsutil cp -Z -a public-read kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar gs://kxdk/xdk_dev_lts6181_v1.tar"
-        run: curl https://storage.googleapis.com/kxdk/xdk_dev_lts6181_v1.tar --create-dirs -o kernel-image-db/releases/kernelctf/lts-6.1.81/custom_modules.tar
+        # uploaded with "gsutil cp -Z -a public-read image_db/releases/kernelctf/lts-6.1.81/custom_modules.tar gs://kxdk/xdk_dev_lts6181_v1.tar"
+        run: curl https://storage.googleapis.com/kxdk/xdk_dev_lts6181_v1.tar --create-dirs -o image_db/releases/kernelctf/lts-6.1.81/custom_modules.tar
 
       - name: Compile xdk_device for target
         if: ${{ steps.vars.outputs.target != 'kernelctf lts-6.1.81' }}
         run: |
-          ./kernel-image-db/download_release.sh ${{steps.vars.outputs.target}} "vmlinuz,modules"
-          ./kernel-image-db/collect_runtime_data.sh  # we need version.txt for compiling the correct xdk_device module
-          ./kernel-image-runner/compile_custom_modules.sh ${{steps.vars.outputs.target}} xdk_device
+          ./image_db/download_release.sh ${{steps.vars.outputs.target}} "vmlinuz,modules"
+          ./image_db/collect_runtime_data.sh  # we need version.txt for compiling the correct xdk_device module
+          ./image_runner/compile_custom_modules.sh ${{steps.vars.outputs.target}} xdk_device
 
       - name: Test kxdb_tool
         if: ${{ success() || failure() }}
@@ -138,11 +138,11 @@ jobs:
             libxdk/samples/**/exp
             libxdk/bin/test
             libxdk/test_results*
-            kernel-image-db/releases/**/custom_modules.tar
-            kernel-image-runner/test/stability_test_outputs
+            image_db/releases/**/custom_modules.tar
+            image_runner/test/stability_test_outputs
 
       - name: Send Google Chat Notification (on failure)
         if: ${{ failure() && !inputs.silence_notifications }}
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_EXPKIT }}
-        run: node ./scripts/send_notification.js
+        run: node ./.github/scripts/send_notification.js

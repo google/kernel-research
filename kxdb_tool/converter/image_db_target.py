@@ -1,4 +1,4 @@
-"""Processes per-target files from kernel-image-db folders."""
+"""Processes per-target files from image_db folders."""
 import os
 from data_model.db import Target
 from data_model.pivots import Pivots
@@ -7,7 +7,7 @@ from data_model.structs import Structs
 from data_model.serialization import from_json
 
 class ImageDbTarget:
-  """Processes per-target files from kernel-image-db folders."""
+  """Processes per-target files from image_db folders."""
 
   KBASE_ADDR = 0xffffffff81000000
   VERSION_TXT = "version.txt"

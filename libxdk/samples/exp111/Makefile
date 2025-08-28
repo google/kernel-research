@@ -22,9 +22,9 @@ target_db.kxdb:
 	wget -O target_db.kxdb https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb
 
 run: build
-	cp exp* ../../../kernel-image-runner/rootfs/
-	#../../../kernel-image-runner/run.sh $(TARGET) --gdb --dbgsym --nokaslr -- /exp.sh | tee output.txt
-	../../../kernel-image-runner/run.sh $(TARGET) --nokaslr -- /exp.sh | tee output.txt
+	cp exp* ../../../image_runner/rootfs/
+	#../../../image_runner/run.sh $(TARGET) --gdb --dbgsym --nokaslr -- /exp.sh | tee output.txt
+	../../../image_runner/run.sh $(TARGET) --nokaslr -- /exp.sh | tee output.txt
 
 test: run
 	grep "CTF{secret_flag_deadbeef}" output.txt || { echo "Failed to leak the flag."; echo "dmesg content: "; cat dmesg.txt; exit 1; }
