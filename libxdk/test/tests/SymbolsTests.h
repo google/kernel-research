@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdio>
-#include <kernelXDK/xdk_device/xdk_device.h>
+#include <xdk/xdk_device/xdk_device.h>
 #include "target/KxdbParser.h"
 #include "test/TestSuite.h"
 #include "test/TestUtils.h"

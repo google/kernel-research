@@ -3,11 +3,11 @@
 #include <set>
 #include <limits>
 #include <optional>
-#include <kernelXDK/pivot/Pivots.h>
-#include <kernelXDK/pivot/StackPivot.h>
-#include <kernelXDK/pivot/StackShiftInfo.h>
-#include <kernelXDK/payloads/Payload.h>
-#include <kernelXDK/payloads/RopChain.h>
+#include <xdk/pivot/Pivots.h>
+#include <xdk/pivot/StackPivot.h>
+#include <xdk/pivot/StackShiftInfo.h>
+#include <xdk/payloads/Payload.h>
+#include <xdk/payloads/RopChain.h>
 
 /**
  * @defgroup pivot_classes Pivot Classes

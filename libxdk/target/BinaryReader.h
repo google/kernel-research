@@ -4,7 +4,7 @@
 #include <cstring>
 #include <vector>
 
-#include <kernelXDK/util/str.h>
+#include <xdk/util/str.h>
 #include "util/log.h"
 
 /**

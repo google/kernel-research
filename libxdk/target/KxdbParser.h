@@ -6,8 +6,8 @@
 #include <optional>
 #include <vector>
 #include "target/BinaryReader.h"
-#include <kernelXDK/target/Target.h>
-#include <kernelXDK/pivot/Pivots.h>
+#include <xdk/target/Target.h>
+#include <xdk/pivot/Pivots.h>
 
 struct FieldMeta {
     std::string field_name;

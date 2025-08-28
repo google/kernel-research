@@ -1,11 +1,11 @@
 #include <optional>
 #include <string>
 #include <set>
-#include <kernelXDK/pivot/Pivots.h>
-#include <kernelXDK/pivot/StackPivot.h>
-#include <kernelXDK/util/error.h>
-#include <kernelXDK/util/str.h>
-#include <kernelXDK/payloads/Payload.h>
+#include <xdk/pivot/Pivots.h>
+#include <xdk/pivot/StackPivot.h>
+#include <xdk/util/error.h>
+#include <xdk/util/str.h>
+#include <xdk/payloads/Payload.h>
 
 StackPivot::StackPivot(const OneGadgetPivot& one_gadget)
     : one_gadget_(one_gadget) {}

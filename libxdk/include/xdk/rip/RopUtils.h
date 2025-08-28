@@ -2,7 +2,7 @@
 
 #include <sys/mman.h>
 #include <cstring>
-#include <kernelXDK/payloads/RopChain.h>
+#include <xdk/payloads/RopChain.h>
 
 /**
  * @defgroup rip_classes RIP Classes

@@ -6,8 +6,8 @@
 #include <sys/mman.h>
 #include <sys/msg.h>
 #include <sys/socket.h>
-#include <kernelXDK/util/error.h>
-#include <kernelXDK/util/syscalls.h>
+#include <xdk/util/error.h>
+#include <xdk/util/syscalls.h>
 
 void Syscalls::__check(int result, int expected, const char* syscall_name) {
   if (result == -1)  // always fail in case of -1, errno will contain the error

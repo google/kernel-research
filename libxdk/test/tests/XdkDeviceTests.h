@@ -2,9 +2,9 @@
 
 #include "test/TestUtils.h"
 #include "test/TestSuite.h"
-#include <kernelXDK/util/error.h>
-#include <kernelXDK/payloads/Payload.h>
-#include <kernelXDK/xdk_device/xdk_device.h>
+#include <xdk/util/error.h>
+#include <xdk/payloads/Payload.h>
+#include <xdk/xdk_device/xdk_device.h>
 
 class XdkDeviceTests: public TestSuite {
     XdkDevice* xdk_;

@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <cstdarg>
 
-#include <kernelXDK/util/str.h>
+#include <xdk/util/str.h>
 
 /**
  * @defgroup util_classes Utility Classes

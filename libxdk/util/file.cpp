@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <fstream>
 #include <vector>
-#include <kernelXDK/util/error.h>
+#include <xdk/util/error.h>
 #include "util/file.h"
 
 std::vector<uint8_t> read_file(const std::string &filename) {

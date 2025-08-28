@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "./include/xdk_device.h"
-#include <kernelXDK/util/Register.h>
+#include <xdk/util/Register.h>
 
 #define DEVICE_PATH "/dev/xdk"
 

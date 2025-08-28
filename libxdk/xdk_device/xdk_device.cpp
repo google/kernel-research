@@ -1,7 +1,7 @@
-#include <kernelXDK/xdk_device/xdk_device.h>
-#include <kernelXDK/util/error.h>
-#include <kernelXDK/util/syscalls.h>
-#include <kernelXDK/util/Register.h>
+#include <xdk/xdk_device/xdk_device.h>
+#include <xdk/util/error.h>
+#include <xdk/util/syscalls.h>
+#include <xdk/util/Register.h>
 
 #include <cstdint>
 #include <cstring>

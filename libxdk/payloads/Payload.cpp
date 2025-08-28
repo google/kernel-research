@@ -1,5 +1,5 @@
-#include <kernelXDK/payloads/Payload.h>
-#include <kernelXDK/util/error.h>
+#include <xdk/payloads/Payload.h>
+#include <xdk/util/error.h>
 #include "util/math_utils.h"
 #include <cstring>
 #include <stdexcept>

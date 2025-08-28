@@ -4,9 +4,9 @@
 #include <map>
 #include <optional>
 #include <vector>
-#include <kernelXDK/target/Target.h>
-#include <kernelXDK/pivot/Pivots.h>
-#include <kernelXDK/util/error.h>
+#include <xdk/target/Target.h>
+#include <xdk/pivot/Pivots.h>
+#include <xdk/util/error.h>
 #include "util/file.h"
 
 std::vector<Target> KxdbParser::GetAllTargets() {

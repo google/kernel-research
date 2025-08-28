@@ -2,7 +2,7 @@
 #include <cstdarg>
 #include <string>
 #include <vector>
-#include <kernelXDK/util/str.h>
+#include <xdk/util/str.h>
 
 std::string format_str(const char* format, va_list args) {
     std::va_list args_copy;
