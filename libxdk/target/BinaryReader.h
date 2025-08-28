@@ -161,24 +161,11 @@ public:
     }
 
     /**
-<<<<<<< HEAD
     * @brief Limits the reader to struct_size.
     * @param struct_size The structure size in bytes.
     * @returns struct_size is not zero.
     */
     bool BeginStruct(uint64_t struct_size);
-=======
-     * @brief Begins parsing a structure. Reads the structure size and pushes the
-     * end offset onto the stack.
-     * @param struct_size_len The number of bytes used to specify the structure
-     * size (2 or 4).
-     * @param begin_if_empty If true, begins the structure even if its size is 0.
-     * Defaults to true.
-     * @return True if the structure is not empty or begin_if_empty is true, false
-     * otherwise.
-     */
-    bool BeginStruct(int struct_size_len, bool begin_if_empty = true);
->>>>>>> 4821e98 (Added doxygen tags for grouping modules)
 
     /**
      * @brief Ends parsing a structure. Jumps the offset to the end of the current

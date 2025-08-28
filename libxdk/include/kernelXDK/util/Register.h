@@ -1,3 +1,5 @@
+#pragma once
+
 /**
  * @defgroup util_classes Utility Classes
  * @brief Helper classes for various utilities.
