@@ -56,7 +56,7 @@ target_include_directories(kernelXDK
 # It tells CMake to take the 'kernelXDK' directory from inside your local 'include'
 # directory and install it to the destination 'include' directory.
 # This preserves the entire subdirectory structure (e.g., xdk/target, xdk/util).
-install(DIRECTORY include/kernelXDK
+install(DIRECTORY include/xdk
     DESTINATION include
     FILES_MATCHING PATTERN "*.h"
 )
