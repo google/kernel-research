@@ -53,10 +53,9 @@ jobs:
         run: |
           PACKAGE_DIR="libxdk-$LIB_VER"
           mkdir -p "$PACKAGE_DIR/lib"
-          mkdir -p "$PACKAGE_DIR/include/xdk"
 
           cp build/libkernelXDK.a "$PACKAGE_DIR/lib/libxdk.a"
-          cp -R include "$PACKAGE_DIR/include"
+          cp -R include "$PACKAGE_DIR/"
 
           tar -czvf "libxdk-$LIB_VER.tar.gz" "$PACKAGE_DIR/"
 
