@@ -31,15 +31,34 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./Documentation
-          destination: ./_site
+
+      - name: Install tools
+        run: |
+          sudo apt install doxygen
+          pip install -U sphinx
+          pip install -U exhale
+          pip install -U sphinx-rtd-theme
+          pip install -U sphinxcontrib-mermaid
+
+      - name: Generating API XML with Doxygen
+        working-directory: ./docs
+        run: |
+          mkdir -p _build
+          doxygen Doxyfile
+
+      - name: Generating HTML website with Sphinx
+        working-directory: ./docs
+        run: |
+          sphinx-build -b html src _build/html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_build/html
+
   deploy:
     environment:
       name: github-pages

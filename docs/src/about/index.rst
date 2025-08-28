@@ -10,14 +10,10 @@ Currently we are `paying extra for kernelCTF researchers <https://google.github.
 
 ``kernelXDK`` aims to detach target-specific information (symbol offsets, ROP chain gadgets, structure and kmalloc cache information) from the exploit itself: making the exploits target-independent. This way we can easily introduce new targets for kernelCTF without the need to manually port these exploits to the new targets.
 
----
-
 Limitations
 -----------
 
 The current beta version of the ``kernelXDK`` has several limitations, and should only be looked at as a proof-of-concept, v0.1 or "minimal viable product" version of the kit which only aims to satisfy one goal of many future goals (see the "Future ambitions" section): **make 50% - 90% of kernelCTF exploits work on multiple kernelCTF targets.**
-
----
 
 What is kernelXDK?
 ==================
@@ -31,10 +27,7 @@ The description of the specific tools can be found in the `README.md <../README.
 
 This graph shows how the tools interact with each other:
 
-.. warning::
-   To properly render this Mermaid diagram in Sphinx, you will likely need a Sphinx extension such as `sphinxcontrib-mermaid`. Without such an extension, this will appear as a plain code block.
-
-.. code-block:: mermaid
+.. mermaid::
 
     graph TD;
         image_runner[**image_runner**: runs kernel images optionally with custom kernel modules] --> |can use vmlinuz images from the image db|image_db[**image_db:** downloads distro images and collects information about them]
@@ -49,8 +42,6 @@ This graph shows how the tools interact with each other:
         exploit[**kernel exploit**] --> |links to the library|expkit
         exploit --> |use or includes .kpwn files|kpwn_db
         exploit --> |optionally, use the kernel module to introduce fake vulns|kpwn_module
-
----
 
 Future ambitions
 ----------------
@@ -81,8 +72,6 @@ We are planning to add the following features to the ``kernelXDK`` mid-term (wit
 
 * TBD
 
----
-
 Areas to explore
 ~~~~~~~~~~~~~~~~
 
@@ -95,8 +84,6 @@ These areas are moon-shot plans to explore in the future in case ``kernelXDK`` d
 * Syzkaller-integration: generate exploits automatically from crashes.
 
 * Windows, macOS support.
-
----
 
 Components
 ============

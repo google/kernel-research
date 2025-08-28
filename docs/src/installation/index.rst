@@ -77,8 +77,6 @@ Creating a Database
 
         *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
 
----
-
 Building the Payload
 --------------------
 
@@ -109,8 +107,6 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
 
     .. note::
         Available ROP actions could be found in ``kpwn_db/config.py``.
-
----
 
 Assembling the Final Payload with PayloadBuilder
 ------------------------------------------------

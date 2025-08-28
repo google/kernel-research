@@ -9,8 +9,6 @@ kernelXDK: Streamlining Kernel Exploit Development
 
 ``kernelXDK`` is an **open-source library** designed to significantly **streamline kernel exploit development**. It addresses common challenges in this domain by **reducing repetitive tasks**, fostering **exploit universality across Linux distributions**, and enhancing **exploit readability**.
 
----
-
 Key Features and Benefits
 --------------------------
 
@@ -34,7 +32,6 @@ Installation
 
    installation/index
 
----
 
 About
 ===============
@@ -43,8 +40,6 @@ About
    :maxdepth: 2
 
    about/index
-
----
 
 
 API
