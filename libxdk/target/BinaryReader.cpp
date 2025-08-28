@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#include <kernelXDK/util/error.h>
+#include <xdk/util/error.h>
 #include "util/file.h"
 #include "util/log.h"
 

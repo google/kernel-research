@@ -3,7 +3,7 @@
 #include <vector>
 #include "test/TestSuite.h"
 #include "util/file.h"
-#include <kernelXDK/util/error.h>
+#include <xdk/util/error.h>
 #include <fstream>
 
 #define TEST_METHOD(name, desc) \

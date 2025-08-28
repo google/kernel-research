@@ -39,7 +39,7 @@ add_library(${PROJECT_NAME} STATIC ${KERNELXDK_SRCS})
 # --- Define Include Directories ---
 target_include_directories(kernelXDK
     # PUBLIC: For consumers of the library.
-    # They will find public headers in <kernelXDK/...>
+    # They will find public headers in <xdk/...>
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -55,7 +55,7 @@ target_include_directories(kernelXDK
 # This replaces the entire KERNELXDK_PUBLIC_HEADERS list and the complex loop.
 # It tells CMake to take the 'kernelXDK' directory from inside your local 'include'
 # directory and install it to the destination 'include' directory.
-# This preserves the entire subdirectory structure (e.g., kernelXDK/target, kernelXDK/util).
+# This preserves the entire subdirectory structure (e.g., xdk/target, xdk/util).
 install(DIRECTORY include/kernelXDK
     DESTINATION include
     FILES_MATCHING PATTERN "*.h"

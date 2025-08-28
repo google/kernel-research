@@ -2,8 +2,8 @@
 
 #include <optional>
 #include <string>
-#include <kernelXDK/pivot/Pivots.h>
-#include <kernelXDK/payloads/Payload.h>
+#include <xdk/pivot/Pivots.h>
+#include <xdk/payloads/Payload.h>
 
 /**
  * @defgroup pivot_classes Pivot Classes

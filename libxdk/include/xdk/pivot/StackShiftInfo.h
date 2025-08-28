@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <vector>
-#include <kernelXDK/pivot/StackPivot.h>
-#include <kernelXDK/payloads/Payload.h>
+#include <xdk/pivot/StackPivot.h>
+#include <xdk/payloads/Payload.h>
 
 /**
  * @defgroup pivot_classes Pivot Classes

@@ -1,7 +1,7 @@
 #include <memory>
 #include <optional>
-#include <kernelXDK/target/TargetDb.h>
-#include <kernelXDK/util/error.h>
+#include <xdk/target/TargetDb.h>
+#include <xdk/util/error.h>
 #include "target/KxdbParser.h"
 #include "util/file.h"
 #include "util/stdutils.h"

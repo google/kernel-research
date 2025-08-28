@@ -1,12 +1,12 @@
 #include <limits>
 #include <optional>
 #include <queue>
-#include <kernelXDK/pivot/Pivots.h>
-#include <kernelXDK/pivot/StackPivot.h>
-#include <kernelXDK/pivot/PivotFinder.h>
-#include <kernelXDK/payloads/Payload.h>
-#include <kernelXDK/payloads/RopChain.h>
-#include <kernelXDK/util/error.h>
+#include <xdk/pivot/Pivots.h>
+#include <xdk/pivot/StackPivot.h>
+#include <xdk/pivot/PivotFinder.h>
+#include <xdk/payloads/Payload.h>
+#include <xdk/payloads/RopChain.h>
+#include <xdk/util/error.h>
 #include "util/stdutils.h"
 
 void RopPivotInfo::PrintDebugInfo() const {

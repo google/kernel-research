@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <kernelXDK/pivot/Pivots.h>
+#include <xdk/pivot/Pivots.h>
 
 /**
  * @defgroup target_classes Target Classes

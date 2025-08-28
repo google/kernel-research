@@ -1,7 +1,7 @@
-#include <kernelXDK/target/TargetDb.h>
-#include <kernelXDK/util/error.h>
+#include <xdk/target/TargetDb.h>
+#include <xdk/util/error.h>
 #include "test/TestEnvironment.h"
-#include <kernelXDK/xdk_device/xdk_device.h>
+#include <xdk/xdk_device/xdk_device.h>
 
 void TestEnvironment::SetTargetDbPath(const std::string& target_db_path) {
   target_db_path_ = target_db_path;

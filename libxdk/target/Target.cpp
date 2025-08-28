@@ -1,9 +1,9 @@
-#include <kernelXDK/target/Target.h>
+#include <xdk/target/Target.h>
 #include <cstdint>
 #include <map>
 #include <string>
 #include <cstring>
-#include <kernelXDK/util/error.h>
+#include <xdk/util/error.h>
 
 std::map<RopActionId, std::string> RopActionNames {
     { RopActionId::MSLEEP, "msleep" },

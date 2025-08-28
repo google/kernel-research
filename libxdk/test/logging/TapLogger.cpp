@@ -2,7 +2,7 @@
 #include "test/logging/TapLogger.h"
 #include "test/TestSuite.h"
 
-#include <kernelXDK/util/str.h>
+#include <xdk/util/str.h>
 
 #include <iostream>
 #include <memory>

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <optional>
-#include <kernelXDK/target/TargetDb.h>
-#include <kernelXDK/xdk_device/xdk_device.h>
+#include <xdk/target/TargetDb.h>
+#include <xdk/xdk_device/xdk_device.h>
 
 class TestEnvironment {
     std::string target_db_path_;

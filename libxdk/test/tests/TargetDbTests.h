@@ -4,9 +4,9 @@
 #include "test/TestUtils.h"
 #include "test/TestSuite.h"
 #include "target/KxdbParser.h"
-#include <kernelXDK/target/Target.h>
-#include <kernelXDK/target/TargetDb.h>
-#include <kernelXDK/payloads/RopChain.h>
+#include <xdk/target/Target.h>
+#include <xdk/target/TargetDb.h>
+#include <xdk/payloads/RopChain.h>
 #include "util/file.h"
 
 struct TargetDbTests: TestSuite {

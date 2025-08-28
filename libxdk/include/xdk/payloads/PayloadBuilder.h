@@ -10,11 +10,11 @@
 #include <optional>
 
 // Project-specific includes
-#include <kernelXDK/pivot/Pivots.h>
-#include <kernelXDK/pivot/StackPivot.h>
-#include <kernelXDK/pivot/StackShiftInfo.h>
-#include <kernelXDK/payloads/RopChain.h>
-#include <kernelXDK/payloads/Payload.h>
+#include <xdk/pivot/Pivots.h>
+#include <xdk/pivot/StackPivot.h>
+#include <xdk/pivot/StackShiftInfo.h>
+#include <xdk/payloads/RopChain.h>
+#include <xdk/payloads/Payload.h>
 
 /**
  * @defgroup payloads_classes Payloads Classes
