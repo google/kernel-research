@@ -13,6 +13,7 @@
  * @ingroup rip_classes
  * @class RopUtils
  * @brief Utility functions for ROP chain generation.
+ */
 class RopUtils {
 public:
     /**
