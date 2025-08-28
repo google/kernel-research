@@ -1,6 +1,6 @@
 #!/usr/bin/env -S python3 -u
 
-"""Static sample writer for kernel_rop_generator."""
+"""Static sample writer for rop_generator."""
 
 import argparse
 import json
@@ -44,11 +44,11 @@ rop_actions = {
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(
-      description="Saves sample ROP Action chains into kernel-image-db"
+      description="Saves sample ROP Action chains into image_db"
   )
-  parser.add_argument("kernel_image_db_path", help="Folder of the kernel-image-db tool")
+  parser.add_argument("image_db_path", help="Folder of the image_db tool")
   args = parser.parse_args()
   for (release_name, release_ras) in rop_actions.items():
-    dst_fn = f"{args.kernel_image_db_path}/releases/{release_name}/rop_actions.json"
+    dst_fn = f"{args.image_db_path}/releases/{release_name}/rop_actions.json"
     with open(dst_fn, "wt") as f:
       f.write(to_json(release_ras, 4, RopActions))

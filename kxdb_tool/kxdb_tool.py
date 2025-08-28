@@ -20,8 +20,8 @@ from converter.partial_sync import PartialSync
 
 def main():
   parser = argparse.ArgumentParser(description=".kxdb database builder and converter")
-  parser.add_argument("--kernel-image-db-path",
-                      help="Path to the kernel-image-db tool to add targets from")
+  parser.add_argument("--image-db-path",
+                      help="Path to the image_db tool to add targets from")
   parser.add_argument("--release-filter", default=None,
                       help="Regex filter for which '{distro}/{release_name}' to be saved in the output database")
   parser.add_argument("--release-filter-add", default=None,
@@ -64,10 +64,10 @@ def main():
       db_config = db.meta
       targets += db.targets
     new_config = db_config
-  elif args.kernel_image_db_path:
+  elif args.image_db_path:
     new_config = default_config
   else:
-    return parser.error("at least one of --input-file or --kernel_image_db_path required")
+    return parser.error("at least one of --input-file or --image-db-path required")
 
   if args.partial_sync:
     new_config = default_config  # upgrade the db_config
@@ -80,8 +80,8 @@ def main():
       print(' '.join(missing_files))
     sys.exit(0 if missing_files else 1)
 
-  if args.kernel_image_db_path:
-    new_targets = get_targets_from_image_db(new_config, args.kernel_image_db_path, args.release_filter_add or args.release_filter, logger, args.partial_sync, True)
+  if args.image_db_path:
+    new_targets = get_targets_from_image_db(new_config, args.image_db_path, args.release_filter_add or args.release_filter, logger, args.partial_sync, True)
     if not new_targets:
       sys.stderr.write("No new targets to add. Exiting...\n")
       sys.exit(1)

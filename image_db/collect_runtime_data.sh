@@ -14,7 +14,7 @@
 # limitations under the License.
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
-RUNNER_DIR="$SCRIPT_DIR/../kernel-image-runner"
+RUNNER_DIR="$SCRIPT_DIR/../image_runner"
 
 cd $SCRIPT_DIR
 

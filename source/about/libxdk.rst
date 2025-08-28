@@ -33,4 +33,4 @@ The tests can be run by:
 
 * ``make test``: runs the tests directly on your machine, thus only those tests will run which does not require a vulnerable target (target with the ``kpwn`` kernel module loaded), others will fail.
 
-* ``./run_tests.sh``: runs the tests on a vulnerable target VM with the ``kpwn`` kernel module loaded via ``kernel-image-runner``, all tests will run.
+* ``./run_tests.sh``: runs the tests on a vulnerable target VM with the ``kpwn`` kernel module loaded via ``image_runner``, all tests will run.

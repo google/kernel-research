@@ -147,7 +147,7 @@ class ReleaseRunner:
   def thread_main(self):
     try:
       self.update_status("downloading release...")
-      self.run(f"../kernel-image-db/download_release.sh '{self.distro}' '{self.release_name}' 'vmlinuz,modules'", True)
+      self.run(f"../image_db/download_release.sh '{self.distro}' '{self.release_name}' 'vmlinuz,modules'", True)
 
       self.update_status("compiling custom modules...")
       self.run(f"./compile_custom_modules.sh '{self.distro}' '{self.release_name}' 'xdk_device'", True)

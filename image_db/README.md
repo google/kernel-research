@@ -66,7 +66,7 @@ The downloaded `vmlinuz` file and `linux-headers-for-module/` folder can be foun
 
 ## collect_runtime_data.sh
 
-Use `kernel-image-runner` to extract runtime information for the already downloaded releases (after calling `download_release.sh`):
+Use `image_runner` to extract runtime information for the already downloaded releases (after calling `download_release.sh`):
 
  * `version.txt`: contents of `/proc/version` (similar to `uname -a`)
 

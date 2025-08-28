@@ -249,17 +249,17 @@ Which results in a crash like (ROP chain item is executed):
 
 # Compilation
 
-## Automatically with kernel-image-runner
+## Automatically with image_runner
 
 If you run `./run.sh` with `--custom-modules=xdk_device`, the module will be compiled and loaded automatically.
 
-## Manually for kernel-image-runner targets
+## Manually for image_runner targets
 
 Run `./compile_custom_modules.sh (kernelctf|ubuntu) <release-name> xdk_device` and after the compilation process, the compiled module can be found at `rootfs/custom_modules/xdk_device.ko`.
 
 ## Manually for custom kernels
 
-Compile your kernel normally and then execute the following command from the same directory where you compiled your kernel (replace `<kernel-image-runner-dir>` with the root directory of the kernel-image-runner):
+Compile your kernel normally and then execute the following command from the same directory where you compiled your kernel (replace `<image_runner_dir>` with the root directory of the image_runner):
 
-`make M=<kernel-image-runner-dir>/../third_party/kernel-modules/xdk_device modules`
+`make M=<image_runner_dir>/../third_party/kernel_modules/xdk_device modules`
 

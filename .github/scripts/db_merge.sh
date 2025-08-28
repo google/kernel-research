@@ -15,7 +15,7 @@
 set -exo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
-IMAGE_DB_DIR="$SCRIPT_DIR/../kernel-image-db"
+IMAGE_DB_DIR="$SCRIPT_DIR/../image_db"
 KXDB_DIR="$SCRIPT_DIR/../kxdb_tool"
 
 mkdir -p db

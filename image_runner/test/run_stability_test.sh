@@ -10,7 +10,7 @@ cd "$SCRIPT_DIR"
 DISTRO="${1:-ubuntu}"
 RELEASE="${2:-4.15.0-20.21}"
 # echo "${@:3}"
-RELEASE_DIR="$SCRIPT_DIR/../../kernel-image-db/releases/$DISTRO/$RELEASE"
+RELEASE_DIR="$SCRIPT_DIR/../../image_db/releases/$DISTRO/$RELEASE"
 
 echo "Updating rootfs..."
 (cd $RUNNER_DIR; ./update_rootfs_image.sh)

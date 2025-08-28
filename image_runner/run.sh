@@ -49,16 +49,16 @@ COMMAND_TO_RUN="${@:3}"
 
 if [[ ! "$DISTRO" =~ ^(kernelctf|ubuntu)$ ]]; then usage; fi
 
-RELEASE_DIR="$SCRIPT_DIR/../kernel-image-db/releases/$DISTRO/$RELEASE_NAME"
+RELEASE_DIR="$SCRIPT_DIR/../image_db/releases/$DISTRO/$RELEASE_NAME"
 VMLINUZ="$RELEASE_DIR/vmlinuz"
 MODULES_PATH="$RELEASE_DIR/linux-modules"
 
 if [ -z "$RELEASE_NAME" ]; then
-    $SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" list
+    $SCRIPT_DIR/../image_db/download_release.sh "$DISTRO" list
     exit 1
 fi
 
-$SCRIPT_DIR/../kernel-image-db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules${DBGSYM:+",dbgsym"}" 1>&2
+$SCRIPT_DIR/../image_db/download_release.sh "$DISTRO" "$RELEASE_NAME" "vmlinuz,modules${DBGSYM:+",dbgsym"}" 1>&2
 
 RUN_ARGS="$VMLINUZ$RUN_ARGS"
 if [ -d "$MODULES_PATH" ]; then RUN_ARGS+=" --modules-path=$MODULES_PATH"; fi

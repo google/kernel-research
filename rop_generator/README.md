@@ -20,7 +20,7 @@ To test the generated ROP chain, we patch the following syscalls
 
 Copy the generated ROP chain into rop_test_trigger.c
 * Compile ```gcc -static -o rop_test_trigger rop_test_trigger.c```
-* ``` cp rop_test_trigger <kernel-image-runner path>/rootfs/```
+* ``` cp rop_test_trigger <image_runner path>/rootfs/```
 * Run the patched vmlinux in QEMU ```./run_vmlinuz.sh <vmlinux>.syscall_patched sh```
 * Inside QEMU run ```./rop_test_trigger```
 
