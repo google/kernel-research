@@ -33,11 +33,11 @@ struct TargetDbTests: TestSuite {
     TEST_METHOD(versionLts6181, "version, distro and release_name fields are correct in target db (lts-6.1.81)") {
         auto parser = getParser();
         auto target = getLts6181();
-        ASSERT_EQ(lts_6181_version, target.version.c_str());
+        ASSERT_EQ(lts_6181_version, target.GetVersion().c_str());
 
         auto target2 = parser.GetTarget(lts_6181_version, true).value();
-        ASSERT_EQ("kernelctf", target2.distro.c_str());
-        ASSERT_EQ("lts-6.1.81", target2.release_name.c_str());
+        ASSERT_EQ("kernelctf", target2.GetDistro().c_str());
+        ASSERT_EQ("lts-6.1.81", target2.GetReleaseName().c_str());
     }
 
     TEST_METHOD(symbolsLts6181, "symbols are correct in target db (lts-6.1.81)") {
@@ -63,7 +63,7 @@ struct TargetDbTests: TestSuite {
     TEST_METHOD(ropActionsLts6181, "rop actions are correct (lts-6.1.81)") {
         auto target = getLts6181();
 
-        auto& telefork = target.rop_actions.at("telefork");
+        auto telefork = target.GetRopActionItems(RopActionId::TELEFORK);
         ASSERT_EQ(4, telefork.size());
         ASSERT_EQ(RopItemType::SYMBOL, telefork[0].type);
         ASSERT_EQ(0x18f0d0 /* FORK */, telefork[0].value);
@@ -92,7 +92,7 @@ struct TargetDbTests: TestSuite {
     }
 
     TEST_METHOD(pivotsLts6181, "stack pivots are correct (lts-6.1.81)") {
-        auto pivots = getLts6181().pivots;
+        auto pivots = getLts6181().GetPivots();
         ASSERT_EQ(11, pivots.one_gadgets.size());
         ASSERT_EQ(156, pivots.push_indirects.size());
         ASSERT_EQ(6, pivots.pop_rsps.size());
@@ -118,50 +118,52 @@ struct TargetDbTests: TestSuite {
     }
 
     TEST_METHOD(structLts6181, "structs are correct (lts-6.1.81)") {
-        auto structs = getLts6181().structs;
-        ASSERT_MINMAX(7, 999, (int)structs.size());
+        auto t = getLts6181();
 
-        ASSERT_EQ(40, structs["pipe_buffer"].size);
-        ASSERT_EQ(1, structs["pipe_buffer"].fields.size());
-        ASSERT_EQ(16, structs["pipe_buffer"].fields["ops"].offset);
-        ASSERT_EQ(8, structs["pipe_buffer"].fields["ops"].size);
+        auto pipe_buffer = t.GetStruct("pipe_buffer");
+        ASSERT_EQ(40, pipe_buffer.size);
+        ASSERT_EQ(1, pipe_buffer.fields.size());
+        ASSERT_EQ(16, pipe_buffer.fields["ops"].offset);
+        ASSERT_EQ(8, pipe_buffer.fields["ops"].size);
 
-        ASSERT_EQ(48, structs["msg_msg"].size);
-        ASSERT_EQ(6, structs["msg_msg"].fields.size());
-        ASSERT_EQ(32, structs["msg_msg"].fields["next"].offset);
-        ASSERT_EQ(8, structs["msg_msg"].fields["next"].size);
+        auto msg_msg = t.GetStruct("msg_msg");
+        ASSERT_EQ(48, msg_msg.size);
+        ASSERT_EQ(6, msg_msg.fields.size());
+        ASSERT_EQ(32, msg_msg.fields["next"].offset);
+        ASSERT_EQ(8, msg_msg.fields["next"].size);
 
-        ASSERT_EQ(8, structs["msg_msgseg"].size);
+        ASSERT_EQ(8, t.GetStruct("msg_msgseg").size);
 
-        ASSERT_EQ(752, structs["hfsc_class"].size);
-        ASSERT_EQ(312, structs["hfsc_class"].fields["cl_cvtmin"].offset);
+        auto hfsc_class = t.GetStruct("hfsc_class");
+        ASSERT_EQ(752, hfsc_class.size);
+        ASSERT_EQ(312, hfsc_class.fields["cl_cvtmin"].offset);
     }
 
-    TEST_METHOD(targetDbMergingWorks, "TargetDb can merge db with static targets") {
-        TargetDb db(xdk_db_lts6181.data(), xdk_db_lts6181.size());
+    TEST_METHOD(targetDbMergingWorks, "TargetDb can merge db with targets") {
+        TargetDb db(kxdb_lts6181);
 
-        StaticTarget st("kernelctf", "lts-6.1.81");
+        Target st("kernelctf", "lts-6.1.81");
         st.AddSymbol("new_symbol", 0x1234);
         st.AddStruct("new_struct", 80, { { "field1", 0x10, 8 }, { "field2", 0x20, 8 } });
-        db.AddStaticTarget(st);
+        db.AddTarget(st);
 
         auto target = db.GetTarget(lts_6181_version);
         // symbols from the xdk db found
         ASSERT_EQ(0x1be800, target.GetSymbolOffset("prepare_kernel_cred"));
-        // symbols from the static target also found
+        // symbols from the target also found
         ASSERT_EQ(0x1234, target.GetSymbolOffset("new_symbol"));
-        ASSERT_EQ(0x20, target.structs.at("new_struct").fields.at("field2").offset);
+        ASSERT_EQ(0x20, target.GetStruct("new_struct").fields.at("field2").offset);
     }
 
-    TEST_METHOD(staticDbWorks, "TargetDb can work with only static targets without a db") {
+    TEST_METHOD(staticDbWorks, "TargetDb can work with only targets without a db") {
         TargetDb db;
 
-        StaticTarget st("kernelctf", "lts-6.1.81", lts_6181_version);
+        Target st("kernelctf", "lts-6.1.81", lts_6181_version);
         st.AddSymbol("new_symbol", 0x1234);
-        db.AddStaticTarget(st);
+        db.AddTarget(st);
 
         auto target = db.GetTarget(lts_6181_version);
-        ASSERT_EQ("lts-6.1.81", target.release_name.c_str());
+        ASSERT_EQ("lts-6.1.81", target.GetReleaseName().c_str());
         ASSERT_EQ(0x1234, target.GetSymbolOffset("new_symbol"));
     }
 };

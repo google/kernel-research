@@ -15,15 +15,27 @@ std::map<RopActionId, std::string> RopActionNames {
     { RopActionId::KPTI_TRAMPOLINE, "ret_via_kpti_retpoline" },
 };
 
-std::vector<RopItem> Target::GetItemsForAction(RopActionId id) {
+std::vector<RopItem> Target::GetRopActionItems(RopActionId id) {
   std::string name = RopActionNames.at(id);
-  if (rop_actions.find(name) == rop_actions.end()) {
+  if (rop_actions.find(name) == rop_actions.end())
     throw ExpKitError("missing RopActionID %u, name=%s", id, name.c_str());
-  }
   return rop_actions[name];
 }
 
-uint32_t Target::GetSymbolOffset(std::string symbol_name) const {
+const std::string& Target::GetDistro() const {
+  return distro;
+}
+
+const std::string& Target::GetReleaseName() const {
+  return release_name;
+
+}
+
+const std::string& Target::GetVersion() const {
+  return version;
+}
+
+uint32_t Target::GetSymbolOffset(std::string symbol_name) {
   auto it = symbols.find(symbol_name);
   if (it == symbols.end() || it->second == 0)
     throw ExpKitError("symbol (%s) is not available for the target",
@@ -31,21 +43,75 @@ uint32_t Target::GetSymbolOffset(std::string symbol_name) const {
   return it->second;
 }
 
-void StaticTarget::AddStruct(const std::string& name, uint64_t size,
+Target::Target(const std::string& distro,
+                           const std::string& release_name,
+                           const std::string& version) {
+  this->distro = distro;
+  this->release_name = release_name;
+  this->version = version;
+}
+
+void Target::AddSymbol(const std::string& name, uint64_t value) {
+  symbols[name] = value;
+}
+
+void Target::AddStruct(const Struct& value) {
+  structs[value.name] = value;
+}
+
+void Target::AddStruct(const std::string& name, uint64_t size,
                              const std::vector<StructField>& fields) {
   Struct str{name, size, {}};
   for (auto field : fields) str.fields[field.name] = field;
   structs[name] = str;
 }
 
-void StaticTarget::AddSymbol(const std::string& name, uint64_t value) {
-  symbols[name] = value;
+void Target::SetPivots(const Pivots& pivots) {
+  this->pivots = pivots;
 }
 
-StaticTarget::StaticTarget(const std::string& distro,
-                           const std::string& release_name,
-                           const std::string& version) {
-  this->distro = distro;
-  this->release_name = release_name;
-  this->version = version;
+void Target::Merge(const Target& src) {
+  if (!src.GetDistro().empty()) distro = src.GetDistro();
+  if (!src.GetReleaseName().empty()) release_name = src.GetReleaseName();
+  if (!src.GetVersion().empty()) version = src.GetVersion();
+
+  symbols.insert(src.symbols.begin(), src.symbols.end());
+  rop_actions.insert(src.rop_actions.begin(), src.rop_actions.end());
+
+  pivots.one_gadgets.insert(pivots.one_gadgets.end(),
+                                src.pivots.one_gadgets.begin(),
+                                src.pivots.one_gadgets.end());
+  pivots.push_indirects.insert(pivots.push_indirects.end(),
+                                   src.pivots.push_indirects.begin(),
+                                   src.pivots.push_indirects.end());
+  pivots.pop_rsps.insert(pivots.pop_rsps.end(),
+                             src.pivots.pop_rsps.begin(),
+                             src.pivots.pop_rsps.end());
+  pivots.stack_shifts.insert(pivots.stack_shifts.end(),
+                                 src.pivots.stack_shifts.begin(),
+                                 src.pivots.stack_shifts.end());
+
+  for (const auto& [name, str] : src.structs) {
+    if (structs.find(name) == structs.end()) {
+      structs[name] = str;
+    } else {
+      structs[name].fields.insert(str.fields.begin(), str.fields.end());
+    }
+  }
+}
+
+const Pivots& Target::GetPivots() {
+  return pivots;
+}
+
+std::map<std::string, uint32_t> Target::GetAllSymbols() {
+  return symbols;
+}
+
+const Struct& Target::GetStruct(const std::string& name) {
+  return structs[name];
+}
+
+void Target::AddRopAction(const std::string& name, std::vector<RopItem> value) {
+  rop_actions[name] = value;
 }

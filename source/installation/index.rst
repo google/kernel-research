@@ -37,45 +37,45 @@ Creating a Database
 
 4.  Already available in database structure and symbol offsets are documented in ``kpwn_db/config.py``. They are added for all the supported targets.
 
-5.  If the needed symbol is not in database, use ``StaticTarget`` object to add it. One object per target needed. For example:
+5.  If the needed symbol is not in database, use ``Target`` object to add it. One object per target needed. For example:
 
     .. code-block:: c++
 
-        StaticTarget st("kernelctf", "cos-105-17412.294.34");
+        Target st("kernelctf", "cos-105-17412.294.34");
 
         st.AddSymbol("nft_last_ops", 0x1acaf20);
 
-        kpwn_db.AddStaticTarget(st);
+        kpwn_db.AddTarget(st);
 
 6.  Similar approach could be taken for adding structure and fields information:
 
     .. code-block:: c++
 
-        StaticTarget st("kernelctf", "cos-105-17412.294.34");
+        Target st("kernelctf", "cos-105-17412.294.34");
 
         st.AddStruct("nft_expr_ops", 128,
                     {{"dump", 64, 8},
                     {"type", 120, 8}});
 
-        kpwn_db.AddStaticTarget(st);
+        kpwn_db.AddTarget(st);
 
     .. note::
         ``128`` in the example above is a size of the ``nft_expr_ops`` structure. ``{"dump", 64, 8}`` field is located at the offset of 64 and as is a pointer, size would be 8 for 64-bit architecture.
 
-7.  Access pre-defined or added (via ``StaticTarget``) structures and symbols using following calls:
-
-    .. code-block:: c++
-
-        auto offset = structs.at("nft_expr_ops").size + structs.at("nft_expr_ops").fields.at("type").offset; // get the size and offset of type field in nft_expr_ops structure   
-
-        *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
-
-8.  Detect which target **TargetDb** is being run on.
+7.  Detect which target **TargetDb** is being run on.
 
     .. code-block:: c++
 
         auto target = kpwn_db.AutoDetectTarget();
         printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
+
+8.  Access pre-defined or added (via ``Target``) structures and symbols using following calls:
+
+    .. code-block:: c++
+
+        auto offset = target.GetStruct("nft_expr_ops").size + target.GetStruct("nft_expr_ops").fields.at("type").offset; // get the size and offset of type field in nft_expr_ops structure   
+
+        *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
 
 ---
 

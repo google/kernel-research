@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstring>
 #include <map>
+#include <memory>
 #include <optional>
 #include <vector>
 #include <xdk/target/Target.h>
@@ -9,19 +10,19 @@
 #include <xdk/util/error.h>
 #include "util/file.h"
 
-std::vector<Target> KxdbParser::GetAllTargets() {
-  return ParseTargets(std::nullopt, std::nullopt, std::nullopt);
+vector<Target> KxdbParser::GetAllTargets() {
+  return ParseTargets(nullopt, nullopt, nullopt);
 }
 
-std::optional<Target> KxdbParser::GetTarget(const std::string& version,
-                                            bool throw_on_missing) {
-  return ParseTarget(std::nullopt, std::nullopt, version, throw_on_missing);
+optional<Target> KxdbParser::GetTarget(const string& version,
+                                         bool throw_on_missing) {
+  return ParseTarget(nullopt, nullopt, version, throw_on_missing);
 }
 
-std::optional<Target> KxdbParser::GetTarget(const std::string& distro,
-                                            const std::string& release_name,
-                                            bool throw_on_missing) {
-  return ParseTarget(distro, release_name, std::nullopt, throw_on_missing);
+optional<Target> KxdbParser::GetTarget(const string& distro,
+                                         const string& release_name,
+                                         bool throw_on_missing) {
+  return ParseTarget(distro, release_name, nullopt, throw_on_missing);
 }
 
 void KxdbParser::ParseHeader() {
@@ -56,25 +57,25 @@ void KxdbParser::ParseHeader() {
 
 void KxdbParser::SetLog(ILog* log) { log_ = log; }
 
-KxdbParser KxdbParser::FromFile(const std::string &filename) {
+KxdbParser KxdbParser::FromFile(const string &filename) {
   return KxdbParser(read_file(filename));
 }
 
-KxdbParser::KxdbParser(const std::vector<uint8_t> data)
+KxdbParser::KxdbParser(const vector<uint8_t> data)
     : BinaryReader(data.data(), data.size()) {}
 
 KxdbParser::KxdbParser(const uint8_t* buffer, size_t size)
     : BinaryReader(buffer, size) {}
 
-std::optional<Target> KxdbParser::ParseTarget(
-    std::optional<const std::string> distro,
-    std::optional<const std::string> release_name,
-    std::optional<const std::string> version, bool throw_on_missing) {
+optional<Target> KxdbParser::ParseTarget(
+    optional<const string> distro,
+    optional<const string> release_name,
+    optional<const string> version, bool throw_on_missing) {
   auto targets = ParseTargets(distro, release_name, version);
 
   if (targets.size() == 1) return targets[0];
 
-  if (targets.size() == 0 && !throw_on_missing) return std::nullopt;
+  if (targets.size() == 0 && !throw_on_missing) return nullopt;
 
   auto error = targets.size() > 1 ? "multiple targets were found"
                                   : "target was not found";
@@ -85,13 +86,13 @@ std::optional<Target> KxdbParser::ParseTarget(
                       release_name->c_str());
 }
 
-std::vector<Target> KxdbParser::ParseTargets(
-    std::optional<const std::string> distro,
-    std::optional<const std::string> release_name,
-    std::optional<const std::string> version) {
+vector<Target> KxdbParser::ParseTargets(
+    optional<const string> distro,
+    optional<const string> release_name,
+    optional<const string> version) {
   if (offset_targets_ == 0) ParseHeader();
 
-  std::vector<Target> result;
+  vector<Target> result;
   SeekTo(offset_targets_);
   auto num_targets = SeekableListCount(); // by_version
   auto sizes = SeekableListSizes();
@@ -110,11 +111,7 @@ std::vector<Target> KxdbParser::ParseTargets(
         (version.has_value() && strcmp(version->c_str(), t_version)))
       continue;
 
-    Target target;
-    target.distro = t_distro;
-    target.release_name = t_release;
-    target.version = t_version;
-
+    auto target = Target(t_distro, t_release, t_version);
     ParseSymbols(target);
     ParseRopActions(target);
     ParsePivots(target);
@@ -135,7 +132,7 @@ void KxdbParser::ParseStructs(Target& target) {
     DebugLog("  struct[%u]: layout_idx_opt=%u", i, layout_idx_opt);
     if (layout_idx_opt == 0) continue;
     auto str = GetStructLayout(layout_idx_opt - 1);
-    target.structs[str.name] = str;
+    target.AddStruct(str);
   }
 }
 
@@ -192,7 +189,7 @@ void KxdbParser::ParseStructsHeader() {
     DebugLog("  struct[%u]: name:%s field_count:%u", i, struct_name,
              num_fields);
 
-    std::vector<FieldMeta> fields;
+    vector<FieldMeta> fields;
     for (uint64_t j = 0; j < num_fields; j++) {
       auto field_name = ZStr();
       auto optional = ReadU8() == 1;
@@ -205,6 +202,7 @@ void KxdbParser::ParseStructsHeader() {
 
 void KxdbParser::ParsePivots(Target& target) {
   BeginStruct(ReadUInt());
+  Pivots pivots;
 
   auto num_one_gadgets = ReadUInt();
   DebugLog("ParsePivots(): num_one_gadgets = %u", num_one_gadgets);
@@ -213,7 +211,7 @@ void KxdbParser::ParsePivots(Target& target) {
     pivot.address = ReadUInt();
     pivot.pivot_reg = ReadRegisterUsage();
     pivot.next_rip_offset = ReadInt();
-    target.pivots.one_gadgets.push_back(pivot);
+    pivots.one_gadgets.push_back(pivot);
     DebugLog("one_gadgets[%u]: address=0x%x, pivot_reg=%u, next_rip_offset=%d",
              i, pivot.address, pivot.pivot_reg.reg, pivot.next_rip_offset);
   }
@@ -227,7 +225,7 @@ void KxdbParser::ParsePivots(Target& target) {
     pivot.push_reg = ReadRegisterUsage();
     pivot.indirect_reg = ReadRegisterUsage();
     pivot.next_rip_offset = ReadInt();
-    target.pivots.push_indirects.push_back(pivot);
+    pivots.push_indirects.push_back(pivot);
   }
 
   auto num_poprsps = ReadUInt();
@@ -237,7 +235,7 @@ void KxdbParser::ParsePivots(Target& target) {
     pivot.address = ReadUInt();
     pivot.stack_change_before_rsp = ReadInt();
     pivot.next_rip_offset = ReadInt();
-    target.pivots.pop_rsps.push_back(pivot);
+    pivots.pop_rsps.push_back(pivot);
   }
 
   auto num_stack_shifts = ReadUInt();
@@ -247,11 +245,12 @@ void KxdbParser::ParsePivots(Target& target) {
     pivot.address = ReadUInt();
     pivot.ret_offset = ReadUInt();
     pivot.shift_amount = ReadUInt();
-    target.pivots.stack_shifts.push_back(pivot);
+    pivots.stack_shifts.push_back(pivot);
     DebugLog("stack_shift[%u]: address=0x%x, ret_offset=%u, shift_amount=%d", i,
              pivot.address, pivot.ret_offset, pivot.shift_amount);
   }
 
+  target.SetPivots(pivots);
   EndStruct();
 }
 
@@ -273,7 +272,7 @@ void KxdbParser::ParseRopActions(Target& target) {
     auto name = split(rop_action_meta_[i_action].desc, "(")[0];
     auto num_items = ReadUInt();
     DebugLog("  RA[%s] num_items = %u", name.c_str(), num_items);
-    std::vector<RopItem> rop_items;
+    vector<RopItem> rop_items;
     for (uint64_t i = 0; i < num_items; i++) {
       auto type_and_value = ReadUInt();
       auto type = (RopItemType)(type_and_value & 0x03);
@@ -282,7 +281,7 @@ void KxdbParser::ParseRopActions(Target& target) {
       rop_items.push_back(RopItem(type, value));
     }
 
-    target.rop_actions[name] = rop_items;
+    target.AddRopAction(name, rop_items);
   }
 }
 
@@ -314,7 +313,7 @@ void KxdbParser::ParseSymbols(Target& target) {
   DebugLog("ParseSymbols (num=%u)", symbol_names_.size());
   for (auto& name : symbol_names_) {
     auto value = ReadU32();
-    target.symbols[name] = value;
+    target.AddSymbol(name, value);
     DebugLog("  symbol[%s] = 0x%x", name.c_str(), value);
   }
 }

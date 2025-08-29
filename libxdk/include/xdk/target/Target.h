@@ -96,7 +96,8 @@ struct Struct {
  * @class Target
  * @brief Represents a specific kernel target with its symbols, ROP gadgets, and other definitions.
  */
-struct Target {
+class Target {
+protected:
     std::string distro;
     std::string release_name;
     std::string version;
@@ -105,13 +106,27 @@ struct Target {
     std::map<std::string, Struct> structs;
     Pivots pivots;
 
+public:
+    /**
+     * @brief Constructor for a Target.
+     * @param distro The distribution name.
+     * @param release_name The release name.
+     * @param version The version string (optional).
+     */
+    Target(const std::string& distro, const std::string& release_name,
+                 const std::string& version = "");
+
+    const std::string& GetDistro() const;
+    const std::string& GetReleaseName() const;
+    const std::string& GetVersion() const;
+
     /**
      * @brief Get the offset of a symbol within the target.
      * @param symbol_name The name of the symbol.
      * @return The offset of the symbol.
      * @throws ExpKitError if the symbol is not found or has an offset of 0.
      */
-    uint32_t GetSymbolOffset(std::string symbol_name) const;
+    uint32_t GetSymbolOffset(std::string symbol_name);
 
     /**
      * @brief Get the ROP items for a specific ROP action ID.
@@ -119,37 +134,48 @@ struct Target {
      * @return A vector of ROP items for the specified action.
      * @throws ExpKitError if the ROP action ID is not found.
      */
-    std::vector<RopItem> GetItemsForAction(RopActionId id);
-};
+    std::vector<RopItem> GetRopActionItems(RopActionId id);
 
-/**
- * @ingroup target_classes
- * @class StaticTarget
- * @brief A concrete implementation of Target for static kernel versions.
- */
-struct StaticTarget: Target {
-    /**
-     * @brief Constructor for a StaticTarget.
-     * @param distro The distribution name.
-     * @param release_name The release name.
-     * @param version The version string (optional).
-     */
-    StaticTarget(const std::string& distro, const std::string& release_name,
-                 const std::string& version = "");
+    const Struct& GetStruct(const std::string& name);
+
+    const Pivots& GetPivots();
+
+    std::map<std::string, uint32_t> GetAllSymbols();
 
     /**
-     * @brief Add a symbol to the static target.
+     * @brief Add a symbol to the target.
      * @param name The name of the symbol.
-     * @param value The value (offset) of the symbol.
+     * @param value The value (offset) of the symbol without the base address.
      */
     void AddSymbol(const std::string& name, uint64_t value);
 
     /**
-     * @brief Add a struct definition to the static target.
+     * @brief Add a ROP Action to the target.
+     * @param name The name of the ROP Action.
+     * @param value The ROP Action items (array of RopItem).
+     */
+    void AddRopAction(const std::string& name, std::vector<RopItem> value);
+
+    /**
+     * @brief Add a struct definition to the target.
+     * @param value The struct structure
+     */
+    void AddStruct(const Struct& value);
+
+    /**
+     * @brief Add a struct definition to the target.
      * @param name The name of the struct.
      * @param size The size of the struct.
      * @param fields A vector of StructField objects representing the fields of the struct.
      */
     void AddStruct(const std::string& name, uint64_t size,
                     const std::vector<StructField>& fields);
+
+    /**
+     * @brief Sets the Pivots struct for the target.
+     * @param pivots The pivots struct
+     */
+    void SetPivots(const Pivots& pivots);
+
+    void Merge(const Target& src);
 };

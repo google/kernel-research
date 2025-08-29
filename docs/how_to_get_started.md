@@ -28,44 +28,44 @@ This section describes how to use the prebuilt database, extend it if necessary 
 4. Already available in database structure and symbol offsets are documented in `kxdb_tool/config.py`.
 They are added for all the supported targets.
 
-5. If the needed symbol is not in database, use `StaticTarget` object to add it. One object per target needed. For example:
+5. If the needed symbol is not in database, use `Target` object to add it. One object per target needed. For example:
 
     ```c++
-    StaticTarget st("kernelctf", "cos-105-17412.294.34");
+    Target st("kernelctf", "cos-105-17412.294.34");
 
     st.AddSymbol("nft_last_ops", 0x1acaf20);
 
-    kxdb.AddStaticTarget(st);
+    kxdb.AddTarget(st);
     ```
 
 6. Similar approach could be taken for adding structure and fields information:
 
     ```c++
-    StaticTarget st("kernelctf", "cos-105-17412.294.34");
+    Target st("kernelctf", "cos-105-17412.294.34");
 
     st.AddStruct("nft_expr_ops", 128, { 
         {"dump", 64, 8},
         {"type", 120, 8} });
 
-    kxdb.AddStaticTarget(st);
+    kxdb.AddTarget(st);
     ```
 
     > **Note**
     > `128` in the example above is a size of the `nft_expr_ops` structure. `{"dump", 64, 8}` field is located at the offset of 64 and as is a pointer, size would be 8 for 64-bit architecture.
 
-7. Access pre-defined or added (via `StaticTarget`) structures and symbols using following calls:
-
-    ```c++
-    auto offset = structs.at("nft_expr_ops").size + structs.at("nft_expr_ops").fields.at("type").offset; // get the size and offset of type field in nft_expr_ops structure   
-
-    *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
-    ``` 
-
-8.  Detect which target **TargetDb** is being run on.
+7.  Detect which target the exploit is being run on.
 
     ```c++
     auto target = kxdb.AutoDetectTarget();
-    printf("[+] Running on target: %s %s\n", target.distro.c_str(), target.release_name.c_str());
+    printf("[+] Running on target: %s %s\n", target.GetDistro().c_str(), target.GetReleaseName().c_str());
+    ```
+
+8. Access pre-defined or added (via `Target`) structures and symbols using following calls:
+
+    ```c++
+    auto offset = target.GetStruct("nft_expr_ops").size + target.GetStruct("nft_expr_ops").fields.at("type").offset; // get the size and offset of type field in nft_expr_ops structure
+
+    *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
     ```
 
 ### Building the Payload
@@ -83,9 +83,9 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
    ```c++
    payload.Reserve(0, 8);
    ```
-   
+
    > **Note**
-   > Reserves 8 bytes at offset 0.   
+   > Reserves 8 bytes at offset 0.
 
 3. Create the `RopChain`. This object is initialized with target-specific information and the KASLR base. You can then add predefined actions to it. The `Ret2Usr` utility helps in gracefully returning execution to a user-mode function after the kernel operations are complete.
 
@@ -96,7 +96,7 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
     ```
 
     > **Note**
-    > Available ROP actions could be found in `kxdb_tool/converter/config.py`. 
+    > Available ROP actions could be found in `kxdb_tool/config.py`.
 
 ### Assembling the Final Payload with PayloadBuilder
 
@@ -128,7 +128,7 @@ The `PayloadBuilder` automates the process of finding a suitable pivot gadget an
     PayloadBuilder builder(target.pivots, kernel_base); // create builder
 
     builder.AddPayload(payload1, std::nullopt, std::nullopt);
-    builder.AddPayload(payload2, Register::RSI, rip_off); // add payload, with register, and rip_offset     
+    builder.AddPayload(payload2, Register::RSI, rip_off); // add payload, with register, and rip_offset
     ```
 
 3. Add the `RopChain` to the builder.
@@ -140,14 +140,14 @@ The `PayloadBuilder` automates the process of finding a suitable pivot gadget an
 4. Build the final payload. The `Build()` method will find an appropriate pivot gadget that uses the specified register (`RSI` in this case) to redirect execution to your ROP chain. The necessary gadgets and the ROP chain itself will be written into the `payload` object you provided earlier.
 
     ```c++
-    if(!builder.Build()) 
-        exit(-1); 
+    if(!builder.Build())
+        exit(-1);
     ```
 
     Once built, the `payload` object contains the complete, ready-to-use exploit payload.
 
 5. In cases when pointer to pivot gadget should be part of some other buffer or passed as a parameter it could be obtained in the following way after building the final payload:
-   
+
    ```c++
-    *(uint64_t *)&some_buffer[offset] = kernel_base + builder.GetStackPivot().GetGadgetOffset(); 
+    *(uint64_t *)&some_buffer[offset] = kernel_base + builder.GetStackPivot().GetGadgetOffset();
    ```

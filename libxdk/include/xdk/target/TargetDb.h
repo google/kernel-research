@@ -32,9 +32,9 @@ class TargetDb {
     void MergeTargets(Target& dst, const Target& src);
 
     /**
-     * @brief Retrieves a Target object, merging data from a KxdbParser target and a static target if available.
-     * @param target_opt An optional Target object parsed from a XdkDevice file.
-     * @param static_idx An optional index of a static target to merge.
+     * @brief Retrieves a Target object, merging data from a KxdbParser target and a target if available.
+     * @param target_opt An optional Target object parsed from a KXDB file.
+     * @param static_idx An optional index of a target to merge.
      * @return The merged Target object.
      * @throws ExpKitError if both target_opt and static_idx are not provided.
      */
@@ -66,10 +66,10 @@ public:
     TargetDb(const std::string& filename, const std::vector<uint8_t>& fallback_kxdb);
 
     /**
-     * @brief Adds a static target to the database.
-     * @param target The static target to add.
+     * @brief Adds a target to the database.
+     * @param target The target to add.
      */
-    void AddStaticTarget(const StaticTarget& target);
+    void AddTarget(const Target& target);
 
     /**
      * @brief Retrieves a Target object by distro and release name.
