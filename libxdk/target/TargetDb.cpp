@@ -62,8 +62,13 @@ TargetDb::TargetDb(const std::string &filename) {
   parser_ = std::make_unique<KxdbParser>(KxdbParser::FromFile(filename));
 }
 
-TargetDb::TargetDb(const uint8_t* buffer, size_t size)
-    : parser_(std::make_unique<KxdbParser>(buffer, size)) {}
+TargetDb::TargetDb(const std::vector<uint8_t>& data)
+    : parser_(std::make_unique<KxdbParser>(data)) {}
+
+TargetDb::TargetDb(const std::string &filename, const std::vector<uint8_t>& fallback_kxdb) {
+  auto file_exists = std::filesystem::exists(filename);
+  parser_ = std::make_unique<KxdbParser>(file_exists ? KxdbParser::FromFile(filename) : KxdbParser(fallback_kxdb));
+}
 
 Target TargetDb::GetTarget(std::optional<Target> target_opt,
                            std::optional<size_t> static_idx) {

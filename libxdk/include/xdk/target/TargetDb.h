@@ -54,10 +54,16 @@ public:
 
     /**
      * @brief Constructs a TargetDb object from a byte buffer.
-     * @param buffer The buffer containing the XdkDevice file data.
-     * @param size The size of the buffer.
+     * @param data The buffer containing the KXDB file data.
      */
-    TargetDb(const uint8_t* buffer, size_t size);
+    TargetDb(const std::vector<uint8_t>& data);
+
+    /**
+     * @brief Constructs a TargetDb object.
+     * @param filename A database file to read from if exists.
+     * @param fallback_kxdb The buffer containing the fallback / built-in KXDB file data if the file does not exists.
+     */
+    TargetDb(const std::string& filename, const std::vector<uint8_t>& fallback_kxdb);
 
     /**
      * @brief Adds a static target to the database.

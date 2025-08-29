@@ -1,6 +1,10 @@
 # How to get started
 
-### Creating a Database
+### Initialize the Target Database
+
+The target database contains all of the information needed to customize the exploit for the current target.
+
+This section describes how to use the prebuilt database, extend it if necessary and how to make it replaceable with an updated version.
 
 1. Add the necessary includes to the exploit code.
 
@@ -9,16 +13,16 @@
     #include <xdk/postrip.h>
     ```
 
-2. Include the **target_db** in the exploit. `INCBIN` creates a read-only section in the binary with the file contents.
+2. Include the **target_db**. `INCBIN` creates a read-only section in the exploit binary with the current target database content.
 
     ```c++
     INCBIN(target_db, "target_db.kxdb");
     ```
 
-3. Initialize **TargetDb**:
+3. Initialize **TargetDb**. This constructor uses the `target_db.kxdb` file if exists, otherwise it fallbacks to the compile-time `INCBIN`'d database. This way, the exploit can be customized for running on other targets by supplying another `target_db.kxdb` after compilation time.
 
     ```c++
-    TargetDb kxdb(target_db, target_db_size);
+    TargetDb kxdb("target_db.kxdb", target_db);
     ```
 
 4. Already available in database structure and symbol offsets are documented in `kxdb_tool/config.py`.

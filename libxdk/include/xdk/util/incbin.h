@@ -1,4 +1,5 @@
  #pragma once
+ #include <vector>
 
  /**
  * @brief Includes a binary file into the executable.
@@ -7,11 +8,12 @@
  */
 #define INCBIN(var_name, filename) \
     __asm__(".section .rodata\n" \
-            #var_name ":\n" \
+            #var_name "_begin:\n" \
             ".incbin \"" filename "\"\n" \
             #var_name "_end:\n" \
     ); \
-    extern const unsigned char var_name[]; \
+    extern const unsigned char var_name ## _begin[]; \
     extern const unsigned char var_name ## _end[]; \
     __asm__(".section .bss\n"); \
-    extern const size_t var_name ## _size = var_name ## _end - var_name;
+    extern const size_t var_name ## _size = var_name ## _end - var_name ## _begin; \
+    std::vector<uint8_t> var_name = std::vector<uint8_t>(var_name ## _begin, var_name ## _end);
