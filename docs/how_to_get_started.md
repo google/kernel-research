@@ -21,7 +21,7 @@
     TargetDb kxdb(target_db, target_db_size);
     ```
 
-4. Already available in database structure and symbol offsets are documented in `kxdb_tool/converter/config.py`. 
+4. Already available in database structure and symbol offsets are documented in `kxdb_tool/config.py`.
 They are added for all the supported targets.
 
 5. If the needed symbol is not in database, use `StaticTarget` object to add it. One object per target needed. For example:

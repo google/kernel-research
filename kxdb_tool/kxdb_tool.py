@@ -10,13 +10,13 @@ import pprint
 KXDB_DIR = os.path.abspath(f"{__file__}/..")
 sys.path.append(KXDB_DIR)
 
-from data_model.db import Db
-from data_model.meta import MetaConfig
-from data_model.serialization import *
-import converter.config as config
+import config
 from converter.image_db_utils import get_targets_from_image_db
 from converter.kxdb_file import read_kxdb, write_kxdb
 from converter.partial_sync import PartialSync
+from data_model.db import Db
+from data_model.meta import MetaConfig
+from data_model.serialization import *
 
 def main():
   parser = argparse.ArgumentParser(description=".kxdb database builder and converter")

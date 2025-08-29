@@ -39,7 +39,7 @@ Arguments
 
 You need to specify either ``input-file`` (to convert) or ``image-db-path`` (to build from), but you can also specify both (to extend).
 
-If you specify ``input-file`` then the configuration will be reused from that file, otherwise the default configuration (from ``converter/config.py`` will be used.
+If you specify ``input-file`` then the configuration will be reused from that file, otherwise the default configuration (from ``config.py``) will be used.
 
 -----
 
