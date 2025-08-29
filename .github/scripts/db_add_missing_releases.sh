@@ -15,8 +15,8 @@
 set -ex
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
-IMAGE_DB_DIR="$SCRIPT_DIR/../image_db"
-KXDB_DIR="$SCRIPT_DIR/../kxdb_tool"
+IMAGE_DB_DIR="$SCRIPT_DIR/../../image_db"
+KXDB_DIR="$SCRIPT_DIR/../../kxdb_tool"
 
 ./db_get_missing_releases.sh
 
