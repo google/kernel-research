@@ -1,8 +1,8 @@
 set -eo pipefail
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
-IMAGE_DB_DIR="$SCRIPT_DIR/../image_db"
-KXDB_DIR="$SCRIPT_DIR/../kxdb_tool"
+IMAGE_DB_DIR="$SCRIPT_DIR/../../image_db"
+KXDB_DIR="$SCRIPT_DIR/../../kxdb_tool"
 
 if [ ! -f kernelctf.kxdb ]; then
     gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kxdb kernelctf.kxdb
