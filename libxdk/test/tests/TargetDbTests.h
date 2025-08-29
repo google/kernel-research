@@ -10,18 +10,18 @@
 #include "util/file.h"
 
 struct TargetDbTests: TestSuite {
-    std::vector<uint8_t> xdk_db_lts6181;
+    std::vector<uint8_t> kxdb_lts6181;
 
     TargetDbTests(): TestSuite("TargetDbStaticTests", "target.kxdb database tests") { }
 
     const char* lts_6181_version = "Linux version 6.1.81 (runner@fv-az736-920) (gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, GNU ld (GNU Binutils for Ubuntu) 2.38) #1 SMP PREEMPT_DYNAMIC Thu Mar  7 12:17:31 UTC 2024";
 
     void init() {
-        xdk_db_lts6181 = read_file("test/artifacts/target_db_lts-6.1.81.kxdb");
+        kxdb_lts6181 = read_file("test/artifacts/target_db_lts-6.1.81.kxdb");
     }
 
     KxdbParser getParser() {
-        auto parser = KxdbParser(xdk_db_lts6181);
+        auto parser = KxdbParser(kxdb_lts6181);
         parser.SetLog(this);
         return parser;
     }
