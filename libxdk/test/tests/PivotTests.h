@@ -16,7 +16,7 @@ class PivotTests: public TestSuite {
     Target lts6181;
 
 public:
-    PivotTests(): TestSuite("PivotStaticTests", "stack pivot static tests"), parser({}) { }
+    PivotTests(): TestSuite("PivotStaticTests", "stack pivot static tests"), parser({}), lts6181("", "") { }
 
     void init() {
         parser = KxdbParser::FromFile("test/artifacts/kernelctf.kxdb");
@@ -26,7 +26,7 @@ public:
     TEST_METHOD(findsPivotsForLts6181, "find all pivots for LTS 6.1.81") {
         Payload p(128);
         for (int r = (int)Register::RAX; r <= (int)Register::R15; r++) {
-            PivotFinder finder(lts6181.pivots, (Register) r, p);
+            PivotFinder finder(lts6181.GetPivots(), (Register) r, p);
             auto pivots = finder.FindAll();
             Log("Found %lu pivots for %s", pivots.size(), register_names[r]);
             for (auto& pivot : pivots)
@@ -41,14 +41,14 @@ public:
             Error("The database does not contain any targets.");
 
         for (auto target : targets) {
-            if (!contains(distros, target.distro))
+            if (!contains(distros, target.GetDistro()))
                 continue;
 
             for (auto buf_reg : registers) {
                 Payload p(128);
-                PivotFinder finder(target.pivots, buf_reg, p);
+                PivotFinder finder(target.GetPivots(), buf_reg, p);
                 if (!finder.Find().has_value())
-                    Error("could not find stack pivot via %s register for target %s/%s", register_names[(int)buf_reg], target.distro.c_str(), target.release_name.c_str());
+                    Error("could not find stack pivot via %s register for target %s/%s", register_names[(int)buf_reg], target.GetDistro().c_str(), target.GetReleaseName().c_str());
             }
         }
     }
@@ -81,7 +81,7 @@ public:
         //   "jump over" shift sequences as the ROP payload won't fit between 0x08 and 0x2e.
         payload.Reserve(0, 4);
 
-        PivotFinder finder(target.pivots, Register::RSI, payload);
+        PivotFinder finder(target.GetPivots(), Register::RSI, payload);
         auto rop_pivot = finder.PivotToRop(rop);
 
         Log("Selected stack pivot: %s", rop_pivot.pivot.GetDescription().c_str());
@@ -108,7 +108,7 @@ public:
         Payload p(128);
         Register buf_reg = Register::RSI;
 
-        PivotFinder finder(env->GetTarget().pivots, buf_reg, p);
+        PivotFinder finder(env->GetTarget().GetPivots(), buf_reg, p);
         auto pivot = finder.Find(8);
         Log("selected pivot: %s", pivot->GetDescription().c_str());
 

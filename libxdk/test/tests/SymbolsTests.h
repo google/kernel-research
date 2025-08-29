@@ -14,7 +14,7 @@ public:
     TEST_METHOD(symbolsCheck, "check if the database contains the correct symbols") {
         auto kaslr_base = env->GetXdkDevice().KaslrLeak();
 
-        for (auto pair : env->GetTarget().symbols) {
+        for (auto pair : env->GetTarget().GetAllSymbols()) {
             auto sym_addr = env->GetXdkDevice().SymAddrOpt(pair.first.c_str());
 
             // releases without CONFIG_KALLSYMS_ALL only contain function addresses

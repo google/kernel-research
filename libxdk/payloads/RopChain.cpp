@@ -7,7 +7,7 @@ RopChain::RopChain(Target &target, uint64_t kaslr_base) : target_(target), kaslr
 
 void RopChain::AddRopAction(RopActionId id, std::vector<uint64_t> arguments) {
 
-    std::vector<RopItem> rop_items = target_.GetItemsForAction(id);
+    std::vector<RopItem> rop_items = target_.GetRopActionItems(id);
     RopAction action;
 
     for (auto item : rop_items) {

@@ -9,14 +9,16 @@
 #include <xdk/target/Target.h>
 #include <xdk/pivot/Pivots.h>
 
+using namespace std;
+
 struct FieldMeta {
-    std::string field_name;
+    string field_name;
     bool optional;
 };
 
 struct StructMeta {
-    std::string struct_name;
-    std::vector<FieldMeta> fields;
+    string struct_name;
+    vector<FieldMeta> fields;
 };
 
 enum class Section { Meta = 1, Targets = 2, StructLayouts = 3 };
@@ -29,10 +31,10 @@ struct SectionInfo {
 class KxdbParser: protected BinaryReader {
 protected:
     uint64_t offset_targets_ = 0, offset_struct_layouts_ = 0;
-    std::vector<std::string> symbol_names_;
-    std::vector<StructMeta> structs_meta_;
-    std::map<uint64_t, Struct> struct_layouts_;
-    std::map<Section, SectionInfo> sections_;
+    vector<string> symbol_names_;
+    vector<StructMeta> structs_meta_;
+    map<uint64_t, Struct> struct_layouts_;
+    map<Section, SectionInfo> sections_;
 
     /**
      * @brief Parses the symbols header section of the KXDB file.
@@ -118,10 +120,10 @@ protected:
      * @return A vector of Target objects that match the specified criteria.
      * @throws ExpKitError if there's an error parsing the binary data.
      */
-    std::vector<Target> ParseTargets(
-        std::optional<const std::string> distro,
-        std::optional<const std::string> release_name,
-        std::optional<const std::string> version);
+    vector<Target> ParseTargets(
+        optional<const string> distro,
+        optional<const string> release_name,
+        optional<const string> version);
 
     /**
      * @brief Parses and retrieves a single target matching the specified criteria.
@@ -129,16 +131,16 @@ protected:
      * @param release_name Optional filter for the release name.
      * @param version Optional filter for the version string.
      * @param throw_on_missing If true, throws an exception if no target or multiple targets are found.
-     * @return An optional containing the matched Target object, or std::nullopt if no target is found and throw_on_missing is false.
+     * @return An optional containing the matched Target object, or nullopt if no target is found and throw_on_missing is false.
      * @throws ExpKitError if no target or multiple targets are found and throw_on_missing is true.
      */
-    std::optional<Target> ParseTarget(
-        std::optional<const std::string> distro,
-        std::optional<const std::string> release_name,
-        std::optional<const std::string> version, bool throw_on_missing);
+    optional<Target> ParseTarget(
+        optional<const string> distro,
+        optional<const string> release_name,
+        optional<const string> version, bool throw_on_missing);
 
    public:
-    std::vector<RopActionMeta> rop_action_meta_;
+    vector<RopActionMeta> rop_action_meta_;
 
     /**
      * @brief Constructs a KxdbParser from a buffer.
@@ -151,7 +153,7 @@ protected:
      * @brief Constructs a KxdbParser from a vector of bytes.
      * @param data The vector containing the KXDB data.
      */
-    KxdbParser(const std::vector<uint8_t> data);
+    KxdbParser(const vector<uint8_t> data);
 
     /**
      * @brief Constructs a KxdbParser by reading data from a file.
@@ -159,7 +161,7 @@ protected:
      * @return A KxdbParser object initialized with the file's content.
      * @throws ExpKitError if the file cannot be read.
      */
-    static KxdbParser FromFile(const std::string &filename);
+    static KxdbParser FromFile(const string &filename);
 
     /**
      * @param log The logger instance to use.
@@ -178,26 +180,26 @@ protected:
      * @param distro The distribution name of the target.
      * @param release_name The release name of the target.
      * @param throw_on_missing If true, throws an exception if no target or multiple targets are found.
-     * @return An optional containing the matched Target object, or std::nullopt if no target is found and throw_on_missing is false.
+     * @return An optional containing the matched Target object, or nullopt if no target is found and throw_on_missing is false.
      * @throws ExpKitError if no target or multiple targets are found for the given distro and release name, and throw_on_missing is true.
      */
-    std::optional<Target> GetTarget(const std::string& distro,
-                                    const std::string& release_name,
+    optional<Target> GetTarget(const string& distro,
+                                    const string& release_name,
                                     bool throw_on_missing = false);
 
     /**
      * @brief Retrieves a target by its full version string.
      * @param version The full version string of the target.
      * @param throw_on_missing If true, throws an exception if no target or multiple targets are found.
-     * @return An optional containing the matched Target object, or std::nullopt if no target is found and throw_on_missing is false.
+     * @return An optional containing the matched Target object, or nullopt if no target is found and throw_on_missing is false.
      * @throws ExpKitError if no target or multiple targets are found for the given version, and throw_on_missing is true.
      */
-    std::optional<Target> GetTarget(const std::string& version,
+    optional<Target> GetTarget(const string& version,
                                     bool throw_on_missing = false);
 
     /**
      * @brief Retrieves all targets available in the KXDB file.
      * @return A vector of all Target objects found in the file.
      */
-    std::vector<Target> GetAllTargets();
+    vector<Target> GetAllTargets();
 };
