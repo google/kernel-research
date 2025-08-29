@@ -35,7 +35,7 @@ Creating a Database
 
         TargetDb kpwn_db(target_db, target_db_size);
 
-4.  Already available in database structure and symbol offsets are documented in ``kpwn_db/converter/config.py``. They are added for all the supported targets.
+4.  Already available in database structure and symbol offsets are documented in ``kpwn_db/config.py``. They are added for all the supported targets.
 
 5.  If the needed symbol is not in database, use ``StaticTarget`` object to add it. One object per target needed. For example:
 
@@ -108,7 +108,7 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
         RopUtils::Ret2Usr(rop, (void*)win);
 
     .. note::
-        Available ROP actions could be found in ``kpwn_db/converter/config.py``.
+        Available ROP actions could be found in ``kpwn_db/config.py``.
 
 ---
 
