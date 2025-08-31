@@ -39,5 +39,5 @@ while IFS= read -r RELEASE <&3; do
     "$KXDB_DIR/kxdb_tool.py" -i db.kxdb -o db.kxdb --image-db-path "$IMAGE_DB_DIR"
 
     echo "Uploading new db"
-    gcloud storage cp -Z -a publicRead db.kxdb gs://kernel-research/pwnkit/db/kernelctf.kxdb
+    gcloud storage cp -Z -a publicRead db.kxdb gs://kernelxdk/db/kernelctf.kxdb
 done 3< missing_db_releases.txt

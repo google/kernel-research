@@ -68,6 +68,6 @@ The contents of the database can be configured via [kxdb_tool/config.py](../kxdb
 
 ## kernelCTF KXDB distribution
 
-The latest version of the database containing all kernelCTF targets can be found at https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb.
+The latest version of the database containing all kernelCTF targets can be found at [https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb](https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb).
 
 This file is updated daily via the [DB: add missing releases](https://github.com/google/kernel-research/actions/workflows/db-add-missing-releases.yml) Github Action workflow.

@@ -19,7 +19,7 @@ exp: exploit.o $(OBJS) target_db.kxdb
 	$(CC) $(CFLAGS) -c $< -o $@
 
 target_db.kxdb:
-	wget -O target_db.kxdb https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb
+	wget -O target_db.kxdb https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb
 
 run: build
 	cp exp* ../../../image_runner/rootfs/

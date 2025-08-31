@@ -32,6 +32,6 @@ target_include_directories(exp151 PRIVATE
 # Download target_db.kxdb directly to this sample's binary directory.
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/target_db.kxdb
-    COMMAND wget -O ${CMAKE_CURRENT_BINARY_DIR}/target_db.kxdb "https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb"
+    COMMAND wget -O ${CMAKE_CURRENT_BINARY_DIR}/target_db.kxdb "https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb"
     VERBATIM
 )

@@ -36,7 +36,7 @@ echo "Creating db for release $DISTRO $RELEASE"
 if [[ "$3" == "--upload" ]]; then
     echo "Uploading dbs"
     for EXT in kxdb json; do
-        gcloud storage cp -Z -a publicRead db.$EXT gs://kernel-research/pwnkit/db/$DISTRO/$RELEASE.$EXT
+        gcloud storage cp -Z -a publicRead db.$EXT gs://kernelxdk/db/$DISTRO/$RELEASE.$EXT
     done
 
     echo "Uploading missing image_db information"

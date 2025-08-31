@@ -5,7 +5,7 @@ IMAGE_DB_DIR="$SCRIPT_DIR/../../image_db"
 KXDB_DIR="$SCRIPT_DIR/../../kxdb_tool"
 
 if [ ! -f kernelctf.kxdb ]; then
-    gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kxdb kernelctf.kxdb
+    gcloud storage cp gs://kernelxdk/db/kernelctf.kxdb kernelctf.kxdb
 fi
 
 FILES_TO_DOWNLOAD=$($KXDB_DIR/kxdb_tool.py -i kernelctf.kxdb --partial-list-files 2>/dev/null || true)
@@ -21,5 +21,5 @@ gcloud storage rsync --recursive "gs://kernel-research/image_db/releases/" "$IMA
 
 echo "Uploading new db"
 for EXT in kxdb json; do
-    gcloud storage cp -Z -a publicRead kernelctf_new.$EXT gs://kernel-research/pwnkit/db/kernelctf.$EXT
+    gcloud storage cp -Z -a publicRead kernelctf_new.$EXT gs://kernelxdk/db/kernelctf.$EXT
 done

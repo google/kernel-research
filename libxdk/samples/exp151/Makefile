@@ -21,7 +21,7 @@ prerequisites:
 	sudo apt-get install libnl-nf-3-dev libnl-route-3-dev
 
 target_db.kxdb:
-	wget -O target_db.kxdb https://storage.googleapis.com/kernel-research/pwnkit/db/kernelctf.kxdb
+	wget -O target_db.kxdb https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb
 
 run: exp
 	cp exp* ../../../image_runner/rootfs/

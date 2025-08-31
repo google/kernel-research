@@ -23,11 +23,11 @@ rm -rf db/*
 if [ "$1" == "--rebuild" ]; then
     echo -n > db_releases.txt
 else
-    gcloud storage cp gs://kernel-research/pwnkit/db/kernelctf.kxdb db/_original.kxdb; echo
+    gcloud storage cp gs://kernelxdk/db/kernelctf.kxdb db/_original.kxdb; echo
     "$KXDB_DIR/kxdb_tool.py" -i db/_original.kxdb --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
 fi
 
-gcloud storage ls gs://kernel-research/pwnkit/db/kernelctf/*.kxdb > gcs_releases.txt
+gcloud storage ls gs://kernelxdk/db/kernelctf/*.kxdb > gcs_releases.txt
 cat gcs_releases.txt | grep -v -f db_releases.txt > missing_db_releases.txt || true
 
 if [[ ! -s "missing_db_releases.txt" ]]; then echo "Nothing is missing from DB, exiting..."; exit 0; fi
@@ -43,5 +43,5 @@ cat missing_db_releases.txt | gcloud storage cp -I ./db
 
 echo "Uploading new db"
 for EXT in kxdb json; do
-    gcloud storage cp -Z -a publicRead kernelctf.$EXT gs://kernel-research/pwnkit/db/kernelctf.$EXT
+    gcloud storage cp -Z -a publicRead kernelctf.$EXT gs://kernelxdk/db/kernelctf.$EXT
 done
