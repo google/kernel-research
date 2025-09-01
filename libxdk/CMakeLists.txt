@@ -10,12 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(MSVC)
-    add_compile_options(/W4 /EHsc /permissive-)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>)
-else()
-    add_compile_options(-Wall -Wextra -Wpedantic -fPIC)
-endif()
+add_compile_options(-Wall -Wextra -Wpedantic -fPIC)
 
 # --- Source File Collection for the Library ---
 # This remains the same, as your .cpp files are still in these directories.
@@ -51,6 +46,8 @@ target_include_directories(kernelXDK
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+add_custom_command(TARGET kernelXDK POST_BUILD COMMAND install -D "$<TARGET_FILE:kernelXDK>" "${CMAKE_SOURCE_DIR}/lib/libkernelXDK.a")
+
 # --- Simplified Public Header Installation ---
 # This replaces the entire KERNELXDK_PUBLIC_HEADERS list and the complex loop.
 # It tells CMake to take the 'kernelXDK' directory from inside your local 'include'
@@ -75,7 +72,6 @@ install(EXPORT ${PROJECT_NAME}Targets
 )
 
 # --- Generate CMake Package Configuration Files ---
-# This part remains the same.
 include(CMakePackageConfigHelpers)
 
 write_basic_package_version_file(
@@ -97,7 +93,6 @@ install(FILES
     DESTINATION "lib/cmake/${PROJECT_NAME}"
 )
 
-# --- Add Subdirectories for Tests and Samples ---
+# --- Add Subdirectories for tests ---
 enable_testing()
 add_subdirectory(test)
-add_subdirectory(samples)

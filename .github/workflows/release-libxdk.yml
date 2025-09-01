@@ -50,20 +50,13 @@ jobs:
         run: ${{ env.DOCKER_CMD }} "cmake --build build -j$(nproc)"
 
       - name: Package artifacts
-        run: |
-          PACKAGE_DIR="libxdk-$LIB_VER"
-          mkdir -p "$PACKAGE_DIR/lib"
-
-          cp build/libkernelXDK.a "$PACKAGE_DIR/lib/libxdk.a"
-          cp -R include "$PACKAGE_DIR/"
-
-          tar -czvf "libxdk-$LIB_VER.tar.gz" "$PACKAGE_DIR/"
+        run: ../.github/scripts/release_libxdk.sh "$LIB_VER"
 
       - name: Upload release package
         uses: actions/upload-artifact@v4
         with:
           name: "libxdk-${{ env.LIB_VER }}.tar.gz"
-          path: ./libxdk/libxdk-${{ env.LIB_VER }}.tar.gz
+          path: ./libxdk/build/libxdk-${{ env.LIB_VER }}.tar.gz
 
   release:
     runs-on: ubuntu-latest
