@@ -1,3 +1,19 @@
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 void new_setelem(struct nl_sock * socket,char *table_name, char *set_name, void *udata, uint32_t ulen, char *obj_ref, char * input_key, int key_len, char *key_end, int key_end_len, int if_catchall){
     struct nl_msg * msg = nlmsg_alloc();
     struct nlmsghdr *hdr1 = nlmsg_put(
