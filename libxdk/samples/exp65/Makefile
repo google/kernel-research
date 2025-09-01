@@ -1,5 +1,5 @@
-# ADJUST THIS PATH if KernelXDK is installed elsewhere (e.g., /opt/my_libs)
-KERNELXDK_INSTALL_PREFIX ?= /usr/local
+# ADJUST THIS PATH if kernelXDK is installed elsewhere (e.g., /usr/local)
+KERNELXDK_INSTALL_PREFIX ?= ../../
 
 KERNELXDK_INCLUDE_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/include/
 KERNELXDK_LIB_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/lib

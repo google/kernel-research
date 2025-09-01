@@ -1,5 +1,5 @@
-# ADJUST THIS PATH if KernelXDK is installed elsewhere (e.g., /opt/my_libs)
-KERNELXDK_INSTALL_PREFIX ?= /usr/local
+# ADJUST THIS PATH if kernelXDK is installed elsewhere (e.g., /usr/local)
+KERNELXDK_INSTALL_PREFIX ?= ../../
 
 KERNELXDK_INCLUDE_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/include/
 KERNELXDK_LIB_DIR ?= $(KERNELXDK_INSTALL_PREFIX)/lib
@@ -23,7 +23,6 @@ target_db.kxdb:
 
 run: build
 	cp exp* ../../../image_runner/rootfs/
-	#../../../image_runner/run.sh $(TARGET) --gdb --dbgsym --nokaslr -- /exp.sh | tee output.txt
 	../../../image_runner/run.sh $(TARGET) --nokaslr -- /exp.sh | tee output.txt
 
 test: run

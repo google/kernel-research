@@ -9,3 +9,4 @@ samples/**/*.kxdb
 test_results/
 build/
 *.o
+lib/

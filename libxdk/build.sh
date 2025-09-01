@@ -1,8 +1,4 @@
 #!/bin/bash
-set -e
-
-mkdir -p build 2>/dev/null
-cd build
-cmake ..
-cd ..
+set -ex
+cmake -B build
 cmake --build build --target kernelXDKTests
