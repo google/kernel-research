@@ -85,5 +85,6 @@ jobs:
             **Contents:**
             - `lib/libxdk.a`: The static library.
             - `include/xdk/`: All public header files.
+            - `samples/`: Samples which show how to use the library.
 
             See the commit history for detailed changes.
