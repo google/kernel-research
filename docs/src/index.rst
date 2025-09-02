@@ -42,17 +42,11 @@ About
    about/index
 
 
-API
-==============
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: libxdk
 
-   api
-
-
-Commandline Tools
-=================
+   libxdk/api
 
 .. toctree::
    :maxdepth: 2
@@ -60,23 +54,11 @@ Commandline Tools
 
    commandline_tools/index
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   tutorials/index        <-- Links to docs/tutorials/index.rst
-   how-to-guides/index    <-- Links to docs/how-to-guides/index.rst
-   explanation/index      <-- Links to docs/explanation/index.rst
-   api/library_root       <-- **Your Doxygen/Breathe/Exhale API reference**
-   contributing/index     <-- Links to docs/contributing/index.rst
-   release_notes          <-- Links to docs/release_notes.rst
-   glossary               <-- Links to docs/glossary.rst
-
 .. note::
    This documentation is still under active development. If you find any issues
    or have suggestions, please open an issue on our `GitHub repository`_.
 
-.. _GitHub repository: https://github.com/your-org/your-project
+.. _GitHub repository: https://github.com/google/kernel-research
 
 Indices and tables
 ==================
