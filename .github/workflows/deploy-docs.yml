@@ -42,6 +42,7 @@ jobs:
           pip install -U exhale
           pip install -U sphinx-rtd-theme
           pip install -U sphinxcontrib-mermaid
+          pip install -U myst-parser
 
       - name: Generating API XML with Doxygen
         working-directory: ./docs
