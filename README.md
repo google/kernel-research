@@ -2,20 +2,20 @@
 
 This repository contains useful tools for Linux kernel security research:
 
-* **image_db**: tools for downloading kernel various distribution release files and extracting various information from them.
-   * For more details, read the [image_db/README.md](image_db/README.md) file.
-
-* **image_runner**: tool for running various kernel distributions, with debugging and custom kernel module compilation support.
-   * For more details, read the [image_runner/README.md](image_runner/README.md) file.
-
-* **xdk_device**: kernel module for simulating vulnerabilities in the kernel, tracking function calls and testing exploitation primitives.
-   * For more details, read the [third_party/kernel_modules/xdk_device/README.md](third_party/kernel_modules/xdk_device/README.md) file.
+* **libxdk**: a work-in-progress Linux Kernel exploitation kit, which contains (will contain) the necessary building blocks for building exploits for the Linux kernel which can target various kernel versions.
+   * For more details, read the [libxdk/README.md](libxdk/README.md) file.
 
 * **rop_generator**: tools for generating ROP chains and stack pivots on Linux Kernel images.
    * For more details, read the [rop_generator/README.md](rop_generator/README.md) file.
 
-* **libxdk**: a work-in-progress Linux Kernel exploitation kit, which contains (will contain) the necessary building blocks for building exploits for the Linux kernel which can target various kernel versions.
-   * For more details, read the [libxdk/README.md](libxdk/README.md) file.
+* **image_runner**: tool for running various kernel distributions, with debugging and custom kernel module compilation support.
+   * For more details, read the [image_runner/README.md](image_runner/README.md) file.
+
+* **image_db**: tools for downloading kernel various distribution release files and extracting various information from them.
+   * For more details, read the [image_db/README.md](image_db/README.md) file.
+
+* **xdk_device**: kernel module for simulating vulnerabilities in the kernel, tracking function calls and testing exploitation primitives.
+   * For more details, read the [third_party/kernel_modules/xdk_device/README.md](third_party/kernel_modules/xdk_device/README.md) file.
 
 * **kxdb_tool**: a database builder which contains exploitation information (symbol addresses, ROP gadgets, stack pivots, structure field offsets) for multiple kernel targets and consumed by the exploit kit to customize exploits for targets.
    * For more details, read the [kxdb_tool/README.md](kxdb_tool/README.md) file.
