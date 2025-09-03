@@ -23,6 +23,15 @@ Key Features and Benefits
 * **Designed for Broad Support**: ``kernelXDK`` is engineered with the capability to support a wide range of kernel exploitation scenarios and environments.
 
 
+About
+===============
+
+.. toctree::
+   :maxdepth: 2
+   :caption: About
+
+   about/index
+
 Installation
 ============
 
@@ -31,16 +40,6 @@ Installation
    :caption: Setup
 
    installation/index
-
-
-About
-===============
-
-.. toctree::
-   :maxdepth: 2
-
-   about/index
-
 
 .. toctree::
    :maxdepth: 2
