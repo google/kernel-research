@@ -79,14 +79,3 @@ These areas are moon-shot plans to explore in the future in case kernelXDK deeme
 * Syzkaller-integration: generate exploits automatically from crashes.
 
 * Windows, macOS support.
-
-# Components
-
-```{toctree}
-:maxdepth: 1
-
-libxdk
-kxdb_database
-kernel_image_tools
-gadget_tools
-```
