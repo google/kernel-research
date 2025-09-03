@@ -23,32 +23,23 @@ Key Features and Benefits
 * **Designed for Broad Support**: ``kernelXDK`` is engineered with the capability to support a wide range of kernel exploitation scenarios and environments.
 
 
-About
-===============
-
 .. toctree::
    :maxdepth: 2
    :caption: About
 
-   about/index
-
-Installation
-============
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Setup
-
-   installation/index
+   about/introduction
+   about/kxdb_database
 
 .. toctree::
    :maxdepth: 2
    :caption: libxdk
 
+   libxdk/README
+   libxdk/how_to_get_started
    libxdk/api
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Commandline Tools
 
    commandline_tools/index
@@ -58,10 +49,3 @@ Installation
    or have suggestions, please open an issue on our `GitHub repository`_.
 
 .. _GitHub repository: https://github.com/google/kernel-research
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
