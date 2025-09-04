@@ -194,4 +194,8 @@ public:
     void SetPivots(const Pivots& pivots);
 
     void Merge(const Target& src);
+
+    uint64_t GetStructSize(const std::string& struct_name);
+    uint64_t GetFieldOffset(const std::string& struct_name, const std::string& field_name);
+    uint64_t GetFieldSize(const std::string& struct_name, const std::string& field_name);
 };

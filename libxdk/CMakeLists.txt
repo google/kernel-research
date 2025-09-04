@@ -35,6 +35,7 @@ set(LIBRARY_SOURCE_ROOT_DIRS
     util
     pivot
     payloads
+    leak
 )
 
 set(KERNELXDK_SRCS "")

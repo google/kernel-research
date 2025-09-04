@@ -12,7 +12,7 @@ LDFLAGS := -L$(KERNELXDK_LIB_DIR) -lkernelXDK
 build: exp
 
 clean:
-	rm exp *.o
+	rm exp *.o || true
 
 exp: exploit.o $(OBJS) target_db.kxdb
 	$(CC) $(CFLAGS) exploit.o $(LDFLAGS) -o exp

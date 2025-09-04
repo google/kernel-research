@@ -23,7 +23,7 @@ Its functionality (and how it can be used) can be seen by looking at the tests (
 The samples can be built and run as:
 
 ```
-make -C samples/stack_pivot_and_rop build run
+make -C samples/pipe_buf_rop build run
 ```
 
 ## Tests
