@@ -21,4 +21,4 @@
 #include <xdk/util/error.h>
 #include <xdk/util/pwn_utils.h>
 #include <xdk/payloads/Payload.h>
-
+#include <xdk/leak/LeakedBuffer.h>
