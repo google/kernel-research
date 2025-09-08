@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-#include <xdk/target/TargetDb.h>
-#include <xdk/util/HexDump.h>
-#include <xdk/util/incbin.h>
-#include <xdk/util/syscalls.h>
-#include <xdk/util/error.h>
-#include <xdk/util/pwn_utils.h>
-#include <xdk/payloads/Payload.h>
-#include <xdk/leak/LeakedBuffer.h>
+#pragma once
+
+#include <cstdint>
+#include <vector>
+#include <xdk/target/Target.h>
+
+class LeakedBuffer {
+    Target& target_;
+    std::vector<uint8_t> data_;
+
+public:
+    LeakedBuffer(Target& target, std::vector<uint8_t> data);
+
+    uint64_t Read(uint64_t offset, size_t size);
+
+    std::map<std::string, uint64_t> GetStruct(const std::string& struct_name, int64_t struct_offset = 0);
+    uint64_t GetField(const std::string& struct_name, const std::string& field_name, int64_t struct_offset = 0);
+};

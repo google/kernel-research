@@ -30,16 +30,16 @@ std::string intToHex(uint64_t value) {
 
 void PayloadBuilder::AddPayload(Payload& payload,
                                  const std::vector<Register>& registers,
-                                 std::optional<size_t> next_rip_offset) {
-    payload_datas_.emplace_back(payload, registers, next_rip_offset);
+                                 std::optional<size_t> rip_ptr_offset) {
+    payload_datas_.emplace_back(payload, registers, rip_ptr_offset);
 }
 
 void PayloadBuilder::AddPayload(Payload& payload,
                                  std::optional<Register> reg,
-                                 std::optional<size_t> next_rip_offset) {
+                                 std::optional<size_t> rip_ptr_offset) {
     std::vector<Register> regs;
     if (reg) regs.push_back(reg.value());
-    payload_datas_.emplace_back(payload, regs, next_rip_offset);
+    payload_datas_.emplace_back(payload, regs, rip_ptr_offset);
 }
 
 void PayloadBuilder::AddRopChain(const RopChain& rop_chain) {
@@ -62,10 +62,10 @@ bool PayloadBuilder::Build(bool need_pivot) {
     if (need_pivot) {
         for (const auto &data_ref : data_refs) {
             PayloadData &data = data_ref.get();
-            if (data.next_rip_offset)
+            if (data.rip_ptr_offset)
             {
                 if(rip_pointer) throw ExpKitError("multiple rip_offsets");
-                rip_pointer = (uint64_t*)data.payload.Reserve(data.next_rip_offset.value(), 8);
+                rip_pointer = (uint64_t*)data.payload.Reserve(data.rip_ptr_offset.value(), 8);
             }
         }
     }

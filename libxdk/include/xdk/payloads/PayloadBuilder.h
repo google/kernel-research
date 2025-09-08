@@ -48,19 +48,19 @@
  */
 struct PayloadData {
     Payload& payload;                          ///< @brief Reference to the Payload object.
-    const std::vector<Register> registers;     ///< @brief Associated registers for this payload (stored by value).
-    const std::optional<size_t> next_rip_offset; ///< @brief Optional offset for the next RIP.
+    const std::vector<Register> registers;     ///< @brief Registers pointing to this buffer when RIP control is triggered.
+    const std::optional<size_t> rip_ptr_offset; ///< @brief Optional offset of a field containing a function pointer which if overwritten can lead to RIP control. If nullopt, then this payload does not contain such a field.
 
     /**
      * @brief Constructs a PayloadData instance.
      * @param payload_ref Reference to the Payload.
-     * @param regs Optional vector of Registers (defaults to empty).
-     * @param offset Optional next RIP offset (defaults to `std::nullopt`).
+     * @param regs Optional vector of Registers pointing to this buffer when RIP control is triggered (defaults to empty).
+     * @param rip_ptr_offset Optional offset of a field containing a function pointer which if overwritten can lead to RIP control. If nullopt, then this payload does not contain such a field.
      */
     PayloadData(Payload &payload_ref,
                 const std::vector<Register> &regs = {},
-                std::optional<size_t> offset = std::nullopt)
-        : payload(payload_ref), registers(regs), next_rip_offset(offset)
+                std::optional<size_t> rip_ptr_offset = std::nullopt)
+        : payload(payload_ref), registers(regs), rip_ptr_offset(rip_ptr_offset)
     {
     }
 };
@@ -101,22 +101,22 @@ public:
     /**
      * @brief Adds a new payload component to the builder.
      * @param payload A reference to the Payload object to add.
-     * @param registers A vector of Register states associated with this payload (defaults to empty).
-     * @param next_rip_offset An optional offset within this payload for the next RIP (defaults to `std::nullopt`).
+     * @param registers Optional vector of Registers pointing to this buffer when RIP control is triggered (defaults to empty).
+     * @param rip_ptr_offset Optional offset of a field containing a function pointer which if overwritten can lead to RIP control. If nullopt, then this payload does not contain such a field.
      */
     void AddPayload(Payload& payload,
                     const std::vector<Register>& registers = {},
-                    std::optional<size_t> next_rip_offset = std::nullopt);
+                    std::optional<size_t> rip_ptr_offset = std::nullopt);
 
     /**
      * @brief Adds a new payload component with an optional single register.
      * @param payload A reference to the Payload object to add.
-     * @param reg An optional single Register state (defaults to `std::nullopt`).
-     * @param next_rip_offset An optional offset within this payload for the next RIP (defaults to `std::nullopt`).
+     * @param reg Optional register pointing to this buffer when RIP control is triggered (defaults to nullopt - so no register points to this buffer).
+     * @param rip_ptr_offset Optional offset of a field containing a function pointer which if overwritten can lead to RIP control. If nullopt, then this payload does not contain such a field.
      */
     void AddPayload(Payload& payload,
                     std::optional<Register> reg = std::nullopt,
-                    std::optional<size_t> next_rip_offset = std::nullopt);
+                    std::optional<size_t> rip_ptr_offset = std::nullopt);
 
     /**
      * @brief Appends a ROP chain to the builder's sequence of ROP actions.

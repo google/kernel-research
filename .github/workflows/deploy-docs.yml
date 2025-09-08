@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Deploy xdk.dev
+name: Build and deploy xdk.dev
 on:
   push:
     branches: ["main"]
-    paths: 'Documentation/**'
+    paths: 'docs/**'
+  pull_request:
+    paths: 'docs/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,6 +44,7 @@ jobs:
           pip install -U exhale
           pip install -U sphinx-rtd-theme
           pip install -U sphinxcontrib-mermaid
+          pip install -U myst-parser
 
       - name: Generating API XML with Doxygen
         working-directory: ./docs
@@ -60,6 +63,7 @@ jobs:
           path: docs/_build/html
 
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

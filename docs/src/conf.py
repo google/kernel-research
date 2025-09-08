@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinxcontrib.mermaid',
+    'myst_parser',
 ]
 
 templates_path = ['_templates']
@@ -73,3 +74,11 @@ exhale_args = {
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown',
+}
+
+myst_fence_as_directive = ["mermaid"]

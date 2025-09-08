@@ -129,3 +129,15 @@ const Struct& Target::GetStruct(const std::string& name) {
 void Target::AddRopAction(const std::string& name, std::vector<RopItem> value) {
   rop_actions[name] = value;
 }
+
+uint64_t Target::GetStructSize(const std::string& struct_name) {
+  return GetStruct(struct_name).size;
+}
+
+uint64_t Target::GetFieldOffset(const std::string& struct_name, const std::string& field_name) {
+  return GetStruct(struct_name).fields.at(field_name).offset;
+}
+
+uint64_t Target::GetFieldSize(const std::string& struct_name, const std::string& field_name) {
+  return GetStruct(struct_name).fields.at(field_name).size;
+}

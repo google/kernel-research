@@ -118,12 +118,12 @@ jobs:
         working-directory: ./libxdk
         run: PREREQ=1 ./build_samples.sh
 
-      - name: Test libxdk's stack_pivot_and_rop sample
+      - name: Test libxdk's pipe_buf_rop sample
         if: ${{ success() || failure() }}
         working-directory: ./libxdk
         run: |
             for action in "test" "stability_test"; do
-                KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/stack_pivot_and_rop TARGET="${{ steps.vars.outputs.target }}" $action
+                KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/pipe_buf_rop TARGET="${{ steps.vars.outputs.target }}" $action
             done
 
       - name: Test libxdk (local TODO tests only)
