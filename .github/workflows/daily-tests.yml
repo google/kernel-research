@@ -23,32 +23,36 @@ jobs:
     strategy:
       matrix:
         target:
+          # release-date: 2025-09-05T12:00:00Z
+          - kernelctf lts-6.12.44
+          - kernelctf cos-121-18867.199.43
+          - kernelctf cos-113-18244.448.33
+          # release-date: 2025-05-02T12:00:00Z
+          - kernelctf lts-6.6.87
+          - kernelctf cos-105-17412.535.98
+          - kernelctf cos-109-17800.436.99
+          # release-date: 2025-01-10T12:00:00Z
+          - kernelctf lts-6.6.69
+          - kernelctf cos-105-17412.495.75
+          - kernelctf cos-109-17800.372.84
+          # release-date: 2024-07-31T12:00:00Z
+          - kernelctf lts-6.6.42
+          - kernelctf cos-105-17412.370.75
+          - kernelctf cos-109-17800.218.76
+          # release-date: 2024-01-12T12:00:00Z
+          - kernelctf lts-6.1.70
+          - kernelctf cos-105-17412.226.52
+          - kernelctf cos-97-16919.404.26
+
           # oldest 6.1 (which also have vmlinux file)
-          # - kernelctf lts-6.1.35
-          # 6.1.35 hangs randomly at boot a lot, without any error
-          - kernelctf lts-6.1.36
+          - kernelctf lts-6.1.36 # 6.1.35 hangs randomly at boot a lot, without any error
           # newest 6.1
           - kernelctf lts-6.1.81
           # oldest 6.6
           - kernelctf lts-6.6.23
-          # newest 6.6
-          #   release-date: 2025-01-10T12:00:00Z
-          - kernelctf lts-6.6.69
-          - kernelctf cos-105-17412.495.75
-          - kernelctf cos-109-17800.372.84
           # active mitigations
           - kernelctf mitigation-v4-6.6
           - kernelctf mitigation-v3b-6.1.55
-
-          # some middle releases
-          #   release-date: 2024-07-31T12:00:00Z
-          - kernelctf lts-6.6.42
-          - kernelctf cos-105-17412.370.75
-          - kernelctf cos-109-17800.218.76
-          #   release-date: 2024-01-12T12:00:00Z
-          - kernelctf lts-6.1.70
-          - kernelctf cos-105-17412.226.52
-          - kernelctf cos-97-16919.404.26
       fail-fast: false # do not cancel test of other targets
     uses: ./.github/workflows/run-tests.yml
     secrets: inherit
