@@ -47,9 +47,12 @@ void PayloadBuilder::AddRopChain(const RopChain& rop_chain) {
     rop_actions_.insert(rop_actions_.end(), new_actions.begin(), new_actions.end());
 }
 
-bool PayloadBuilder::Build(bool need_pivot) {
-    // TODO handle case with no pivot?
+void PayloadBuilder::SetRopShift(const uint64_t shift_value) {
+    rop_shift_ = shift_value;
+}
 
+
+bool PayloadBuilder::Build(bool need_pivot) {
     // Create a vector of references to the payloads
     std::vector<std::reference_wrapper<PayloadData>> data_refs;
     for (auto& data : payload_datas_) {
@@ -165,12 +168,15 @@ bool PayloadBuilder::TryPayloadPivot(Payload& payload, StackPivot pivot) {
 
     chosen_shifts_.clear();
 
+    uint64_t min_rop_start = rop_shift_;
+
     // now we need to see if we can apply the all the rop actions, shifting to the next action as needed
     for (size_t i = 0; i < rop_actions_.size(); i++) {
         auto &action = rop_actions_[i];
         auto shifts = pivot_finder.GetShiftToRop(payload_off, 
                                                  action.values.size()*8, 
-                                                 i != rop_actions_.size()-1 /* include_extra_slot */
+                                                 i != rop_actions_.size()-1, /* include_extra_slot */
+                                                 min_rop_start
                                                 );
 
         if (!shifts ) {

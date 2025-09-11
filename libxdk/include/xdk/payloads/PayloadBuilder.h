@@ -125,6 +125,16 @@ public:
     void AddRopChain(const RopChain& rop_chain);
 
     /**
+     * @brief Uses stack shift gadgets to shift the stack by at least shift_value.
+     *
+     * This method is useful for moving the rop chain towards the end of the buffer.
+     * This can prevent function calls from clobbering data before the buffer.
+     *
+     * @param shift_value Shifts the stack by at least shift_value.
+     */
+    void SetRopShift(const uint64_t shift_value);
+
+    /**
      * @brief Attempts to build the final payload.
      *
      * This method tries to find a suitable stack pivot, applies it to the
@@ -174,6 +184,7 @@ private:
 
     std::vector<PayloadData> payload_datas_;              ///< @brief List of payload components to integrate.
     std::vector<RopAction> rop_actions_;                  ///< @brief Sequence of ROP actions to execute.
+    uint64_t rop_shift_ = 0;                              ///< @brief Minimum shift before the rop payload inserted
     Pivots pivots_;                                       ///< @brief Available stack pivot gadgets.
     uint64_t kaslr_base_;                                 ///< @brief The Kernel Address Space Layout Randomization base address.
     std::optional<StackPivot> chosen_pivot_;              ///< @brief The pivot chosen during the build process.

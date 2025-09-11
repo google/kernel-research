@@ -184,7 +184,9 @@ public:
      */
     std::optional<StackShiftingInfo> GetShiftToRop(uint64_t from_offset,
                                                      uint64_t byte_size,
-                                                     bool include_extra_slot);
+                                                     bool include_extra_slot,
+                                                     uint64_t min_rop_start = 0
+                                                  );
 
     /**
      * @brief Internal helper function to find a sequence of stack shift gadgets using a breadth-first search.

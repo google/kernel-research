@@ -205,13 +205,14 @@ std::optional<StackShiftingInfo> PivotFinder::FindShiftsInternal(
 }
 
 std::optional<StackShiftingInfo> PivotFinder::GetShiftToRop(
-    uint64_t from_offset, uint64_t byte_size, bool include_extra_slot) {
+    uint64_t from_offset, uint64_t byte_size,
+    bool include_extra_slot, uint64_t min_rop_start) {
   // search for min_next_space = rop_size-8
   // because the first gadget is put in the next_ret_offset
   if (byte_size == 0) throw ExpKitError("byte_size is 0");
   uint64_t search_size = byte_size - 8;
   if (include_extra_slot) search_size += 8;
-  return FindShiftsInternal(from_offset, std::nullopt, search_size);
+  return FindShiftsInternal(from_offset, min_rop_start, search_size);
 }
 
 std::optional<StackShiftingInfo> PivotFinder::GetShiftToOffset(
