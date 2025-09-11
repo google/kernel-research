@@ -63,5 +63,5 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Create db for release
-        working-directory: ./scripts
+        working-directory: .github/scripts
         run: ./db_process_release.sh ${{ inputs.release }} --upload
