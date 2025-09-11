@@ -24,6 +24,7 @@
 #include <sys/mman.h>
 #include <sys/msg.h>
 #include <sys/socket.h>
+#include <string>
 
 /**
  * @defgroup util_classes Utility Classes
@@ -126,4 +127,26 @@ public:
      * @throws ExpKitError if the system call fails.
      */
     static void pipe(pipefds pipefds);
+
+    /**
+     * @brief Wraps the stat() system call with error checking.
+     * @param path The path argument passed to the stat() syscall.
+     * @throws ExpKitError if the system call fails.
+     */
+    static struct stat stat(const char* path);
+
+    /**
+     * @brief Wraps the unshare() system call with error checking.
+     * @param flags The flags argument passed to the unshare() syscall.
+     * @throws ExpKitError if the system call fails.
+     */
+    static void unshare(int flags);
+
+    /**
+     * @brief Wraps the readlink() system call with error checking.
+     * @param path The path argument passed to the unshare() syscall.
+     * @param bufsize Maximum expected size of the result path.
+     * @throws ExpKitError if the system call fails or if the bufsize was not big enough.
+     */
+    static std::string readlink(const char* path, size_t bufsize = 256);
 };
