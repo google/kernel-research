@@ -14,7 +14,7 @@
 
 #include <xdk/xdk_device/xdk_device.h>
 #include <xdk/util/error.h>
-#include <xdk/util/syscalls.h>
+#include <xdk/util/Syscalls.h>
 #include <xdk/util/Register.h>
 
 #include <cstdint>

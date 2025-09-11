@@ -20,3 +20,9 @@ void TestUtils::eq(const char* expected, const char* actual, const char* name) {
     throw ExpKitError("expected '%s' but got '%s' for %s", expected, actual,
                       name);
 }
+
+void TestUtils::ne(const char* not_expected, const char* actual, const char* name) {
+  if (!strcmp(not_expected, actual))
+    throw ExpKitError("not expected '%s' but got '%s' for %s", not_expected, actual,
+                      name);
+}
