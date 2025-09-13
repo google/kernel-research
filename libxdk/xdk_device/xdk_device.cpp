@@ -145,7 +145,9 @@ xdk_error XdkDevice::Call(enum xdk_cmd cmd, void* arg,
   return error;
 }
 
-void XdkDevice::Call(enum xdk_cmd cmd, void* arg) const { Call(cmd, arg, SUCCESS); }
+void XdkDevice::Call(enum xdk_cmd cmd, void* arg) const {
+  Call(cmd, arg, SUCCESS);
+}
 
 uint64_t XdkDevice::AllocBuffer(uint64_t size, bool gfp_account) const {
   xdk_message msg = {.length = size, .gfp_account = gfp_account};

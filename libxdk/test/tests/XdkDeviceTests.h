@@ -67,14 +67,15 @@ public:
     }
 
     TEST_METHOD(kprobeTest, "kprobe test") {
-        auto kprobe = xdk_->InstallKprobe("__kmalloc", 2, CALL_LOG);
+        auto kmalloc_name = xdk_->SymAddrOpt("__kmalloc_noprof") ? "__kmalloc_noprof" : "__kmalloc";
+        auto kprobe = xdk_->InstallKprobe(kmalloc_name, 2, CALL_LOG);
         auto buf_ptr = xdk_->AllocBuffer(128, true);
         auto callLogs = kprobe->GetCallLogs(true);
         xdk_->RemoveKprobe(kprobe);
         xdk_->Kfree(buf_ptr);
 
         ASSERT_EQ(1, callLogs.size());
-        ASSERT_EQ("__kmalloc", callLogs[0].function_name.c_str());
+        ASSERT_EQ(kmalloc_name, callLogs[0].function_name.c_str());
         ASSERT_EQ(2, callLogs[0].arguments.size());
         ASSERT_EQ(128, callLogs[0].arguments[0]);
         uint64_t GFP_ACCOUNT = 0x400000u;
