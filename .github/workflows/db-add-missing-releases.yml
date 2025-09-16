@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       missing_gcs: ${{ steps.get_missing_releases.outputs.missing_gcs }}
+      missing_db: ${{ steps.get_missing_releases.outputs.missing_db }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -83,3 +84,15 @@ jobs:
       - name: Merge DB
         working-directory: .github/scripts
         run: ./db_merge.sh ${{ inputs.rebuild && '--rebuild' }}
+
+  test_new_releases:
+    needs: [get_missing_releases, merge_db]
+    if: ${{ always() && needs.get_missing_releases.outputs.missing_db != '[]' && !inputs.rebuild }}
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.get_missing_releases.outputs.missing_db) }}
+      fail-fast: false # do not cancel test of other targets
+    uses: ./.github/workflows/run-tests.yml
+    secrets: inherit
+    with:
+      target: ${{matrix.target}}
