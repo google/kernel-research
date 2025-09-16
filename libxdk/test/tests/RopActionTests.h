@@ -89,7 +89,8 @@ public:
         auto orig_uid = getuid();
         setuid(1);
         ASSERT_EQ(1, getuid());
-        ExecuteRopAction(RopActionId::COMMIT_INIT_TASK_CREDS, {}, 100, 512);
+        // max used stack: 744 bytes
+        ExecuteRopAction(RopActionId::COMMIT_INIT_TASK_CREDS, {}, 100, 1024);
         ASSERT_EQ(0, getuid());
         setuid(orig_uid);
     }
