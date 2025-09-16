@@ -25,11 +25,21 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.DB_GCS_SA_KEY }}'
+
+      - name: Install tool prerequisites
+        run: |
+          cd kxdb_tool
+          pip install -r requirements.txt
+
       - name: Collect targets
         id: collect_targets
         run: |
           gcloud storage cp gs://kernelxdk/db/kernelctf.kxdb kernelctf.kxdb
-          echo "targets=$(kxdb_tool/kxdb_tool.py -i kernelctf.kxdb --list-targets | sed "s/\//\ /" | jq -Rsc 'split("\n") | map(select(length > 0))')"
+          echo "targets=$(kxdb_tool/kxdb_tool.py -i kernelctf.kxdb --list-targets | sed "s/\//\ /" | jq -Rsc 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
   tests:
     needs: collect_targets
