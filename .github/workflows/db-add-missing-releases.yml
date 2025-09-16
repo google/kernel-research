@@ -45,6 +45,7 @@ jobs:
         run: |
           ./db_get_missing_releases.sh ${{ inputs.rebuild && '--rebuild' }}
           echo "missing_gcs=$(cat missing_gcs_releases.txt | jq -Rsc 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
+          echo "missing_db=$(cat missing_db_releases.txt | jq -Rsc 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         if: always()
