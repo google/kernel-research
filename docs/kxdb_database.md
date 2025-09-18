@@ -2,37 +2,37 @@
 
 ## Database concept
 
-One of the traditional approaches for kernel exploits is to put target (kernel image, vmlinuz) specific information like symbol, function, ops pointer, ROP gadget, stack pivot addresses, structure and field sizes and offsets into `#define`s into the exploit's source code which can be replaced when porting an exploit to a new target. This also means that the exploit needs to be manually modified and recompiled for every new target.
+The traditional approach to kernel exploits involves embedding target-specific information (such as symbol, function, ROP gadget, and stack pivot addresses, along with structure and field sizes/offsets) directly into the exploit's source code using `#define`s. While these values can be replaced when porting, this method requires the exploit to be manually modified and recompiled for every new target.
 
-kernelXDK detaches this target-specific information from the exploit into a database which contains all the target specific information for multiple targets and the exploit can dynamically detect the target on which the exploit runs and use the right offsets during runtime (instead of compile time).
+kernelXDK decouples this target-specific information from the exploit by storing it in a database. This database contains data for multiple targets, allowing the exploit to dynamically detect the running target and use the correct offsets at runtime (rather than at compile time).
 
 ## KXDB file format
 
-To store this information, we introduced a new binary file format, call Kernel eXploit DataBase (KXDB), with the file format `.kxdb`.
+To store this information, we introduced a new binary file format called the Kernel eXploit DataBase (KXDB), with the file extension `.kxdb`.
 
-The exact file format structure can be found in the [kxdb_file_format.txt](kxdb_file_format.txt) file.
+The precise structure of this file format is detailed in the [kxdb_file_format.txt](./kxdb_file_format.txt) file.
 
-This database can be included into the exploit binary as a binary blob or can be read from a file or both approach can be combined: the exploit is built with an up-to-date database at the time of compilation, but can be replace with a newer database by putting the new one next to the exploit binary as a file.
+This database offers flexible integration: it can be included directly into the exploit binary as a binary blob, read from a separate file, or a combination of both approaches can be used. For instance, an exploit can be built with an up-to-date database at compilation time, yet allow it to be replaced with a newer version by placing the `.kxdb` file next to the exploit binary.
 
 ### Design goals
 
   * Minimize size:
-    * Binary format instead of text.
-    * No unnecessary repetiton (e.g. if structure layout matches for two targets, it is only stored once).
-    * Variable-size integers (no unnecessary zero bytes).
+    * **Binary format** instead of text.
+    * **Avoid unnecessary repetiton**: e.g. if a structure layout is identical across two targets, it's stored only once.
+    * **Variable-size integers** to eliminate unnecessary zero bytes.
 
   * Backwards compatibility and extendibility:
-    * Minor versions can introduce new fields without breaking backwards compatibility, so older exploits can use the new DB.
-    * Major versions can introduce breaking changes.
+    * **Minor versions** can introduce new fields without breaking backwards compatibility, allowing older exploits to utilize new database files.
+    * **Major versions** can introduce breaking changes.
 
   * Searchable and seekable*:
-    * Structures are seekable, unnecessary information (e.g. non-current target information) can be skipped.
-    * Internal structures are organized alphabetically, which makes them binary searchable.
+    * **Seekable structures** allow skipping unnecessary information (e.g. data for non-current targets).
+    * Internal structures are organized alphabetically to allow **binary searching**.
 
   * Optimized for parsing:
-    * String are stored as length-prefixed zero-terminated strings, so C APIs (e.g. `strcmp`) can be used directly.
+    * Strings are stored as length-prefixed, zero-terminated strings so standard C APIs (e.g. `strcmp`) can be used directly.
 
-*_Note: the current libxdk implementation reads the whole metadata section, linear searches targets and read all target-specific information. But this will be optimized in the future._
+*_Note: While the format is designed to be searchable and seekable, the current `libxdk` implementation reads the entire metadata section and performs linear searches for targets, and reads all target-specific information. This will be optimized in a future release._
 
 ## Contents
 
@@ -64,10 +64,10 @@ This database can be included into the exploit binary as a binary blob or can be
 
 ### Configuration file
 
-The contents of the database can be configured via [kxdb_tool/config.py](../kxdb_tool/config.py) and then a new database can be generated by running the [DB: upgrade to new config](https://github.com/google/kernel-research/actions/workflows/db-upgrade-to-new-config.yml) Github Action workflow (with the help of a project maintainer).
+You can configure the database contents using the file located at [kxdb_tool/config.py](https://github.com/google/kernel-research/blob/main/kxdb_tool/config.py). Once configured, a new database can be generated by running the [DB: upgrade to new config](https://github.com/google/kernel-research/actions/workflows/db-upgrade-to-new-config.yml) GitHub Action workflow (this requires assistance from a project maintainer).
 
 ## kernelCTF KXDB distribution
 
-The latest version of the database containing all kernelCTF targets can be found at [https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb](https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb).
+The latest database version, which includes all kernelCTF targets, is available at [https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb](https://storage.googleapis.com/kernelxdk/db/kernelctf.kxdb).
 
 This file is updated daily via the [DB: add missing releases](https://github.com/google/kernel-research/actions/workflows/db-add-missing-releases.yml) Github Action workflow.
