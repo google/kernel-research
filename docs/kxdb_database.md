@@ -10,7 +10,7 @@ kernelXDK decouples this target-specific information from the exploit by storing
 
 To store this information, we introduced a new binary file format called the Kernel eXploit DataBase (KXDB), with the file extension `.kxdb`.
 
-The precise structure of this file format is detailed in the [kxdb_file_format.txt](./kxdb_file_format.txt) file.
+The precise structure of this file format is detailed in the [kxdb_file_format.txt](https://github.com/google/kernel-research/blob/main/docs/kxdb_file_format.txt) file.
 
 This database offers flexible integration: it can be included directly into the exploit binary as a binary blob, read from a separate file, or a combination of both approaches can be used. For instance, an exploit can be built with an up-to-date database at compilation time, yet allow it to be replaced with a newer version by placing the `.kxdb` file next to the exploit binary.
 
