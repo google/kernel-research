@@ -517,6 +517,7 @@ if __name__ == "__main__":
         description="Generates ROP payloads for linux kernel images"
     )
     parser.add_argument("vmlinux_path", help="Path to vmlinux file")
+    parser.add_argument("vmlinuz_path", help="Path to vmlinuz file")
     parser.add_argument("--output", choices=["python", "json"], default="python")
     parser.add_argument("--json-indent", type=int, default=None)
     parser.add_argument("--rpp-cache", help="Path to cache the output of r++")
@@ -527,7 +528,7 @@ if __name__ == "__main__":
     ).with_suffix(".thunk_replaced")
 
     if not patched_vmlinux_path.exists():
-        RopInstructionPatcher(args.vmlinux_path).apply_patches(patched_vmlinux_path)
+        RopInstructionPatcher(args.vmlinux_path, args.vmlinuz_path).apply_patches(patched_vmlinux_path)
 
     rop_generator = RopGeneratorAngrop(patched_vmlinux_path, args.rpp_cache)
     action_sleep = rop_generator.rop_action_msleep(RopChainArgument(0))

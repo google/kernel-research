@@ -778,33 +778,22 @@ def main():
     parser = argparse.ArgumentParser(description="ROP stack pivot finder")
     parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], default="ERROR",
                         help="Set the logging level.")
-    parser.add_argument("--backend", choices=["rp++", "text"], default="rp++",
-                        help="Backend to use for processing: "
-                             "'rp++': use the rp++ tool (default), "
-                             "'text': use a text file produced by either the "
-                             "rp++ or the ROPgadget tools.")
-    parser.add_argument("--vmlinux", help="Path to the vmlinux file, filters gadgets"
-                        "only within the .text section if the 'text' backend is used")
     parser.add_argument("--output", choices=["text", "json"], default="text")
     parser.add_argument("--text-output-format", choices=["original", "short"], default="original")
     parser.add_argument("--json-indent", type=int, default=None)
-    parser.add_argument("input_file", help="Path to the input file (vmlinux binary for "
-                        "the 'rp++' backend, text file containing ROP gadgets for the "
-                        "'text' gadget)")
+    parser.add_argument("vmlinux_path", help="Path to the vmlinux binary")
+    parser.add_argument("vmlinuz_path", help="Path to the vmlinuz binary")
     args = parser.parse_args()
 
     logging.basicConfig(level=getattr(logging, args.log_level))
 
-    if args.backend == "text":
-        backend = gadget_finder.TextFileBackend(args.input_file, args.vmlinux)
-    else:
-        patched_vmlinux_path = pathlib.Path(
-            args.input_file
-        ).with_suffix(".thunk_replaced")
+    patched_vmlinux_path = pathlib.Path(
+        args.vmlinux_path
+    ).with_suffix(".thunk_replaced")
 
-        if not patched_vmlinux_path.exists():
-            RopInstructionPatcher(args.input_file).apply_patches(patched_vmlinux_path)
-        backend = gadget_finder.RppBackend(patched_vmlinux_path, CONTEXT_SIZE)
+    if not patched_vmlinux_path.exists():
+        RopInstructionPatcher(args.vmlinux_path, args.vmlinuz_path).apply_patches(patched_vmlinux_path)
+    backend = gadget_finder.RppBackend(patched_vmlinux_path, CONTEXT_SIZE)
 
     pivot_finder = PivotFinder(backend)
     pivots = pivot_finder.find_pivots()
