@@ -17,6 +17,7 @@ from collections import defaultdict
 import logging
 from pathlib import Path
 import struct
+import subprocess
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
@@ -30,6 +31,8 @@ FENTRY_BYTES_REPLACE = b"\x0f\x1f\x44\x00\x00"
 RUNTIME_RELOCATED_BYTES_REPLACE = b"\xcc\xcc\xcc\xcc"
 STATIC_CALL_REPLACE = b"\xcc\xcc\xcc\xcc"
 OUTPUT_FILE_EXTENTION = ".thunk_replaced"
+EXTRACT_VMLINUX = Path(__file__).parent.parent / "third_party/linux/scripts/extract-vmlinux"
+KERNEL_BASE = 0xffffffff00000000
 
 logger = setup_logger("rop_instruction_patcher")
 
@@ -51,8 +54,9 @@ gs:0x20c80:
 
 
 class RopInstructionPatcher:
-    def __init__(self, vmlinux_path) -> None:
+    def __init__(self, vmlinux_path, vmlinuz_path) -> None:
         self.vmlinux_path = vmlinux_path
+        self.vmlinuz_path = vmlinuz_path
         self.alternatives = []
         self.static_call_sites = []
         self.fentry_calls = []
@@ -163,6 +167,7 @@ class RopInstructionPatcher:
                         has_nonzero_repl = True
                 # we should have seen some non-zero replacements
                 if match and has_nonzero_repl:
+                    print("got alt_instr size and instrlen_offset ", size, instrlen_offset)
                     logger.debug("got alt_instr size and instrlen_offset %d %d", size, instrlen_offset)
                     return size, instrlen_offset
 
@@ -337,6 +342,37 @@ class RopInstructionPatcher:
                 continue
             self.fentry_calls.append(address)
 
+    def process_vmlinuz_relocations(self):
+        """
+        Load time relocations are changed according to the kaslr base
+        For example "mov    rdi,0xffffffff835c5640"
+        These are not stored in the symbolized vmlinux.
+        Instead, they can be found by extracting vmlinux from vmlinuz, and at the end of that file
+        """
+
+        # run EXTRACT_VMLINUX self.vmlinuz_path
+        data = subprocess.check_output([EXTRACT_VMLINUX, self.vmlinuz_path])
+
+        # interpret the file as a sequence of 32 bit little-endian values
+        offsets = list(struct.iter_unpack("<I", data))
+        index = len(offsets)-1
+
+        def read_table_backwards():
+            nonlocal index
+
+            addrs = []
+            while index >= 0 and offsets[index][0] != 0:
+                addrs.append(offsets[index][0] + KERNEL_BASE)
+                index -= 1
+            index -= 1 # skip the zero terminator
+            return addrs
+
+        # parse tables (order rel32 at end then rel64 before it)
+        rel32 = read_table_backwards()
+        rel64 = read_table_backwards()
+        self.other_relocations.extend(rel32)
+        self.other_relocations.extend(rel64)
+
     def find_relocated_instructions(self):
         """
         Finds relocated instructions in a kernel image using pyelftools.
@@ -367,6 +403,8 @@ class RopInstructionPatcher:
                 self.process_retpoline_sites_section(elffile)
                 self.process_return_sites_section(elffile)
                 self.process_fentry_table(elffile)
+                # relocations themselves must be found via the relocations packed in vmlinuz
+                self.process_vmlinuz_relocations()
 
 
     @staticmethod
@@ -439,8 +477,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Replaces \"Relocations and Load-time kernel patches\" with custom bytes for finding the right ROP gadgets")
     parser.add_argument("vmlinux", help="Path to vmlinux file")
-    file_path = parser.parse_args().vmlinux
-    output_file_path = Path(file_path).with_suffix(OUTPUT_FILE_EXTENTION)
+    parser.add_argument("vmlinuz", help="Path to vmlinuz file")
+    vmlinux_path = parser.parse_args().vmlinux
+    vmlinuz_path = parser.parse_args().vmlinuz
+    output_file_path = Path(vmlinux_path).with_suffix(OUTPUT_FILE_EXTENTION)
     logging.basicConfig(level=logging.DEBUG)
-    reloc_patcher = RopInstructionPatcher(file_path)
-    reloc_patcher.apply_patches(output_file_path)
+    rop_patcher = RopInstructionPatcher(vmlinux_path, vmlinuz_path)
+    rop_patcher.apply_patches(output_file_path)
