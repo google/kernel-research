@@ -167,7 +167,6 @@ class RopInstructionPatcher:
                         has_nonzero_repl = True
                 # we should have seen some non-zero replacements
                 if match and has_nonzero_repl:
-                    print("got alt_instr size and instrlen_offset ", size, instrlen_offset)
                     logger.debug("got alt_instr size and instrlen_offset %d %d", size, instrlen_offset)
                     return size, instrlen_offset
 

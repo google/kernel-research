@@ -27,7 +27,7 @@ while IFS= read -r RELEASE <&3; do
     fi
 
     echo "Downloading release $RELEASE"
-    "$IMAGE_DB_DIR/download_release.sh" kernelctf $RELEASE dbgsym >/dev/null || continue
+    "$IMAGE_DB_DIR/download_release.sh" kernelctf $RELEASE dbgsym,vmlinuz >/dev/null || continue
 
     echo "Processing release $RELEASE"
     "$IMAGE_DB_DIR/download_release.sh" kernelctf $RELEASE process --only-db || continue

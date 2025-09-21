@@ -21,7 +21,7 @@ DISTRO="$1"
 RELEASE="$2"
 
 echo "Downloading release $RELEASE"
-"$IMAGE_DB_DIR/download_release.sh" "$DISTRO" "$RELEASE" dbgsym >/dev/null
+"$IMAGE_DB_DIR/download_release.sh" "$DISTRO" "$RELEASE" dbgsym,vmlinuz >/dev/null
 
 echo "Processing release $RELEASE"
 "$IMAGE_DB_DIR/download_release.sh" "$DISTRO" "$RELEASE" process --only-db
