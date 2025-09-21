@@ -103,8 +103,8 @@ def main():
     if args.partial_sync:
       partial_sync.sync(targets, new_targets, logger)
     else:
-      # add new targets, but make sure they are unique
-      targets = {str(t): t for t in new_targets + targets}.values()
+      # add new targets, but make sure they are unique (new overwrites old)
+      targets = {str(t): t for t in targets + new_targets}.values()
 
   if args.release_filter:
     targets = [t for t in targets if re.search(args.release_filter, f"{t.distro}/{t.release_name}")]
