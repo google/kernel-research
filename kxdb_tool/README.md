@@ -1,12 +1,14 @@
+# KXDB Tool
+
 A database builder which contains exploitation information (symbol addresses, ROP gadgets, stack pivots, structure field offsets) for multiple kernel targets and consumed by the exploit kit to customize exploits for targets.
 
 The recommended extension for the target db file: `.kxdb`.
 
-# Prerequisites
+## Prerequisites
 
  * `rop_generator` (part of the kernel-researcher tools)
 
-# Usage
+## Usage
 
 ```
 ./kxdb_tool.py
@@ -18,7 +20,7 @@ The recommended extension for the target db file: `.kxdb`.
   [--log-level=<DEBUG|INFO|WARNING|ERROR|CRITICAL>]
 ```
 
-## Arguments
+### Arguments
 
 * `input-file` (optional): location of the current database to convert or extend. Supported file formats: kxdb, json, yaml.
 
@@ -32,7 +34,7 @@ You need to specify either `input-file` (to convert) or `image-db-path` (to buil
 
 If you specify `input-file` then the configuration will be reused from that file, otherwise the default configuration (from `config.py`) will be used.
 
-## Example usages
+### Example usages
 
 Processes all downloaded releases from the `../image_db` folder and extends the `target_db.kxdb` database with these new releases:
 

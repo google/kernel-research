@@ -1,9 +1,9 @@
+# Kernel Image Runner
+
 Tool for running various kernel distribution images, with debugging and custom kernel module compilation support.
 
-# Prerequisites
+## Prerequisites
  * `sudo apt install libguestfs-tools`
-
-# Commands
 
 ## run.sh
 
