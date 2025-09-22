@@ -41,9 +41,12 @@ Key Features and Benefits
 
 .. toctree::
    :maxdepth: 1
-   :caption: Commandline Tools
+   :caption: Command Line Tools
 
-   commandline_tools/index
+   commandline_tools/image_db
+   commandline_tools/image_runner
+   commandline_tools/kxdb_tool
+   commandline_tools/rop_generator
 
 .. note::
    This documentation is still under active development. If you find any issues
