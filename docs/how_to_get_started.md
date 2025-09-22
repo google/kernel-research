@@ -1,6 +1,6 @@
 # How to get started
 
-### Initialize the Target Database
+## Initialize the Target Database
 
 The target database contains all of the information needed to customize the exploit for the current target.
 
@@ -43,7 +43,7 @@ They are added for all the supported targets.
     ```c++
     Target st("kernelctf", "cos-105-17412.294.34");
 
-    st.AddStruct("nft_expr_ops", 128, { 
+    st.AddStruct("nft_expr_ops", 128, {
         {"dump", 64, 8},
         {"type", 120, 8} });
 
@@ -68,7 +68,7 @@ They are added for all the supported targets.
     *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
     ```
 
-### Building the Payload
+## Building the Payload
 
 After leaking a kernel address and calculating the KASLR base, you can begin constructing the exploit payload.
 
@@ -98,7 +98,7 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
     > **Note**
     > Available ROP actions could be found in `kxdb_tool/config.py`.
 
-### Assembling the Final Payload with PayloadBuilder
+## Assembling the Final Payload with PayloadBuilder
 
 The `PayloadBuilder` automates the process of finding a suitable pivot gadget and combining it with your payload and ROP chain.
 

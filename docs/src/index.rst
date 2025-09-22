@@ -36,6 +36,7 @@ Key Features and Benefits
 
    libxdk/README
    libxdk/how_to_get_started
+   libxdk/sample_exploit
    libxdk/api
 
 .. toctree::

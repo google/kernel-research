@@ -91,3 +91,7 @@ Downloads all releases listed in `releases.yaml`.
 ```
 
 There are no arguments.
+
+### Disclaimer
+
+This is not an officially supported Google product.

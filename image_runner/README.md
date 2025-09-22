@@ -126,3 +126,7 @@ test/xdk_dev_test.sh
 ```
 test/xdk_dev_test.sh ubuntu 5.4.0-67.75
 ```
+
+### Disclaimer
+
+This is not an officially supported Google product.
