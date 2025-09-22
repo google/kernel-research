@@ -111,11 +111,11 @@ test/xdk_dev_test.sh [(kernelctf|ubuntu) <release-name>]
 
 ### Arguments
 
-* same as `./run.sh` - which distro and release to compile the kernel module for and run the binary on. Defaults to `ubuntu 5.4.0-26.30` in case the kernel version does not matter, just testing the module.
+* same as `./run.sh` - which distro and release to compile the kernel module for and run the binary on. Defaults to `kernelctf lts-6.1.58` in case the kernel version does not matter, just testing the module.
 
 ### Example usages
 
-* Tests the `xdk_device` module on the default kernel version (currently `ubuntu 5.4.0-26.30`):
+* Tests the `xdk_device` module on the default kernel version (currently `kernelctf lts-6.1.58`):
 
 ```
 test/xdk_dev_test.sh
