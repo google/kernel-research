@@ -1,11 +1,11 @@
+# Kernel Image DB
+
 Tools for downloading kernel various distribution release files and extracting various information from them.
 
-# Prerequisites
+## Prerequisites
 
  * `curl`
  * for processing debug symbols: `bpftool`, `jq`, `pahole`, `nm`, `ROPgadget`
-
-# Scripts
 
 ## download_release.sh
 
