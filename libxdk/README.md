@@ -110,11 +110,20 @@ This process generates the static library binary at `build/libkernelXDK.a`, read
 
 ### Building and running samples
 
+To build the samples, run the following script:
+
 ```bash
 ./build_samples.sh
 ```
 
-Successful execution will create the sample binaries, named `exp`, located within their respective directories (e.g., `samples/<sample_name>/exp`).
+Successful execution will create the sample binaries, named `exp`, located within their respective directories (e.g., `samples/exp65/exp`).
+
+To test a sample exploit, run the following commands:
+
+```bash
+cd samples/exp65
+make test
+```
 
 ## Tests
 
