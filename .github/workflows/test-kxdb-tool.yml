@@ -27,6 +27,7 @@ jobs:
     outputs:
       kxdb_tool: ${{ steps.filter.outputs.kxdb_tool }}
     steps:
+      - uses: actions/checkout@v4
       - id: filter
         uses: dorny/paths-filter@v3
         with:
@@ -36,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: changes
-    if: ${{ needs.changes.outputs.kxdb_tool == 'true' }}
+    if: ${{ needs.changes.outputs.kxdb_tool == 'true' || github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
