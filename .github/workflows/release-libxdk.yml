@@ -16,7 +16,7 @@ name: Build and release libxdk
 on:
   push:
     tags:
-      - 'libxdk/v*.*.*' # Trigger on tags like libxdk/v1.0.0, libxdk/v1.2.3, libxdk/v1.0.0-beta, etc but not for xdk_dev/v1.0.0
+      - 'libxdk/v*.*' # Trigger on tags like libxdk/v1.0.0, libxdk/v1.2.3, libxdk/v1.0.0-beta, etc but not for xdk_dev/v1.0.0
   workflow_dispatch:
     inputs:
       version:
