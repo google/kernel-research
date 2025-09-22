@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Run tests on all targets
+name: Test libxdk on all targets
 on:
   workflow_dispatch:
 permissions: {}
@@ -47,7 +47,7 @@ jobs:
       matrix:
         target: ${{ fromJson(needs.collect_targets.outputs.targets) }}
       fail-fast: false # do not cancel test of other targets
-    uses: ./.github/workflows/run-tests.yml
+    uses: ./.github/workflows/test-libxdk.yml
     secrets: inherit
     with:
       target: ${{ matrix.target }}

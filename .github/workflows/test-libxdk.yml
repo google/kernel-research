@@ -19,6 +19,9 @@ on:
      - 'kxdb_tool/**'
      - 'libxdk/**'
   pull_request:
+    paths:
+     - 'kxdb_tool/**'
+     - 'libxdk/**'
   workflow_dispatch:
     inputs:
       target:
