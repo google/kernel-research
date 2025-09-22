@@ -42,6 +42,7 @@ jobs:
     outputs:
       libxdk: ${{ steps.filter.outputs.libxdk }}
     steps:
+      - uses: actions/checkout@v4
       - id: filter
         uses: dorny/paths-filter@v3
         with:
@@ -51,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: changes
-    if: ${{ needs.changes.outputs.libxdk == 'true' }}
+    if: ${{ needs.changes.outputs.libxdk == 'true' || github.event_name != 'pull_request' }}
     steps:
       - name: Fix input variables
         id: vars
