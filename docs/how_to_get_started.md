@@ -63,7 +63,7 @@ They are added for all the supported targets.
 8. Access pre-defined or added (via `Target`) structures and symbols using following calls:
 
     ```c++
-    auto offset = target.GetStruct("nft_expr_ops").size + target.GetStruct("nft_expr_ops").fields.at("type").offset; // get the size and offset of type field in nft_expr_ops structure
+    auto offset = target.GetStructSize("nft_expr_ops") + target.GetFieldOffset("nft_expr_ops", "type"); // get the size and offset of type field in nft_expr_ops structure
 
     *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
     ```
