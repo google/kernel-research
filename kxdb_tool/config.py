@@ -61,5 +61,5 @@ structs = {
     "nft_expr_ops": ["dump?", "type?"],
     "nft_bitmap_elem": [],
     "nft_set_elem_expr": [],
-    "nft_expr": ["ops?"],
+    "nft_expr": ["ops?"], 
 }
