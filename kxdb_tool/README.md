@@ -51,4 +51,6 @@ Converts the database from a binary format (`.kxdb`) to JSON:
 
     ./kxdb_tool.py -i target_db.kxdb -o target_db.json
 
+### Disclaimer
 
+This is not an officially supported Google product.

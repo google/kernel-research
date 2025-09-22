@@ -24,7 +24,7 @@ The following functionalities are not yet implemented but are planned for future
 
   * `core_pattern` **overwrite** and eBPF-based **shellcode spraying**.
 
-# Usage
+# Installation
 
 The library is available via a pre-compiled binary distribution or through source code compilation.
 
@@ -142,3 +142,7 @@ The library provides two distinct test execution scripts:
     ```bash
     ./run_tests.sh kernelctf lts-6.6.69
     ```
+
+### Disclaimer
+
+This is not an officially supported Google product.
