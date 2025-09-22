@@ -5,6 +5,7 @@ output.txt
 actual_results/*
 samples/**/exp
 samples/**/exploit
+samples/**/output
 samples/**/*.kxdb
 test_results/
 build/
