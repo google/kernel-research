@@ -26,34 +26,110 @@ The following functionalities are not yet implemented but are planned for future
 
 # Usage
 
-The library can be used either by downloading the binary release version or directly compiling from the source code.
+The library is available via a pre-compiled binary distribution or through source code compilation.
 
-## Using the binary release version
+## Binary release
 
-The latest libxdk version can be downloaded from the [Github releases page](https://github.com/google/kernel-research/releases).
+The most recent stable **libxdk** binary release is available for download on the **[Github releases page](https://github.com/google/kernel-research/releases)**.
 
-This release is [built](https://github.com/google/kernel-research/blob/main/.github/workflows/release-libxdk.yml#L54) with GCC 9.4.0 on Ubuntu 20.04 to increase compatability, but it is possible that it won't work on your system and you need to recompile the library from source code in case of incompability issues.
+This binary is **built** using **GCC 9.4.0** on **Ubuntu 20.04** to maximize compatibility. However, please be aware that compatibility issues may arise depending on your specific system environment. Should you encounter incompatibilities, recompiling the library from the **source code** is recommended (refer to the following section for details).
 
+### Compiling sample exploits
 
+The binary release package includes several **sample exploits**. Follow these steps to compile them:
 
-## Prerequisites
+1.  **Download and extract the latest libxdk release:**
 
-  * `sudo apt install libkeyutils-dev`
+    ```bash
+    wget https://github.com/google/kernel-research/releases/download/libxdk%2Fv0.1/libxdk-v0.1.tar.gz
+    tar -xzvf libxdk-v0.1.tar.gz
+    ```
 
-Currently the exploit kit can be used by including its' source code into the exploits. Its API is not stable yet and cannot be used as a library.
+2.  **Go the sample folder and compile the exploit:**
 
-Its functionality (and how it can be used) can be seen by looking at the tests (in the `test/tests` folder) and at the samples.
+    ```bash
+    cd samples/exp65
+    make
+    ```
 
-The samples can be built and run as:
+Upon successful execution, the **statically compiled** binary, named `exp`, will be located in the `samples/exp65` directory.
 
+### Integrating libxdk into an existing C exploit
+
+To integrate the **libxdk** binary release into an existing C exploit that currently compiles with a command such as:
+
+```bash
+gcc -o exp exploit.cpp -static
 ```
-make -C samples/pipe_buf_rop build run
+
+Follow these steps:
+1.  **Download and extract libxdk:**
+    First, download and extract the libxdk release into your exploit's project folder:
+
+    ```bash
+    wget https://github.com/google/kernel-research/releases/download/libxdk%2Fv0.1/libxdk-v0.1.tar.gz
+    tar -xzvf libxdk-v0.1.tar.gz
+    ```
+
+2.  **Update the command line:**
+    Use the following command line for compilation and linking:
+
+    ```bash
+    g++ -o exp exploit.cpp -static -Iinclude -Llib -lkernelXDK
+    ```
+
+    **Changes in the command line:**
+
+      * **Compiler change:** The compiler is switched from the C compiler (`gcc`) to the **C++ compiler** (`g++`) as libxdk is a C++ library.
+
+      * **Include paths:**
+        * `-Iinclude` adds the `include` directory to the header search path.
+        * `-Llib` adds the `lib` directory to the library search path.
+
+      * **Linking:** `-lkernelXDK` links the exploit with the static library file, `libkernelXDK.a`.
+
+## Source code compilation
+
+### Prerequisites
+
+The library requires the following package before compilation:
+
+```bash
+sudo apt install libkeyutils-dev
 ```
+
+### Compilation
+
+Once the prerequisite is installed, compile the core library:
+
+```bash
+./build.sh
+```
+
+This process generates the static library binary at `build/libkernelXDK.a`, ready for linking with exploits (see "Binary release" section).
+
+### Building and running samples
+
+```bash
+./build_samples.sh
+```
+
+Successful execution will create the sample binaries, named `exp`, located within their respective directories (e.g., `samples/<sample_name>/exp`).
 
 ## Tests
 
-The tests can be run by:
+The library provides two distinct test execution scripts:
 
-* `make test`: runs the tests directly on your machine, thus only those tests will run which does not require a vulnerable target (target with the `xdk` kernel module loaded), others will fail.
+* **Local tests (`./run_local_tests.sh`)**
 
-* `./run_tests.sh`: runs the tests on a vulnerable target VM with the `xdk` kernel module loaded via `image_runner`, all tests will run.
+    This script executes a subset of tests that **do not require kernel exploitation** and can be safely run directly on your host machine.
+
+* **Integration tests (`./run_tests.sh`)**
+
+    This script runs the **complete test suite**, including tests that perform kernel exploitation. These tests require a VM setup, utilizing the `image_runner` tool and the `xdk_device` kernel module.
+
+    To specify a target kernel for the integration test, use the following syntax (e.g., targeting kernelCTF's `lts-6.6.69` release):
+
+    ```bash
+    ./run_tests.sh kernelctf lts-6.6.69
+    ```
