@@ -118,6 +118,8 @@ To build the samples, run the following script:
 
 Successful execution will create the sample binaries, named `exp`, located within their respective directories (e.g., `samples/exp65/exp`).
 
+**Note:** some samples require installing prerequisites, which can be done with `sudo PREREQ=1 ./build_samples.sh`.
+
 To test a sample exploit, run the following commands:
 
 ```bash
