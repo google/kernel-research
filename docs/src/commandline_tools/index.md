@@ -1,4 +1,6 @@
-# Kernel Image DB
+# Command Line Tools
+
+## Kernel Image DB
 
 ```{toctree}
 :maxdepth: 1
@@ -6,7 +8,7 @@
 image_db
 ```
 
-# Kernel Image Runner
+## Kernel Image Runner
 
 ```{toctree}
 :maxdepth: 1
@@ -14,7 +16,7 @@ image_db
 image_runner
 ```
 
-# KXDB Tool
+## KXDB Tool
 
 ```{toctree}
 :maxdepth: 1
@@ -22,7 +24,7 @@ image_runner
 kxdb_tool
 ```
 
-# ROP Generator
+## ROP Generator
 
 ```{toctree}
 :maxdepth: 1
