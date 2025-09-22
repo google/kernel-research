@@ -36,7 +36,7 @@ If you specify `input-file` then the configuration will be reused from that file
 
 Processes all downloaded releases from the `../image_db` folder and extends the `target_db.kxdb` database with these new releases:
 
-    ./kxdb_tool.py --image-db-path ../image_db -i target_db.kxdb -o  target_db.kxdb
+    ./kxdb_tool.py --image-db-path ../image_db -i target_db.kxdb -o target_db.kxdb
 
 Processes only the `kernelctf/lts-6.1.81` release from the `../image_db/releases` folder and save the resulting database to the `../libxdk/test/artifacts/target_db_lts-6.1.81.kxdb` file:
 

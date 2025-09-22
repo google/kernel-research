@@ -83,7 +83,7 @@ uint64_t StackPivot::GetDestinationOffset() const {
 
 void StackPivot::ApplyToPayload(Payload& payload, uint64_t kaslr_base) {
   if (push_gadget_ && pop_gadget_)
-    payload.Set(push_gadget_->next_rip_offset,
+    payload.SetU64(push_gadget_->next_rip_offset,
                 kaslr_base + pop_gadget_->address);
 
   // Handle clobbered offsets

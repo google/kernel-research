@@ -25,7 +25,7 @@ This section describes how to use the prebuilt database, extend it if necessary 
     TargetDb kxdb("target_db.kxdb", target_db);
     ```
 
-4. Already available in database structure and symbol offsets are documented in `kxdb_tool/config.py`.
+4. Already available in database structure and symbol offsets are documented in [kxdb_tool/config.py](https://github.com/google/kernel-research/blob/main/kxdb_tool/config.py).
 They are added for all the supported targets.
 
 5. If the needed symbol is not in database, use `Target` object to add it. One object per target needed. For example:
@@ -41,13 +41,9 @@ They are added for all the supported targets.
 6. Similar approach could be taken for adding structure and fields information:
 
     ```c++
-    Target st("kernelctf", "cos-105-17412.294.34");
-
     st.AddStruct("nft_expr_ops", 128, {
         {"dump", 64, 8},
         {"type", 120, 8} });
-
-    kxdb.AddTarget(st);
     ```
 
     > **Note**
@@ -63,7 +59,8 @@ They are added for all the supported targets.
 8. Access pre-defined or added (via `Target`) structures and symbols using following calls:
 
     ```c++
-    auto offset = target.GetStructSize("nft_expr_ops") + target.GetFieldOffset("nft_expr_ops", "type"); // get the size and offset of type field in nft_expr_ops structure
+    auto size = target.GetStructSize("nft_expr_ops"); // not used, just showing API usage
+    auto offset = target.GetFieldOffset("nft_expr", "ops"); // get the offset of ops field in nft_expr structure
 
     *(uint64_t *)&buffer[offset] = kernel_base + target.GetSymbolOffset("nft_last_ops"); // the address of nft_last_ops
     ```
@@ -78,14 +75,12 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
     Payload payload(1024);
     ```
 
-2. If the payload contains constants / areas that should not be overwritten by `PayloadBuilder`, mark them as reserved:
+2. To set constants or to reserve areas that must not be altered by the `PayloadBuilder`, set their values explicitly beforehand:
 
    ```c++
-   payload.Reserve(0, 8);
+   payload.SetU64(0, 0x100); // Sets 8 bytes at offset 0 to 0x100.
+   payload.SetU32(24, 0);    // Sets 4 bytes at offset 24 to 0 (reserving the area).
    ```
-
-   > **Note**
-   > Reserves 8 bytes at offset 0.
 
 3. Create the `RopChain`. This object is initialized with target-specific information and the KASLR base. You can then add predefined actions to it. The `Ret2Usr` utility helps in gracefully returning execution to a user-mode function after the kernel operations are complete.
 
@@ -96,7 +91,7 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
     ```
 
     > **Note**
-    > Available ROP actions could be found in `kxdb_tool/config.py`.
+    > Available ROP actions could be found in [kxdb_tool/config.py](https://github.com/google/kernel-research/blob/main/kxdb_tool/config.py).
 
 ## Assembling the Final Payload with PayloadBuilder
 
@@ -146,7 +141,17 @@ The `PayloadBuilder` automates the process of finding a suitable pivot gadget an
 
     Once built, the `payload` object contains the complete, ready-to-use exploit payload.
 
-5. In cases when pointer to pivot gadget should be part of some other buffer or passed as a parameter it could be obtained in the following way after building the final payload:
+5. The contents of the final payload can be printed for inspection and debugging using the `HexDump::Print` method.
+
+    ```c++
+    printf("[+] Payload:\n");
+    HexDump::Print(payload.GetUsedData());
+    ```
+
+    > **Note:**
+    > The `GetUsedData()` method returns only the data actually written to the payload, excluding the unused bytes at the end of the buffer.
+
+6. In cases when pointer to pivot gadget should be part of some other buffer or passed as a parameter it could be obtained in the following way after building the final payload:
 
    ```c++
     *(uint64_t *)&some_buffer[offset] = kernel_base + builder.GetStackPivot().GetGadgetOffset();

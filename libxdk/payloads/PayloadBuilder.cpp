@@ -189,11 +189,11 @@ bool PayloadBuilder::TryPayloadPivot(Payload& payload, StackPivot pivot) {
 
         shifts->Apply(kaslr_base_, payload);
         std::vector<uint64_t> &rop_words = action.values;
-        payload.Set(shifts->next_ret_offset, rop_words[0]);
+        payload.SetU64(shifts->next_ret_offset, rop_words[0]);
 
         payload_off = shifts->to_offset;
         for(uint64_t i = 1; i < rop_words.size(); i++) {
-            payload.Set(payload_off, rop_words[i]);
+            payload.SetU64(payload_off, rop_words[i]);
             payload_off += 8;
         }
     }

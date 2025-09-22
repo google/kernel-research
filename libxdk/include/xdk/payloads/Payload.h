@@ -178,7 +178,7 @@ public:
      * @param value The `uint32_t` value to set.
      * @throws ExpKitError if the space is not free or out of bounds.
      */
-    void Set(uint64_t offset, uint32_t value);
+    void SetU32(uint64_t offset, uint32_t value);
 
     /**
      * @brief Sets a 64-bit unsigned integer value at a specific offset.
@@ -189,7 +189,7 @@ public:
      * @param value The `uint64_t` value to set.
      * @throws ExpKitError if the space is not free or out of bounds.
      */
-    void Set(uint64_t offset, uint64_t value);
+    void SetU64(uint64_t offset, uint64_t value);
 
     /**
      * @brief Finds the first contiguous block of empty (unused) bytes of a given length.

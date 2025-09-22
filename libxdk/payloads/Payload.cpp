@@ -85,11 +85,11 @@ void Payload::Set(uint64_t offset, const std::vector<uint8_t>& bytes) {
     Set(offset, (void*) bytes.data(), bytes.size());
 }
 
-void Payload::Set(uint64_t offset, uint32_t value) {
+void Payload::SetU32(uint64_t offset, uint32_t value) {
     *ReserveU32(offset) = value;
 }
 
-void Payload::Set(uint64_t offset, uint64_t value) {
+void Payload::SetU64(uint64_t offset, uint64_t value) {
     *ReserveU64(offset) = value;
 }
 

