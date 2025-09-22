@@ -82,3 +82,4 @@ seekable_varsize =
     # be able to calculate item sizes (first start offset is 0 anyway)
     end_offsets (varsize_ints)
     array_items[len(end_offsets)]
+ 
