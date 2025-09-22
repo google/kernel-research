@@ -62,11 +62,11 @@ RopPivotInfo PivotFinder::PivotToRop(const RopChain& rop) {
 
     shifts->Apply(rop.kaslr_base_, payload_);
     std::vector<uint64_t> rop_words = rop.GetDataWords();
-    payload_.Set(shifts->next_ret_offset, rop_words[0]);
+    payload_.SetU64(shifts->next_ret_offset, rop_words[0]);
 
     uint64_t payload_off = shifts->to_offset;
     for (uint64_t i = 1; i < rop_words.size(); i++) {
-      payload_.Set(payload_off, rop_words[i]);
+      payload_.SetU64(payload_off, rop_words[i]);
       payload_off += 8;
     }
     return RopPivotInfo{rop, pivot, shifts->to_offset, shifts->to_offset,

