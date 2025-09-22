@@ -18,13 +18,25 @@ on:
     paths:
      - 'kxdb_tool/**'
   pull_request:
-    paths:
-     - 'kxdb_tool/**'
 permissions: {}
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      kxdb_tool: ${{ steps.filter.outputs.kxdb_tool }}
+    steps:
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: "kxdb_tool: ['kxdb_tool/**']"
+
   tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    needs: changes
+    if: ${{ needs.changes.outputs.kxdb_tool == 'true' }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
