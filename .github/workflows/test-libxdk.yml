@@ -16,11 +16,9 @@ name: Run tests
 on:
   push:
     paths:
-     - 'kxdb_tool/**'
      - 'libxdk/**'
   pull_request:
     paths:
-     - 'kxdb_tool/**'
      - 'libxdk/**'
   workflow_dispatch:
     inputs:
@@ -67,18 +65,6 @@ jobs:
             sudo apt remove parallel -yq
             sudo apt install -yq --no-install-recommends build-essential flex bison bc ca-certificates libelf-dev libssl-dev cpio pahole qemu-system-x86 libkeyutils-dev moreutils
 
-      - name: Install tool prerequisites
-        run: |
-          cd kxdb_tool
-          pip install -r requirements.txt
-
-      - name: Environment info
-        run: |
-          set -x
-          g++ --version
-          ldd --version
-          man parallel|cat
-
       - name: Download cached xdk_device module # to skip compilation and speedup tests
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
         # uploaded with "gsutil cp -Z -a public-read image_db/releases/kernelctf/lts-6.1.81/custom_modules.tar gs://kernelxdk/xdk_device/releases/lts6181_v1.tar"
@@ -90,11 +76,6 @@ jobs:
           ./image_db/download_release.sh ${{steps.vars.outputs.target}} "vmlinuz,modules"
           ./image_db/collect_runtime_data.sh  # we need version.txt for compiling the correct xdk_device module
           ./image_runner/compile_custom_modules.sh ${{steps.vars.outputs.target}} xdk_device
-
-      - name: Test kxdb_tool
-        if: ${{ success() || failure() }}
-        working-directory: ./kxdb_tool
-        run: ./test.sh
 
       - name: Build libxdk
         if: ${{ success() || failure() }}
