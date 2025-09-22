@@ -13,10 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 set -e
+
+SCRIPT_DIR=$(dirname $(realpath "$0"))
+LIBXDK_DIR="$SCRIPT_DIR/../../libxdk"
+cd "$LIBXDK_DIR"
+
 LIB_VER="$1"
 
 if [ -z "$LIB_VER" ]; then
-  echo "Usage: $0 <version, e.g.  >"
+  echo "Usage: $0 <version, e.g. v0.0.1>"
   exit 1
 fi
 
@@ -27,4 +32,5 @@ mkdir -p $PACKAGE_DIR 2>/dev/null
 cp -R include lib "$PACKAGE_DIR/"
 find samples -type f -regex ".*\.\(cpp\|h\|sh\)\|.*Makefile" -exec install -D {} $PACKAGE_DIR/{} \;
 
-tar -czvf "build/libxdk-$LIB_VER.tar.gz" "$PACKAGE_DIR/"
+cd "$PACKAGE_DIR"
+tar -czvf "../libxdk-$LIB_VER.tar.gz" *
