@@ -16,7 +16,7 @@ name: Build and deploy xdk.dev
 on:
   push:
     branches: ["main"]
-    paths: 'docs/**'
+    paths: ['docs/**', '**/README.md']
   pull_request:
   workflow_dispatch:
 permissions:
@@ -38,7 +38,7 @@ jobs:
       - id: filter
         uses: dorny/paths-filter@v3
         with:
-          filters: "docs: ['docs/**']"
+          filters: "docs: ['docs/**', '**/README.md']"
 
   build:
     runs-on: ubuntu-latest
