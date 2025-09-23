@@ -55,6 +55,8 @@ jobs:
           - kernelctf mitigation-v3b-6.1.55
       fail-fast: false # do not cancel test of other targets
     uses: ./.github/workflows/test-libxdk.yml
+    permissions:
+      pull-requests: read
     secrets: inherit
     with:
       target: ${{matrix.target}}
