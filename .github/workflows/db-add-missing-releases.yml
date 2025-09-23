@@ -94,6 +94,8 @@ jobs:
         target: ${{ fromJson(needs.get_missing_releases.outputs.missing_db) }}
       fail-fast: false # do not cancel test of other targets
     uses: ./.github/workflows/test-libxdk.yml
+    permissions:
+      pull-requests: read
     secrets: inherit
     with:
       target: ${{matrix.target}}

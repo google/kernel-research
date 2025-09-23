@@ -49,6 +49,8 @@ jobs:
       fail-fast: false # do not cancel test of other targets
     uses: ./.github/workflows/test-libxdk.yml
     secrets: inherit
+    permissions:
+      pull-requests: read
     with:
       target: ${{ matrix.target }}
       silence_notifications: true
