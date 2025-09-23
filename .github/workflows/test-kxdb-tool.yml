@@ -21,11 +21,12 @@ on:
 permissions: {}
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     permissions:
       pull-requests: read
     outputs:
       kxdb_tool: ${{ steps.filter.outputs.kxdb_tool }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -34,10 +35,10 @@ jobs:
           filters: "kxdb_tool: ['kxdb_tool/**']"
 
   tests:
+    needs: changes
+    if: ${{ always() && (github.event_name != 'pull_request' || needs.changes.outputs.kxdb_tool == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: changes
-    if: ${{ needs.changes.outputs.kxdb_tool == 'true' || github.event_name != 'pull_request' }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

@@ -36,11 +36,12 @@ on:
 permissions: {}
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     permissions:
       pull-requests: read
     outputs:
       libxdk: ${{ steps.filter.outputs.libxdk }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -49,10 +50,10 @@ jobs:
           filters: "libxdk: ['libxdk/**']"
 
   tests:
+    needs: changes
+    if: ${{ always() && (github.event_name != 'pull_request' || needs.changes.outputs.libxdk == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: changes
-    if: ${{ needs.changes.outputs.libxdk == 'true' || github.event_name != 'pull_request' }}
     steps:
       - name: Fix input variables
         id: vars
