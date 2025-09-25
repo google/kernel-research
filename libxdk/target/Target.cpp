@@ -26,7 +26,7 @@ std::map<RopActionId, std::string> RopActionNames {
     { RopActionId::WRITE_WHAT_WHERE_64, "write_what_where_64" },
     { RopActionId::FORK, "fork" },
     { RopActionId::TELEFORK, "telefork" },
-    { RopActionId::KPTI_TRAMPOLINE, "ret_via_kpti_retpoline" },
+    { RopActionId::RET2USER, "ret2user" },
 };
 
 std::vector<RopItem> Target::GetRopActionItems(RopActionId id) {

