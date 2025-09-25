@@ -21,7 +21,7 @@ LIBXDK_DIR="$SCRIPT_DIR/../../libxdk"
 KXDB_FN="$SCRIPT_DIR/test.kxdb"
 
 usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) <release-name>";
+    echo "Usage: $0 (kernelctf|ubuntu) <release-name> [--keep-image-db]";
     exit 1;
 }
 
@@ -48,7 +48,7 @@ if [[ ! "$DISTRO" =~ ^(kernelctf|ubuntu)$ || -z "$RELEASE" ]]; then usage; fi
 
 if [ "$KEEP_IMAGE_DB" == "" ]; then
   # cleanup generated Image DB artifacts
-  for FN in btf.json symbols.txt rop_actions.json stack_pivots.json structs.json; do
+  for FN in btf.json symbols.txt rop_actions.json stack_pivots.json structs.json vmlinux.thunk_replaced; do
     if [ -f "$RELEASE_DIR/$FN" ]; then
       rm "$RELEASE_DIR/$FN";
     fi
