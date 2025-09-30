@@ -59,7 +59,7 @@ class MetaConfig():
   @classmethod
   def from_desc(cls,
                 symbols: Dict[int, str] = {},
-                rop_actions: Dict[int, str] = {},
+                rop_actions: List[str] = {},
                 structs: Dict[str, List[str]] = {}):
     symbols = [SymbolMeta(name=name) for name in symbols]
     rop_actions = [RopActionMeta.from_config(desc) for desc in rop_actions]

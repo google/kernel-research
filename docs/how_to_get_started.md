@@ -25,7 +25,7 @@ This section describes how to use the prebuilt database, extend it if necessary 
     TargetDb kxdb("target_db.kxdb", target_db);
     ```
 
-4. Already available in database structure and symbol offsets are documented in [kxdb_tool/config.py](https://github.com/google/kernel-research/blob/main/kxdb_tool/config.py).
+4. Already available in database structure and symbol offsets are documented in [`kxdb_tool/config.py`](https://github.com/google/kernel-research/blob/main/kxdb_tool/config.py).
 They are added for all the supported targets.
 
 5. If the needed symbol is not in database, use `Target` object to add it. One object per target needed. For example:
@@ -91,7 +91,7 @@ After leaking a kernel address and calculating the KASLR base, you can begin con
     ```
 
     > **Note**
-    > Available ROP actions could be found in [kxdb_tool/config.py](https://github.com/google/kernel-research/blob/main/kxdb_tool/config.py).
+    > Available ROP actions could be found in `[`kxdb_tool/config.py`](https://github.com/google/kernel-research/blob/main/kxdb_tool/config.py).
 
 ## Assembling the Final Payload with PayloadBuilder
 
@@ -156,3 +156,20 @@ The `PayloadBuilder` automates the process of finding a suitable pivot gadget an
    ```c++
     *(uint64_t *)&some_buffer[offset] = kernel_base + builder.GetStackPivot().GetGadgetOffset();
    ```
+6. Retrieve the Final Payload for Exploitation
+
+    Once `builder.Build()` has successfully completed, your `payload` object is now populated with the final exploit, including the stack pivot logic and your ROP chain.
+
+    To use this payload (for example, by writing it into kernel memory using an arbitrary write primitive), you must retrieve the finalized byte vector.
+
+    ```c++
+    // Get the final, ready-to-use payload data
+    std::vector<uint8_t> final_payload = payload.GetUsedData();
+
+    // Now, use this vector in your arbitrary write function
+    trigger_vuln_arb_write(victim_pipe_addr, final_payload);
+    ```
+
+    > **Note**
+    > The `GetUsedData()` method returns a `std::vector<uint8_t>` containing only the portion of the payload buffer that was actually filled in by the builder (from the start of the buffer up to the `used_size_`). This is the exact data you need for the exploit.
+
