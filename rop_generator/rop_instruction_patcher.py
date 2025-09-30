@@ -347,6 +347,7 @@ class RopInstructionPatcher:
         For example "mov    rdi,0xffffffff835c5640"
         These are not stored in the symbolized vmlinux.
         Instead, they can be found by extracting vmlinux from vmlinuz, and at the end of that file
+        handle_relocations() in arch/x86/boot/compressed/misc.c
         """
 
         # run EXTRACT_VMLINUX self.vmlinuz_path

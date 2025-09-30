@@ -4,6 +4,14 @@
 
   * **Target Detection:** Detect the target environment the exploit is running on (currently supports **kernelCTF** targets).
 
+  * [x] RIP control (including stack pivots, ROP actions)
+  * [ ] vulnerability triggers
+  * [ ] kASLR leaks
+  * [ ] utility functions commonly used in kernel exploitations
+  * [ ] primitive transfers (e.g. UAF -> Arbitrary Write)
+  * [ ] spraying techniques (including cross-cache)
+  * [ ] "Exploit recipes": declarative structure how to put together the above "ingredients" to create an exploit (can be adjusted to different targets)
+
   * **Symbol and Structure Information:** Provide symbols, structure and field information specific to the target.
 
   * **ROP Payload Generation:** Generate ROP payloads for privilege escalation and escaping namespaces and sandboxes.
@@ -11,6 +19,8 @@
   * **Payload Layout Planner:** Finds the right **stack pivoting** gadgets.
 
   * **Convenience Functions:** Offer functions for commonly used exploit functionality.
+
+Currently the exploit kit can be used by including its source code into the exploits. Its API is not stable yet and cannot be used as a library.
 
 ### Planned Features
 
