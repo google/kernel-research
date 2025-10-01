@@ -327,7 +327,7 @@ std::vector<StackPivot> PivotFinder::FindInternal(bool only_one,
     snapshot.Reserve(push.next_rip_offset, 8);
 
     for (auto& pop : pivots_.pop_rsps) {
-      auto push_change = push.indirect_type == IndirectType::CALL ? 8 : 0;
+      uint64_t push_change = push.indirect_type == IndirectType::CALL ? 8 : 0;
       if (pop.stack_change_before_rsp != push_change ||
           !snapshot.CheckFree(pop.next_rip_offset, 8 + free_bytes_after))
         continue;
