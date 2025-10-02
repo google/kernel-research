@@ -49,3 +49,12 @@ uint64_t check_kaslr_base(uint64_t kbase_addr);
  * @return The checked kernel heap pointer if valid.
  */
 uint64_t check_heap_ptr(uint64_t heap_leak);
+
+/**
+ * @ingroup util_classes
+ * @brief Pins the calling thread to the specified CPU.
+ *
+ * @param cpu The CPU the calling thread should be pinned to.
+ * @throws errno_error if the operation fails
+ */
+void pin_cpu(int cpu);
