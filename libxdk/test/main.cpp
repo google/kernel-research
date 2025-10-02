@@ -19,6 +19,7 @@
 #include "test/TestRunner.h"
 #include "test/logging/TapLogger.h"
 #include "test/tests/TargetDbTests.h"
+#include "test/tests/UtilsTests.h"
 #include "test/tests/XdkDeviceTests.h"
 #include "test/tests/RopActionTests.h"
 #include "test/tests/SymbolsTests.h"
@@ -40,6 +41,7 @@ class Main {
 public:
     Main(int argc, const char* argv[]): args_(argc, argv) {
         runner_.Add(new TargetDbTests());
+        runner_.Add(new UtilsTests());
         runner_.Add(new XdkDeviceTests());
         runner_.Add(new SymbolsTest());
         runner_.Add(new PivotTests());

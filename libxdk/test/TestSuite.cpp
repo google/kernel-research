@@ -67,7 +67,7 @@ void TestSuite::AssertLogs(bool fail_if_no_expected) {
       return;
     }
 
-    int i = 0;
+    size_t i = 0;
     std::string line;
     for (; std::getline(input_file, line); i++) {
       if (i >= logs.size())

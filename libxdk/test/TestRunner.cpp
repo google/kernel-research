@@ -117,7 +117,7 @@ bool TestRunner::Run(uint skip) {
       testSuite->had_errors = false;
       logger_->TestBegin(*testSuite, test, test_idx);
       try {
-        for (int repeat_id = 0; repeat_id < repeat_count_; repeat_id++)
+        for (uint repeat_id = 0; repeat_id < repeat_count_; repeat_id++)
           test.func();
         testSuite->AssertLogs(false);
         testSuite->AssertNoErrors();

@@ -73,7 +73,7 @@ std::vector<CallLog> Kprobe::GetCallLogs(bool clear_log) {
   std::vector<CallLog> result;
 
   kprobe_log_entry* entry = args_.logs->entries;
-  for (int i = 0; i < args_.logs->entry_count; i++) {
+  for (uint64_t i = 0; i < args_.logs->entry_count; i++) {
     CallLog log;
     log.function_name = args_.function_name;
     for (int j = 0; j < args_.arg_count; j++)
