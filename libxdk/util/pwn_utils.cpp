@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <sched.h>
 #include <stdint.h>
 #include <xdk/util/error.h>
 #include <xdk/util/pwn_utils.h>
@@ -32,4 +33,12 @@ uint64_t check_heap_ptr(uint64_t heap_leak) {
     if ((heap_leak & 0xFFFF000000000000) != 0xFFFF000000000000)
         throw ExpKitError("kernel heap address (%p) is incorrect", heap_leak);
     return heap_leak;
+}
+
+void pin_cpu(int cpu) {
+    cpu_set_t set;
+    CPU_ZERO(&set);
+    CPU_SET(cpu, &set);
+    if (sched_setaffinity(0, sizeof(set), &set))
+        throw errno_error("sched_setaffinity failed");
 }
