@@ -38,7 +38,7 @@ enum struct RopActionId: uint32_t {
     WRITE_WHAT_WHERE_64 = 0x04,
     FORK = 0x5,
     TELEFORK = 0x6,
-    RET2USER = 0x07,
+    RET2USR = 0x07,
 };
 
 /**

