@@ -43,7 +43,7 @@ rop_actions = [
     "write_what_where_64(ARG_address, ARG_new_value)",
     "fork()",
     "telefork(ARG_sleep_msec=0xffffffff)",
-    "ret2user(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
+    "ret2usr(ARG_user_rip, ARG_user_cs, ARG_user_rflags, ARG_user_sp, ARG_user_ss)",
 ]
 
 structs = {

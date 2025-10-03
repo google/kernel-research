@@ -27,6 +27,10 @@ run: build
 	cp exp* ../../../image_runner/rootfs/
 	../../../image_runner/run.sh $(TARGET) --custom-modules=xdk_device --only-command-output --dmesg=dmesg.txt -- /exp.sh|tee output.txt
 
+debug: build
+	cp exp* ../../../image_runner/rootfs/
+	../../../image_runner/run.sh $(TARGET) --gdb --nokaslr --custom-modules=xdk_device --only-command-output --dmesg=dmesg.txt -- /exp.sh|tee output.txt
+
 test: run
 	grep "CTF{secret_flag_deadbeef}" output.txt || { echo "Failed to leak the flag."; grep -q ExpKitError output.txt || { echo "dmesg content: "; cat dmesg.txt; }; exit 1; }
 
