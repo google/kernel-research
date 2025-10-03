@@ -56,6 +56,7 @@ if [ "$KEEP_IMAGE_DB" == "" ]; then
 fi
 
 "$IMAGE_DB_DIR/download_release.sh" "$DISTRO" "$RELEASE" dbgsym,vmlinuz,process
+"$IMAGE_DB_DIR/collect_runtime_data.sh"
 "$KXDB_TOOL_DIR/kxdb_tool.py" --image-db-path "$IMAGE_DB_DIR" --release-filter "$DISTRO/$RELEASE" -o "$KXDB_FN"
 cp "$KXDB_FN" "$LIBXDK_DIR/test/artifacts/kernelctf.kxdb"
 cp "$KXDB_FN" "$LIBXDK_DIR/build/test/artifacts/kernelctf.kxdb"
