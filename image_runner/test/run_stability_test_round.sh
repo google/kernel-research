@@ -37,10 +37,11 @@ if [ -z "$RUNNER_ARGS" ]; then echo "RUNNER_ARGS are missing"; usage; fi
 
 OUTPUT_FN="$STDOUT_DIR/round_${ROUND_ID}_output.txt"
 DMESG_FN="$STDOUT_DIR/round_${ROUND_ID}_dmesg.txt"
+DEBUG_FN="$STDOUT_DIR/round_${ROUND_ID}_debug.txt"
 
 mkdir -p "$STDOUT_DIR" 2>/dev/null || true
 
-if ! timeout --foreground -s SIGKILL 15s ../run.sh $DISTRO $RELEASE --only-command-output --no-rootfs-update --dmesg=$DMESG_FN $RUNNER_ARGS|sed s/\\r//g > "$OUTPUT_FN"; then
+if ! timeout --foreground -s SIGKILL 15s ../run.sh $DISTRO $RELEASE --only-command-output --no-rootfs-update --dmesg=$DMESG_FN --qemu-args="-D $DEBUG_FN -d int,cpu_reset,unimp,guest_errors" $RUNNER_ARGS|sed s/\\r//g > "$OUTPUT_FN"; then
     echo "#$ROUND_ID: image_runner failed to run. Check the arguments: '$RUNNER_ARGS'"
     exit 2;
 fi

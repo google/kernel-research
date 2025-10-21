@@ -25,7 +25,7 @@ target_db.kxdb:
 
 run: build
 	cp exp* ../../../image_runner/rootfs/
-	../../../image_runner/run.sh $(TARGET) --custom-modules=xdk_device --only-command-output --dmesg=dmesg.txt -- /exp.sh|tee output.txt
+	../../../image_runner/run.sh $(TARGET) --custom-modules=xdk_device --only-command-output --dmesg=dmesg.txt --qemu-args="-D debug.log -d int,cpu_reset,unimp,guest_errors" -- /exp.sh|tee output.txt
 
 debug: build
 	cp exp* ../../../image_runner/rootfs/

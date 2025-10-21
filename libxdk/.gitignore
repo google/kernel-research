@@ -1,5 +1,6 @@
 bin/
 dmesg.txt
+debug.log
 tap_results.txt
 output.txt
 actual_results/*
