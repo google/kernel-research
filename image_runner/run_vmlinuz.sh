@@ -18,16 +18,18 @@ set -e
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--stdout-file=<path>] -- [<commands-to-run-in-vm>]" >&2;
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--stdout-file=<path>] [--qemu-args=<args>] -- [<commands-to-run-in-vm>]" >&2;
     exit 1;
 }
 
+QEMU_ARGS=""
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     --modules-path=*) MODULES_PATH="${1#*=}"; shift;;
     --custom-modules-tar=*) CUSTOM_MODULES_TAR="${1#*=}"; shift;;
     --stdout-file=*) STDOUT_FILE="${1#*=}"; shift;;
+    --qemu-args=*) QEMU_ARGS="${1#*=}"; shift;;
     --no-rootfs-update) NO_ROOTFS_UPDATE=1; shift;;
     --snapshot) SNAPSHOT=1; shift;;
     --gdb) GDB=1; shift;;
@@ -65,10 +67,9 @@ if [ ! -z "$STDOUT_FILE" ]; then
     SERIAL_PORTS="-serial file:$STDOUT_FILE -serial mon:stdio"
 fi
 
-EXTRA_ARGS=""
 EXTRA_CMDLINE=""
-if [ "$GDB" == "1" ]; then EXTRA_ARGS+=" -s -S"; fi
-if [ "$SNAPSHOT" == "1" ]; then EXTRA_ARGS+=" -snapshot"; fi
+if [ "$GDB" == "1" ]; then QEMU_ARGS+=" -s -S"; fi
+if [ "$SNAPSHOT" == "1" ]; then QEMU_ARGS+=" -snapshot"; fi
 if [ "$NOKASLR" == "1" ]; then EXTRA_CMDLINE+=" nokaslr"; fi
 
 ABC=({a..z})
@@ -77,13 +78,13 @@ if [ ! -z "$MODULES_PATH" ]; then
     if [[ "$MODULES_PATH" == */ ]]; then MODULES_PATH=${MODULES_PATH%/}; fi
     MODULES_IMG="$MODULES_PATH.img"
     check_archive_uptodate $MODULES_IMG $MODULES_PATH "virt-make-fs --type ext4 --size=+16M $MODULES_PATH $MODULES_IMG"
-    EXTRA_ARGS+=" -drive file=$MODULES_IMG,if=ide,format=raw,snapshot=on"
+    QEMU_ARGS+=" -drive file=$MODULES_IMG,if=ide,format=raw,snapshot=on"
     EXTRA_CMDLINE+=" MOUNT_MODULES=/dev/sd${ABC[IDE_IDX]}"
     IDE_IDX=$((IDE_IDX+1))
 fi
 
 if [ ! -z "$CUSTOM_MODULES_TAR" ]; then
-    EXTRA_ARGS+=" -drive file=$CUSTOM_MODULES_TAR,if=ide,format=raw,snapshot=on"
+    QEMU_ARGS+=" -drive file=$CUSTOM_MODULES_TAR,if=ide,format=raw,snapshot=on"
     EXTRA_CMDLINE+=" MOUNT_CUSTOM_MODULES=/dev/sd${ABC[IDE_IDX]}"
     IDE_IDX=$((IDE_IDX+1))
 fi
@@ -93,7 +94,7 @@ qemu-system-x86_64 -m 3.5G -nographic -nodefaults -no-reboot \
     -kernel $VMLINUZ \
     -initrd $SCRIPT_DIR/initramfs.cpio \
     -nic user,model=virtio-net-pci \
-    $SERIAL_PORTS $EXTRA_ARGS \
+    $SERIAL_PORTS $QEMU_ARGS \
     -append "console=ttyS0 panic=-1 oops=panic loadpin.enable=0 loadpin.enforce=0$EXTRA_CMDLINE init=/init -- $COMMANDS_TO_RUN"
 
 stty sane 2>/dev/null || true
