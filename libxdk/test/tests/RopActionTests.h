@@ -161,7 +161,7 @@ public:
 
           auto rop = GetRopChain();
           rop.AddRopAction(RopActionId::SWITCH_TASK_NAMESPACES, {(uint64_t)getpid()});
-          ExecuteRopChain(rop, 0, 600);
+          ExecuteRopChain(rop);
 
           auto restored_ns = Syscalls::readlink("/proc/self/ns/ipc");
           Log("after SWITCH_TASK_NAMESPACES %u %u %s", getuid(), getpid(), restored_ns.c_str());
