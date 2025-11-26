@@ -53,7 +53,7 @@ public:
     TEST_METHOD(pinsToInvalidCpuThrows, "pins to CPU -1 throws") {
         try {
             pin_cpu(-1);
-            throw new ExpKitError("pin_cpu(-1) did not throw an exception");
+            throw ExpKitError("pin_cpu(-1) did not throw an exception");
         } catch(const errno_error &e) {
             ASSERT_EQ("sched_setaffinity failed: Invalid argument", e.what());
         }
