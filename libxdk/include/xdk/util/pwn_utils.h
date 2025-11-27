@@ -58,3 +58,28 @@ uint64_t check_heap_ptr(uint64_t heap_leak);
  * @throws errno_error if the operation fails
  */
 void pin_cpu(int cpu);
+
+/**
+ * @ingroup util_classes
+ * @brief Leaks the KASLR base address using a prefetch side-channel.
+ *
+ * This function determines the kernel base address by measuring the execution
+ * time of prefetch instructions across all possible KASLR slots. It uses a
+ * "Windowed Max Absolute Difference" strategy, which detects the kernel image
+ * location by sliding a window across the timing data to find the region that
+ * maximizes the timing difference compared to the median. To ensure
+ * reliability, it runs multiple independent scans and applies a majority voting
+ * algorithm.
+ *
+ * @param window_size The size of the sliding window used to identify the region
+ * containing the kernel image. This should match the number of pages the kernel
+ * occupies in memory.
+ * @param samples The number of prefetch timing measurements to collect for
+ * each candidate KASLR slot during a single trial.
+ * @param trials The number of memory scans to perform. The final result is
+ * selected via a majority vote across these trials.
+ * @return The kernel base address.
+ * @throws ExpKitError if the address could not be leaked reliably.
+ */
+uint64_t leak_kaslr_base(uint64_t window_size, int samples = 100,
+                         int trials = 7);
