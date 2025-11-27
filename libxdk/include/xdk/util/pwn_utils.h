@@ -58,3 +58,11 @@ uint64_t check_heap_ptr(uint64_t heap_leak);
  * @throws errno_error if the operation fails
  */
 void pin_cpu(int cpu);
+
+/**
+ * @ingroup util_classes
+ * @brief Leaks the KASLR base address.
+ *
+ * @throws errno_error if the address could not be leaked
+ */
+uint64_t leak_kaslr_base();
