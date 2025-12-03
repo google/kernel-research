@@ -61,8 +61,10 @@ void pin_cpu(int cpu);
 
 /**
  * @ingroup util_classes
- * @brief Leaks the KASLR base address.
+ * @brief Leaks the KASLR base address using a prefetch side-channel.
  *
- * @throws errno_error if the address could not be leaked
+ * @param samples The number of prefetch samples to collect per candidate address.
+ * @return The kernel base address.
+ * @throws ExpKitError if the address could not be leaked.
  */
-uint64_t leak_kaslr_base();
+uint64_t leak_kaslr_base(int samples = 100);

