@@ -64,7 +64,8 @@ void pin_cpu(int cpu);
  * @brief Leaks the KASLR base address using a prefetch side-channel.
  *
  * @param samples The number of prefetch samples to collect per candidate address.
+ * @param trials The number of addresses to collect for majority voting.
  * @return The kernel base address.
  * @throws ExpKitError if the address could not be leaked.
  */
-uint64_t leak_kaslr_base(int samples = 100);
+uint64_t leak_kaslr_base(int samples = 100, int trials = 3);

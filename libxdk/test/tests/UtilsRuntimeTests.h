@@ -20,6 +20,7 @@
 #include "test/TestUtils.h"
 #include "test/TestSuite.h"
 #include <xdk/util/pwn_utils.h>
+#include <iostream>
 
 class UtilsRuntimeTests: public TestSuite {
     XdkDevice* xdk_;
@@ -33,9 +34,15 @@ public:
     TEST_METHOD(leaksKaslrBase, "leaks KASLR base") {
         uint64_t expected = xdk_->KaslrLeak();
 
-        for (int i = 0; i < 100; i++) {
+        int total = 1000;
+        int incorrect = 0;
+        for (int i = 0; i < total; i++) {
             uint64_t actual = leak_kaslr_base();
-            ASSERT_EQ(expected, actual);
+            if (actual != expected) {
+               printf("Iteration: %d failed, expected %llx, got %llx\n", i, expected, actual);
+               incorrect++;
+            }
         }
+        ASSERT_EQ(incorrect, 0);
     }
 };

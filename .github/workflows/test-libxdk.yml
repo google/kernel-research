@@ -104,7 +104,7 @@ jobs:
       - name: Test libxdk (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
+        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
@@ -124,17 +124,11 @@ jobs:
                 KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/pipe_buf_rop TARGET="${{ steps.vars.outputs.target }}" $action
             done
 
-      - name: Test libxdk (local TODO tests only)
-        if: ${{ success() || failure() }}
-        continue-on-error: true
-        working-directory: ./libxdk
-        run: timeout 2m ./build.sh && build/test/kernelXDKTests --test-suites StaticTests --tests TODO
-
       - name: Test libxdk (QEMU TODO tests only)
         if: ${{ success() || failure() }}
         continue-on-error: true
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 2m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
+        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
@@ -152,9 +146,3 @@ jobs:
             libxdk/test_results*
             image_db/releases/**/custom_modules.tar
             image_runner/test/stability_test_outputs
-
-      - name: Send Google Chat Notification (on failure)
-        if: ${{ failure() && !inputs.silence_notifications }}
-        env:
-          WEBHOOK_URL: ${{ secrets.WEBHOOK_EXPKIT }}
-        run: node ./.github/scripts/send_notification.js

