@@ -91,12 +91,61 @@ std::optional<uint64_t> try_find_edge(const std::vector<uint64_t>& timings) {
         printf("%lx: %lu \n", slot_to_addr(slot), timings[slot]);
     }
 
-    for (size_t slot = 0; slot < timings.size(); slot++) {
-        uint64_t diff = abs_diff(timings[slot], median);
-        if (diff >= threshold) {
-            return slot;
+    // 1. Create Binary Mask
+    std::vector<int> mask(timings.size());
+    for (size_t i = 0; i < timings.size(); ++i) {
+        uint64_t diff = abs_diff(timings[i], median);
+        mask[i] = (diff >= threshold) ? 1 : 0;
+    }
+
+    // 2. Fill Gaps
+    const size_t max_gap = 1;
+    std::vector<int> filled_mask = mask;
+
+    std::vector<size_t> ones_indices;
+    for (size_t i = 0; i < mask.size(); ++i) {
+        if (mask[i] == 1) ones_indices.push_back(i);
+    }
+
+    if (!ones_indices.empty()) {
+        for (size_t i = 0; i < ones_indices.size() - 1; ++i) {
+            size_t idx1 = ones_indices[i];
+            size_t idx2 = ones_indices[i+1];
+            size_t gap_size = idx2 - idx1 - 1;
+            
+            if (gap_size > 0 && gap_size <= max_gap) {
+                for (size_t k = idx1 + 1; k < idx2; ++k) {
+                    filled_mask[k] = 1;
+                }
+            }
         }
     }
+
+    // 3. Remove Short Runs
+    const size_t min_length = 2;
+    std::vector<int> final_mask = filled_mask;
+    
+    size_t current_idx = 0;
+    while (current_idx < final_mask.size()) {
+        int key = final_mask[current_idx];
+        size_t run_len = 0;
+        while (current_idx + run_len < final_mask.size() && final_mask[current_idx + run_len] == key) {
+            run_len++;
+        }
+        
+        if (key == 1 && run_len < min_length) {
+            for (size_t k = current_idx; k < current_idx + run_len; ++k) {
+                final_mask[k] = 0;
+            }
+        }
+        current_idx += run_len;
+    }
+
+    // 4. Find the Start
+    for (size_t i = 0; i < final_mask.size(); ++i) {
+        if (final_mask[i] == 1) return (uint64_t)i;
+    }
+
     return std::nullopt;
 }
 

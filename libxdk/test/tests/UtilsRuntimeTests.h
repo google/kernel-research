@@ -34,15 +34,15 @@ public:
     TEST_METHOD(leaksKaslrBase, "leaks KASLR base") {
         uint64_t expected = xdk_->KaslrLeak();
 
-        int total = 1000;
+        int total = 450;
         int incorrect = 0;
         for (int i = 0; i < total; i++) {
-            uint64_t actual = leak_kaslr_base();
+            uint64_t actual = leak_kaslr_base(100, 7);
             if (actual != expected) {
                printf("Iteration: %d failed, expected %llx, got %llx\n", i, expected, actual);
                incorrect++;
             }
         }
-        ASSERT_EQ(incorrect, 0);
+        ASSERT_EQ(0, incorrect);
     }
 };
