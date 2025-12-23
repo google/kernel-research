@@ -104,7 +104,7 @@ jobs:
       - name: Test libxdk (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap
+        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}

