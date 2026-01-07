@@ -77,7 +77,7 @@ jobs:
         run: |
             sudo apt-get update
             sudo apt remove parallel -yq
-            sudo apt install -yq --no-install-recommends build-essential flex bison bc ca-certificates libelf-dev libssl-dev cpio pahole qemu-system-x86 libkeyutils-dev moreutils
+            sudo apt install -yq --no-install-recommends build-essential flex bison bc ca-certificates libelf-dev libssl-dev cpio pahole qemu-system-x86 libkeyutils-dev moreutils cpu-checker
 
       - name: Download cached xdk_device module # to skip compilation and speedup tests
         if: ${{ steps.vars.outputs.target == 'kernelctf lts-6.1.81' }}
@@ -101,10 +101,19 @@ jobs:
         working-directory: ./libxdk
         run: ./run_local_tests.sh
 
+      - name: Check KVM
+        run: |
+          if [ -e /dev/kvm ]; then
+            echo "KVM is present"
+            kvm-ok
+          else
+            echo "KVM is MISSING - QEMU will use TCG"
+          fi
+
       - name: Test libxdk (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 20 --tap
+        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 200 --tap
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
