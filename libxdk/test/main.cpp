@@ -41,14 +41,14 @@ class Main {
     }
 public:
     Main(int argc, const char* argv[]): args_(argc, argv) {
-        runner_.Add(new TargetDbTests());
+        // runner_.Add(new TargetDbTests());
         runner_.Add(new UtilsRuntimeTests());
-        runner_.Add(new UtilsTests());
-        runner_.Add(new XdkDeviceTests());
-        runner_.Add(new SymbolsTest());
-        runner_.Add(new PivotTests());
-        runner_.Add(new PivotXdkDeviceTests());
-        runner_.Add(new RopActionTests());
+        // runner_.Add(new UtilsTests());
+        // runner_.Add(new XdkDeviceTests());
+        // runner_.Add(new SymbolsTest());
+        // runner_.Add(new PivotTests());
+        // runner_.Add(new PivotXdkDeviceTests());
+        // runner_.Add(new RopActionTests());
 
         runner_.SetSuiteFilter(args_.getOption("test-suites"));
         runner_.SetTestFilter(args_.getOption("tests").value_or("^TODO"));

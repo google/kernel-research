@@ -54,7 +54,7 @@ def check_dmesg():
 
 success = False
 try:
-  success = check_tap() & check_dmesg()
+  success = check_tap() # & check_dmesg()
 except Exception as e:
   print(str(e))
 

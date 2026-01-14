@@ -224,3 +224,24 @@ uint64_t leak_kaslr_base(int samples, int trials, std::vector<std::vector<uint64
     }
     throw ExpKitError("Failed to leak KASLR base");
 }
+
+uint64_t get_kaslr_base_from_kallsyms() {
+    FILE* pipe = popen("sudo grep 'T _text$' /proc/kallsyms", "r");
+    if (!pipe) {
+        throw ExpKitError("Failed to run popen");
+    }
+
+    char buffer[128];
+    uint64_t addr = 0;
+    if (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        sscanf(buffer, "%lx", &addr);
+    }
+
+    pclose(pipe);
+
+    if (addr == 0) {
+        throw ExpKitError("Failed to get KASLR base from kallsyms");
+    }
+
+    return addr;
+}

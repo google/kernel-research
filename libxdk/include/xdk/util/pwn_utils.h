@@ -72,3 +72,12 @@ void pin_cpu(int cpu);
  * @throws ExpKitError if the address could not be leaked.
  */
 uint64_t leak_kaslr_base(int samples = 100, int trials = 3, std::vector<std::vector<uint64_t>>* debug_data = nullptr);
+
+/**
+ * @ingroup util_classes
+ * @brief Gets the KASLR base address from /proc/kallsyms.
+ *
+ * @return The kernel base address.
+ * @throws ExpKitError if the address could not be obtained.
+ */
+uint64_t get_kaslr_base_from_kallsyms();

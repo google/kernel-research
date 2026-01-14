@@ -23,24 +23,19 @@
 #include <iostream>
 
 class UtilsRuntimeTests: public TestSuite {
-    XdkDevice* xdk_;
 public:
     UtilsRuntimeTests(): TestSuite("UtilsRuntimeTests", "pwn utils runtime tests") { }
 
-    void init() {
-        xdk_ = &env->GetXdkDevice();
-    }
-
     TEST_METHOD(leaksKaslrBase, "leaks KASLR base") {
-        uint64_t expected = xdk_->KaslrLeak();
+        uint64_t expected = get_kaslr_base_from_kallsyms();
 
         int total = 1;
         int incorrect = 0;
         for (int i = 0; i < total; i++) {
             std::vector<std::vector<uint64_t>> debug_data;
-            uint64_t actual = leak_kaslr_base(100, 51, &debug_data);
+            uint64_t actual = leak_kaslr_base(100, 7, &debug_data);
             if (actual != expected) {
-               printf("Iteration: %d failed, expected %llx, got %llx\n", i, expected, actual);
+               printf("Iteration: %d failed, expected %lx, got %lx\n", i, expected, actual);
                
                for (size_t trial = 0; trial < debug_data.size(); trial++) {
                    const auto& timings = debug_data[trial];

@@ -113,7 +113,7 @@ jobs:
       - name: Test libxdk (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 200 --tap
+        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 2000 --tap
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
@@ -132,17 +132,6 @@ jobs:
             for action in "test" "stability_test"; do
                 KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/pipe_buf_rop TARGET="${{ steps.vars.outputs.target }}" $action
             done
-
-      - name: Test libxdk (QEMU TODO tests only)
-        if: ${{ success() || failure() }}
-        continue-on-error: true
-        working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 1 --tap --test-suites RuntimeTests --tests TODO
-
-      - name: Move test results to separate dir
-        if: ${{ success() || failure() }}
-        working-directory: ./libxdk
-        run: mv test_results test_results_todo
 
       - name: Upload artifacts
         if: always()
