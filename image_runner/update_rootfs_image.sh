@@ -36,7 +36,7 @@ download_busybox_if_missing() {
 regenerate_rootfs_img() {
     if ! command -v guestfish > /dev/null; then
         echo_err "guestfish binary is missing (try apt intall libguestfs-tools), downloading pre-generated binary"
-        # was uploaded via: gsutil cp -Z -a public-read rootfs.img gs://kernelctf-build/files/rootfs_image_runner_v4.img
+        # was uploaded via: gcloud storage cp --gzip-local-all --predefined-acl=public-read rootfs.img gs://kernelctf-build/files/rootfs_image_runner_v4.img
         curl -f https://storage.googleapis.com/kernelctf-build/files/rootfs_image_runner_v4.img -o $ROOTFS_IMG
     else
         download_busybox_if_missing
