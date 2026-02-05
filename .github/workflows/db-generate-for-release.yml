@@ -58,8 +58,12 @@ jobs:
           chmod u+x rp++
           echo "$PWD" >> "$GITHUB_PATH"
 
-      - name: Install rop_generator prerequisites
+      - name: Install rop_generator Python dependencies
         working-directory: rop_generator
+        run: pip install -r requirements.txt
+
+      - name: Install image_db Python dependencies
+        working-directory: image_db
         run: pip install -r requirements.txt
 
       - name: Create db for release

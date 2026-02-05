@@ -127,6 +127,7 @@ process_vmlinux() {
 
     save btf.json                 "bpftool btf dump -j file btf"
     save structs.json             "$SCRIPT_DIR/extract_structures.py"
+    save kernel_pages.txt         "$SCRIPT_DIR/kernel_pages.py vmlinux"
 
     if [ "$ONLY_DB" == "" ]; then
         save btf_formatted.json       "jq . btf.json"
