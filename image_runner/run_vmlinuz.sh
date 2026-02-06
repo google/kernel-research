@@ -18,11 +18,12 @@ set -e
 SCRIPT_DIR=$(dirname $(realpath "$0"))
 
 usage() {
-    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--stdout-file=<path>] [--qemu-args=<args>] -- [<commands-to-run-in-vm>]" >&2;
+    echo "Usage: $0 <vmlinuz-path> [--modules-path=<...>] [--custom-modules-tar=<...>] [--gdb] [--snapshot] [--no-rootfs-update] [--nokaslr] [--stdout-file=<path>] [--qemu-args=<args>] [--kernel-args=<args>] -- [<commands-to-run-in-vm>]" >&2;
     exit 1;
 }
 
 QEMU_ARGS=""
+EXTRA_CMDLINE=""
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -30,6 +31,7 @@ while [[ $# -gt 0 ]]; do
     --custom-modules-tar=*) CUSTOM_MODULES_TAR="${1#*=}"; shift;;
     --stdout-file=*) STDOUT_FILE="${1#*=}"; shift;;
     --qemu-args=*) QEMU_ARGS="${1#*=}"; shift;;
+    --kernel-args=*) EXTRA_CMDLINE=" ${1#*=}"; shift;;
     --no-rootfs-update) NO_ROOTFS_UPDATE=1; shift;;
     --snapshot) SNAPSHOT=1; shift;;
     --gdb) GDB=1; shift;;
@@ -67,7 +69,6 @@ if [ ! -z "$STDOUT_FILE" ]; then
     SERIAL_PORTS="-serial file:$STDOUT_FILE -serial mon:stdio"
 fi
 
-EXTRA_CMDLINE=""
 if [ "$GDB" == "1" ]; then QEMU_ARGS+=" -s -S"; fi
 if [ "$SNAPSHOT" == "1" ]; then QEMU_ARGS+=" -snapshot"; fi
 if [ "$NOKASLR" == "1" ]; then EXTRA_CMDLINE+=" nokaslr"; fi
@@ -89,7 +90,7 @@ if [ ! -z "$CUSTOM_MODULES_TAR" ]; then
     IDE_IDX=$((IDE_IDX+1))
 fi
 
-qemu-system-x86_64 -m 3.5G -nographic -nodefaults -no-reboot \
+qemu-system-x86_64 -m 5G -nographic -nodefaults -no-reboot \
     -enable-kvm -cpu host -smp cores=2 \
     -kernel $VMLINUZ \
     -initrd $SCRIPT_DIR/initramfs.cpio \
