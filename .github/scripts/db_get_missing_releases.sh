@@ -23,7 +23,7 @@ fi
 # gcloud storage ls gs://kernelctf-build/releases | sed "s/.*releases\/\(.*\)\//\1/" > build_releases.txt
 
 # missing_releases = kernelctf_releases without gcs_releases and skipped_releases
-curl -s https://raw.githubusercontent.com/google/security-research/master/kernelctf/server/releases.yaml | grep -Eoh "^[^: ]*"  > kernelctf_releases.txt
+curl -s https://raw.githubusercontent.com/google/security-research/master/kernelctf/server/releases.yaml | grep -Eoh "(lts|cos|mitigation)[^:]*"  > kernelctf_releases.txt
 cat kernelctf_releases.txt | grep -v -f gcs_releases.txt | grep -v -f <(cat skipped_releases.txt | sed 's/\s*#.*//') > missing_gcs_releases.txt || true
 
 if [[ ! -s "missing_gcs_releases.txt" ]]; then echo "Nothing is missing from GCS, exiting..."; exit 0; fi
