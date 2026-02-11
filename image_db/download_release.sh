@@ -18,10 +18,16 @@ SCRIPT_DIR=$(dirname $(realpath "$0"))
 UBUNTU_BASE_URL="https://mirrors.edge.kernel.org/ubuntu/pool/main/l"
 KERNELCTF_BASE_URL="https://storage.googleapis.com/kernelctf-build/releases"
 
+usage() {
+    echo "Usage: $0 (kernelctf|ubuntu) (list|<release-name>) [--only-db|--only-kxdl] (vmlinuz|dbgsym|headers|modules|process|all)";
+    exit 1;
+}
+
 ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     --only-db) ONLY_DB=1; shift;;
+    --only-kxdl) ONLY_KXDL=1; shift;;
     --) # stop processing special arguments after "--"
         shift
         while [[ $# -gt 0 ]]; do ARGS+=("$1"); shift; done
@@ -32,11 +38,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 set -- "${ARGS[@]}"
-
-usage() {
-    echo "Usage: $0 (kernelctf|ubuntu) (list|<release-name>) (vmlinuz|dbgsym|headers|modules|process|all)";
-    exit 1;
-}
 
 release_format() {
     declare -A groups
@@ -129,7 +130,7 @@ process_vmlinux() {
     save structs.json             "$SCRIPT_DIR/extract_structures.py"
     save kernel_pages.txt         "$SCRIPT_DIR/kernel_pages.py vmlinux"
 
-    if [ "$ONLY_DB" == "" ]; then
+   if [[ "$ONLY_DB" == "" && "$ONLY_KXDL" == "" ]]; then
         save btf_formatted.json       "jq . btf.json"
         save pahole.txt               "pahole vmlinux"
         save .config                  "$SCRIPT_DIR/../third_party/linux/scripts/extract-ikconfig vmlinux"
@@ -138,8 +139,10 @@ process_vmlinux() {
         save rop_gadgets_filtered.txt "grep ' : \(pop\|cmp\|add rsp\|mov\|push\|xchg\|leave\).* ; ret$' rop_gadgets_wo_jop.txt"
     fi
 
-    save rop_actions.json         "$SCRIPT_DIR/../rop_generator/angrop_rop_generator.py --output json --json-indent 4 vmlinux vmlinuz --rpp-cache rp++.txt"
-    save stack_pivots.json        "$SCRIPT_DIR/../rop_generator/pivot_finder.py --output json --json-indent 4 vmlinux vmlinuz"
+    if [ "$ONLY_KXDL" == "" ]; then
+      save rop_actions.json         "$SCRIPT_DIR/../rop_generator/angrop_rop_generator.py --output json --json-indent 4 vmlinux vmlinuz --rpp-cache rp++.txt"
+      save stack_pivots.json        "$SCRIPT_DIR/../rop_generator/pivot_finder.py --output json --json-indent 4 vmlinux vmlinuz"
+    fi
 }
 
 DISTRO="$1"
