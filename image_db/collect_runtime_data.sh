@@ -18,11 +18,17 @@ RUNNER_DIR="$SCRIPT_DIR/../image_runner"
 
 cd $SCRIPT_DIR
 
-for RELEASE_DIR in releases/*/*; do
+FILTER_DISTRO="${1:-*}"
+FILTER_RELEASE="${2:-*}"
+FILTER_FILES="${3:-version slabinfo}"
+
+for RELEASE_DIR in releases/$FILTER_DISTRO/$FILTER_RELEASE; do
+    if [ ! -d "$RELEASE_DIR" ]; then continue; fi
+
     RELEASE_DIR_PARTS=(${RELEASE_DIR//\// })
     DISTRO=${RELEASE_DIR_PARTS[1]}
     RELEASE_NAME=${RELEASE_DIR_PARTS[2]}
-    for PROC_FN in version slabinfo; do
+    for PROC_FN in $FILTER_FILES; do
         OUT_FN="$RELEASE_DIR/$PROC_FN.txt"
         if [ -f "$OUT_FN" ]; then continue; fi
 
