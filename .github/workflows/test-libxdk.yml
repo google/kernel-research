@@ -87,9 +87,11 @@ jobs:
       - name: Compile xdk_device for target
         if: ${{ steps.vars.outputs.target != 'kernelctf lts-6.1.81' }}
         run: |
-          ./image_db/download_release.sh ${{steps.vars.outputs.target}} "vmlinuz,modules"
+          ./image_db/download_release.sh ${STEPS_VARS_OUTPUTS_TARGET} "vmlinuz,modules"
           ./image_db/collect_runtime_data.sh  # we need version.txt for compiling the correct xdk_device module
-          ./image_runner/compile_custom_modules.sh ${{steps.vars.outputs.target}} xdk_device
+          ./image_runner/compile_custom_modules.sh ${STEPS_VARS_OUTPUTS_TARGET} xdk_device
+        env:
+          STEPS_VARS_OUTPUTS_TARGET: ${{steps.vars.outputs.target}}
 
       - name: Build libxdk
         if: ${{ success() || failure() }}
@@ -113,7 +115,9 @@ jobs:
       - name: Test libxdk (QEMU)
         if: ${{ success() || failure() }}
         working-directory: ./libxdk
-        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${{ steps.vars.outputs.target }} 2000 --tap
+        run: CUSTOM_MODULES_KEEP=1 timeout 20m ./run_tests.sh ${STEPS_VARS_OUTPUTS_TARGET} 2000 --tap
+        env:
+          STEPS_VARS_OUTPUTS_TARGET: ${{ steps.vars.outputs.target }}
 
       - name: Move test results to separate dir
         if: ${{ success() || failure() }}
@@ -130,8 +134,10 @@ jobs:
         working-directory: ./libxdk
         run: |
             for action in "test" "stability_test"; do
-                KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/pipe_buf_rop TARGET="${{ steps.vars.outputs.target }}" $action
+                KERNELXDK_INSTALL_PREFIX=$PWD KERNELXDK_LIB_DIR=$PWD/build CUSTOM_MODULES_KEEP=1 timeout 2m make -j`nproc` -C samples/pipe_buf_rop TARGET="${STEPS_VARS_OUTPUTS_TARGET}" $action
             done
+        env:
+          STEPS_VARS_OUTPUTS_TARGET: ${{ steps.vars.outputs.target }}
 
       - name: Upload artifacts
         if: always()

@@ -64,4 +64,6 @@ jobs:
 
       - name: Create db for release
         working-directory: .github/scripts
-        run: ./db_process_release.sh ${{ inputs.release }} --upload
+        run: ./db_process_release.sh ${INPUTS_RELEASE} --upload
+        env:
+          INPUTS_RELEASE: ${{ inputs.release }}
