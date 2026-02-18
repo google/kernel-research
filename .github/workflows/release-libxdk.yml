@@ -58,10 +58,10 @@ jobs:
           echo "DOCKER_CMD=docker exec --user "$(id -u):$(id -g)" build_env bash -c" >> $GITHUB_ENV
 
       - name: Configure CMake
-        run: ${{ env.DOCKER_CMD }} "cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
+        run: ${DOCKER_CMD} "cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF"
 
       - name: Build Static Library (.a)
-        run: ${{ env.DOCKER_CMD }} "cmake --build build -j$(nproc)"
+        run: ${DOCKER_CMD} "cmake --build build -j$(nproc)"
 
       - name: Package artifacts
         run: ../.github/scripts/libxdk_release.sh "$LIB_VER"
