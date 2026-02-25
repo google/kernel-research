@@ -89,6 +89,12 @@ jobs:
           ./db_merge.sh ${{ inputs.rebuild && '--rebuild' }}
           echo "missing_db=$(cat missing_db_releases.txt | jq -Rsc 'split("\n") | map(select(length > 0))')" >> $GITHUB_OUTPUT
 
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          path: '.github/scripts/*.txt'
+
   test_new_releases:
     needs: [merge_db]
     if: ${{ always() && needs.merge_db.outputs.missing_db != '[]' && !inputs.rebuild }}
