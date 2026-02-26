@@ -121,6 +121,7 @@ protected:
     std::map<std::string, std::vector<RopItem>> rop_actions;
     std::map<std::string, Struct> structs;
     Pivots pivots;
+    uint64_t num_pages_ = 0;
 
 public:
     /**
@@ -159,6 +160,13 @@ public:
     std::map<std::string, uint32_t> GetAllSymbols();
 
     /**
+     * @brief Get the number of runtime kernel pages for the target.
+     * @return The number of runtime kernel pages.
+     * @throws ExpKitError if the number of runtime kernel pages is not available.
+     */
+    uint64_t GetNumPages() const;
+
+    /**
      * @brief Add a symbol to the target.
      * @param name The name of the symbol.
      * @param value The value (offset) of the symbol without the base address.
@@ -192,6 +200,11 @@ public:
      * @param pivots The pivots struct
      */
     void SetPivots(const Pivots& pivots);
+
+    /**
+     * @brief Sets the number of runtime kernel pages for the target.
+     */
+    void SetNumPages(uint64_t num_pages);
 
     void Merge(const Target& src);
 

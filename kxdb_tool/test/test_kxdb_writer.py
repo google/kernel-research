@@ -68,7 +68,7 @@ class SymbolWriterTests(unittest.TestCase):
 class KxdbWriterTests(unittest.TestCase):
   """Tests for the KxdbWriter class."""
 
-  EXPECTED_HDR = b"KXDB" + b"\x01\x00" + b"\x01\x00"  # v1.1
+  EXPECTED_HDR = b"KXDB" + b"\x01\x00" + b"\x02\x00"  # v1.2
 
   def expect(self, expected, symbols_desc=[], actions_desc={}, targets=[]):
     meta = MetaConfig.from_desc(symbols_desc, actions_desc)
@@ -133,7 +133,8 @@ class KxdbWriterTests(unittest.TestCase):
           b"\0" +                      # t[0].pivots.push_indirects.count
           b"\0" +                      # t[0].pivots.pop_rsps.count
           b"\0" +                      # t[0].pivots.stack_shifts.count
-          b"\0")                       # t[0].struct_layout_indices
+          b"\0" +                      # t[0].struct_layout_indices
+          b"\x29\x00")                 # t[0].num_pages
 
 
     self.expect_smart(
