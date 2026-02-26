@@ -25,11 +25,12 @@ class ImageDbTarget:
 
   KBASE_ADDR = 0xffffffff81000000
   VERSION_TXT = "version.txt"
+  KERNEL_PAGES_TXT = "kernel_pages.txt"
   SYMBOLS_TXT = "symbols.txt"
   ROP_ACTIONS_JSON = "rop_actions.json"
   STACK_PIVOTS_JSON = "stack_pivots.json"
   STRUCTS_JSON = "structs.json"
-  ALL_FILES = [VERSION_TXT, SYMBOLS_TXT, ROP_ACTIONS_JSON, STACK_PIVOTS_JSON, STRUCTS_JSON]
+  ALL_FILES = [VERSION_TXT, KERNEL_PAGES_TXT, SYMBOLS_TXT, ROP_ACTIONS_JSON, STACK_PIVOTS_JSON, STRUCTS_JSON]
 
   def __init__(self, distro, release_name, dir_):
     self.distro = distro
@@ -90,6 +91,9 @@ class ImageDbTarget:
   def get_structs(self):
     return self.from_json(self.STRUCTS_JSON, Structs)
 
+  def get_num_pages(self):
+    return int(self.read_file(self.KERNEL_PAGES_TXT).strip())
+
   def process_symbols(self, config=None):
     symbol_filter = [s.name for s in config.symbols] if config and config.symbols else None
     return self.get_symbols(symbol_filter)
@@ -127,6 +131,7 @@ class ImageDbTarget:
     rop_actions = self.process_rop_actions(config)
     stack_pivots = self.get_stack_pivots()
     structs = self.process_structs(config, allow_missing)
+    num_pages = self.get_num_pages()
     return Target(distro=self.distro, release_name=self.release_name, version=version,
                   symbols=symbols, rop_actions=rop_actions, stack_pivots=stack_pivots,
-                  structs=structs)
+                  structs=structs, num_pages=num_pages)

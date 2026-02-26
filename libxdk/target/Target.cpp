@@ -57,6 +57,13 @@ uint32_t Target::GetSymbolOffset(std::string symbol_name) {
   return it->second;
 }
 
+uint64_t Target::GetNumPages() const {
+  if (num_pages_ == 0) {
+    throw ExpKitError("number of pages is not available, rebuild the database to use this feature");
+  }
+  return num_pages_;
+}
+
 Target::Target(const std::string& distro,
                            const std::string& release_name,
                            const std::string& version) {
@@ -82,6 +89,10 @@ void Target::AddStruct(const std::string& name, uint64_t size,
 
 void Target::SetPivots(const Pivots& pivots) {
   this->pivots = pivots;
+}
+
+void Target::SetNumPages(uint64_t num_pages) {
+  num_pages_ = num_pages;
 }
 
 void Target::Merge(const Target& src) {
@@ -111,6 +122,10 @@ void Target::Merge(const Target& src) {
     } else {
       structs[name].fields.insert(str.fields.begin(), str.fields.end());
     }
+  }
+
+  if (src.num_pages_ != 0) {
+    num_pages_ = src.num_pages_;
   }
 }
 

@@ -64,6 +64,8 @@ class KxdbWriter:
         self.stack_pivot_writer.write_target(wr_target, target)
         self.struct_writer.write_target(wr_target, target)
 
+        wr_target.u2(target.num_pages)
+
     # struct layouts
     with sections.add(SECTION_STRUCT_LAYOUTS) as wr:
         self.struct_writer.write_struct_layouts(wr)

@@ -50,10 +50,10 @@ void KxdbParser::ParseHeader() {
     throw ExpKitError("invalid magic: %llx", magic);
 
   auto version_major = ReadU16();
-  auto version_minor = ReadU16();
+  version_minor_ = ReadU16();
   if (version_major > 1)
     throw ExpKitError("version v%d.%d is not supported (only v1.x)",
-                      version_major, version_minor);
+                      version_major, version_minor_);
 
   auto num_sections = ReadU16();
   for (auto i = 0; i < num_sections; i++) {
@@ -130,6 +130,13 @@ vector<Target> KxdbParser::ParseTargets(
     ParseRopActions(target);
     ParsePivots(target);
     ParseStructs(target);
+
+    if (version_minor_ >= 2) {
+      target.SetNumPages(ReadU16());
+    } else {
+      DebugLog("version_minor_=%u, not setting num_pages", version_minor_);
+    }
+
     result.push_back(target);
   }
 

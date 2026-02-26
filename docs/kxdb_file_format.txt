@@ -59,6 +59,7 @@ targets[seekable_varsize]          # sorted by (distro,release_name)
       ret_offset (uint)
       shift_amount (uint)
   struct_layout_indices (varsize_ints) # seekable, skippable
+  num_pages (u2)
 struct_layouts[seekable_varsize]
   struct_meta_idx (uint)
   sizeof_structure (uint)

@@ -161,6 +161,7 @@ struct TargetDbTests: TestSuite {
         Target st("kernelctf", "lts-6.1.81");
         st.AddSymbol("new_symbol", 0x1234);
         st.AddStruct("new_struct", 80, { { "field1", 0x10, 8 }, { "field2", 0x20, 8 } });
+        st.SetNumPages(0x4141);
         db.AddTarget(st);
 
         auto target = db.GetTarget(lts_6181_version);
@@ -169,6 +170,8 @@ struct TargetDbTests: TestSuite {
         // symbols from the target also found
         ASSERT_EQ(0x1234, target.GetSymbolOffset("new_symbol"));
         ASSERT_EQ(0x20, target.GetStruct("new_struct").fields.at("field2").offset);
+
+        ASSERT_EQ(0x4141, target.GetNumPages());
     }
 
     TEST_METHOD(staticDbWorks, "TargetDb can work with only targets without a db") {

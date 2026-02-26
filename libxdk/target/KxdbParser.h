@@ -46,6 +46,7 @@ struct SectionInfo {
 
 class KxdbParser: protected BinaryReader {
 protected:
+    uint16_t version_minor_;
     uint64_t offset_targets_ = 0, offset_struct_layouts_ = 0;
     vector<string> symbol_names_;
     vector<StructMeta> structs_meta_;

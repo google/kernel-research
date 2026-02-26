@@ -69,8 +69,13 @@ class KxdbReader:
       stack_pivots = self.stack_pivot_reader.read_target(r_root)
       structs = self.struct_reader.read_target(r_root)
 
+      if minor_ver >= 2:
+        num_pages = r_root.u2()
+      else:
+        num_pages = 0
+
       target = Target(distro, release_name, version,
-                      symbols, rop_actions, stack_pivots, structs)
+                      symbols, rop_actions, stack_pivots, structs, num_pages)
 
       targets.append(target)
 

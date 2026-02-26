@@ -44,5 +44,5 @@ class ImageDbUtilsTests(unittest.TestCase):
     targets = collect_image_db_targets(RELEASES_DIR, "bad/missing_files")
     self.assertEqual(1, len(targets))
     self.assertEqual("missing_files", targets[0].release_name)
-    self.assertListEqual(["version.txt", "symbols.txt", "rop_actions.json",
+    self.assertListEqual(["version.txt", "kernel_pages.txt", "symbols.txt", "rop_actions.json",
       "stack_pivots.json", "structs.json"], targets[0].missing_files)
