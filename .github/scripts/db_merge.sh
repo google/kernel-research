@@ -27,7 +27,7 @@ else
     "$KXDB_DIR/kxdb_tool.py" -i db/_original.kxdb --list-targets | grep kernelctf | sed "s/kernelctf\///" > db_releases.txt
 fi
 
-gcloud storage ls gs://kernelxdk/db/kernelctf/*.kxdb |sed -E "s/.*kernelctf\/(.*)\.kxdb/\\1/" > gcs_releases.txt
+gcloud storage ls gs://kernelxdk/db/kernelctf/*.kxdb > gcs_releases.txt
 cat gcs_releases.txt | grep -v -f db_releases.txt > missing_db_releases.txt || true
 
 if [[ ! -s "missing_db_releases.txt" ]]; then echo "Nothing is missing from DB, exiting..."; exit 0; fi
