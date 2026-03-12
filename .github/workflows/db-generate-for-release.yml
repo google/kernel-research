@@ -48,7 +48,10 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Install Linux package prerequisites
-        run: sudo apt-get update && sudo apt install -yq --no-install-recommends pahole python3-ropgadget qemu-system-x86
+        run: |
+          sudo apt-get update && sudo apt install -yq --no-install-recommends pahole python3-ropgadget qemu-system-x86
+          sudo wget -O /usr/local/bin/bpftool https://storage.googleapis.com/kernel-research/files/bpftool-v7.6.0-amd64
+          sudo chmod +x /usr/local/bin/bpftool
 
       - name: Install rp++
         run: |
