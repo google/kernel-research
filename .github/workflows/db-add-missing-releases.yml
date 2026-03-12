@@ -50,6 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: '.github/scripts/*.txt'
+          name: get_missing_releases_logs
 
   process_release:
     needs: get_missing_releases
@@ -94,6 +95,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: '.github/scripts/*.txt'
+          name: merge_db_logs
 
   test_new_releases:
     needs: [merge_db]
