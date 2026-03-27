@@ -29,7 +29,7 @@ class Target():
   rop_actions: Optional[RopActions]
   stack_pivots: Optional[Pivots]
   structs: Optional[Structs]
-  num_pages: int
+  kernel_page_count: int
 
   def __str__(self):
     return f"{self.distro}/{self.release_name}"

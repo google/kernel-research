@@ -121,7 +121,7 @@ protected:
     std::map<std::string, std::vector<RopItem>> rop_actions;
     std::map<std::string, Struct> structs;
     Pivots pivots;
-    uint64_t num_pages_ = 0;
+    uint64_t page_count_ = 0;
 
 public:
     /**
@@ -164,7 +164,7 @@ public:
      * @return The number of runtime kernel pages.
      * @throws ExpKitError if the number of runtime kernel pages is not available.
      */
-    uint64_t GetNumPages() const;
+    uint64_t GetKernelPageCount() const;
 
     /**
      * @brief Add a symbol to the target.
@@ -204,7 +204,7 @@ public:
     /**
      * @brief Sets the number of runtime kernel pages for the target.
      */
-    void SetNumPages(uint64_t num_pages);
+    void SetKernelPageCount(uint64_t page_count_);
 
     void Merge(const Target& src);
 

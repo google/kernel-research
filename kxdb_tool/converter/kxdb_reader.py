@@ -70,12 +70,12 @@ class KxdbReader:
       structs = self.struct_reader.read_target(r_root)
 
       if minor_ver >= 2:
-        num_pages = r_root.u2()
+        kernel_page_count = r_root.u2()
       else:
-        num_pages = 0
+        kernel_page_count = 0
 
       target = Target(distro, release_name, version,
-                      symbols, rop_actions, stack_pivots, structs, num_pages)
+                      symbols, rop_actions, stack_pivots, structs, kernel_page_count)
 
       targets.append(target)
 
