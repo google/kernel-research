@@ -134,7 +134,7 @@ class KxdbWriterTests(unittest.TestCase):
           b"\0" +                      # t[0].pivots.pop_rsps.count
           b"\0" +                      # t[0].pivots.stack_shifts.count
           b"\0" +                      # t[0].struct_layout_indices
-          b"\x29\x00")                 # t[0].num_pages
+          b"\x29\x00")                 # t[0].kernel_page_count
 
 
     self.expect_smart(

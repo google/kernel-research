@@ -91,7 +91,7 @@ class ImageDbTarget:
   def get_structs(self):
     return self.from_json(self.STRUCTS_JSON, Structs)
 
-  def get_num_pages(self):
+  def get_kernel_page_count(self):
     return int(self.read_file(self.KERNEL_PAGES_TXT).strip())
 
   def process_symbols(self, config=None):
@@ -131,7 +131,7 @@ class ImageDbTarget:
     rop_actions = self.process_rop_actions(config)
     stack_pivots = self.get_stack_pivots()
     structs = self.process_structs(config, allow_missing)
-    num_pages = self.get_num_pages()
+    kernel_page_count = self.get_kernel_page_count()
     return Target(distro=self.distro, release_name=self.release_name, version=version,
                   symbols=symbols, rop_actions=rop_actions, stack_pivots=stack_pivots,
-                  structs=structs, num_pages=num_pages)
+                  structs=structs, kernel_page_count=kernel_page_count)

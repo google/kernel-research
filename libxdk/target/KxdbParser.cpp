@@ -132,9 +132,9 @@ vector<Target> KxdbParser::ParseTargets(
     ParseStructs(target);
 
     if (version_minor_ >= 2) {
-      target.SetNumPages(ReadU16());
+      target.SetKernelPageCount(ReadU16());
     } else {
-      DebugLog("version_minor_=%u, not setting num_pages", version_minor_);
+      DebugLog("version_minor_=%u, not setting kernel page count", version_minor_);
     }
 
     result.push_back(target);

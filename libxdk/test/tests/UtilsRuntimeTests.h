@@ -31,11 +31,11 @@ public:
     void init() { xdk_ = &env->GetXdkDevice(); }
 
     TEST_METHOD(leaksKaslrBase, "leaks KASLR base") {
-        uint64_t num_pages = env->GetTarget().GetNumPages();
+        uint64_t page_count = env->GetTarget().GetKernelPageCount();
         uint64_t expected = xdk_->KaslrLeak();
         int wrong = 0;
         for (int i = 0; i < 100; i++) {
-            uint64_t actual = leak_kaslr_base(num_pages, /* samples = */ 100, /* trials = */ 3);
+            uint64_t actual = leak_kaslr_base(page_count, /* samples = */ 100, /* trials = */ 3);
             if (actual != expected) {
                 wrong++;
             }

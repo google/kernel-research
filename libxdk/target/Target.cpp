@@ -57,11 +57,11 @@ uint32_t Target::GetSymbolOffset(std::string symbol_name) {
   return it->second;
 }
 
-uint64_t Target::GetNumPages() const {
-  if (num_pages_ == 0) {
-    throw ExpKitError("number of pages is not available, rebuild the database to use this feature");
+uint64_t Target::GetKernelPageCount() const {
+  if (page_count_ == 0) {
+    throw ExpKitError("Kernel page count is not available, rebuild the database to use this feature");
   }
-  return num_pages_;
+  return page_count_;
 }
 
 Target::Target(const std::string& distro,
@@ -91,8 +91,8 @@ void Target::SetPivots(const Pivots& pivots) {
   this->pivots = pivots;
 }
 
-void Target::SetNumPages(uint64_t num_pages) {
-  num_pages_ = num_pages;
+void Target::SetKernelPageCount(uint64_t page_count) {
+  page_count_ = page_count;
 }
 
 void Target::Merge(const Target& src) {
@@ -124,8 +124,8 @@ void Target::Merge(const Target& src) {
     }
   }
 
-  if (src.num_pages_ != 0) {
-    num_pages_ = src.num_pages_;
+  if (src.page_count_ != 0) {
+    page_count_ = src.page_count_;
   }
 }
 
