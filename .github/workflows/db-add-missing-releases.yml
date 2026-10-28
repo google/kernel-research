@@ -21,8 +21,6 @@ on:
         type: boolean
         required: false
         default: false
-  schedule:
-    - cron: '0 0 * * *'
 permissions: {}
 jobs:
   get_missing_releases:
